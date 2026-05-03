@@ -1,0 +1,26 @@
+[
+  {
+    "role": { "id": "Direktur Pascasarjana", "en": "Director of Graduate School" },
+    "name": "Prof. Dr. Contoh Nama Direktur, M.Pd.",
+    "nip": "19650101 199001 1 001",
+    "photo": "/programs/doktor-photo.png"
+  },
+  {
+    "role": { "id": "Wakil Direktur Bidang Akademik", "en": "Vice Director for Academic Affairs" },
+    "name": "Dr. Contoh Nama Wakil Direktur I, M.Si.",
+    "nip": "19700202 199703 1 002",
+    "photo": "/programs/magister-photo.png"
+  },
+  {
+    "role": { "id": "Wakil Direktur Bidang Keuangan dan Umum", "en": "Vice Director for Finance and General Affairs" },
+    "name": "Dr. Contoh Nama Wakil Direktur II, M.M.",
+    "nip": "19750303 200012 1 003",
+    "photo": "/programs/doktor-photo.png"
+  },
+  {
+    "role": { "id": "Wakil Direktur Bidang Kemahasiswaan dan Kerja Sama", "en": "Vice Director for Student Affairs and Partnerships" },
+    "name": "Dr. Contoh Nama Wakil Direktur III, M.Pd.",
+    "nip": "19790404 200704 1 004",
+    "photo": "/programs/magister-photo.png"
+  }
+]

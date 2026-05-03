@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-hidden="true">
+  <defs><linearGradient id="g5" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#14532d"/><stop offset="100%" stop-color="#22c55e"/></linearGradient></defs>
+  <circle cx="48" cy="48" r="48" fill="url(#g5)"/>
+  <circle cx="48" cy="38" r="18" fill="#dcfce7" opacity="0.95"/>
+  <ellipse cx="48" cy="78" rx="28" ry="22" fill="#dcfce7" opacity="0.95"/>
+</svg>
