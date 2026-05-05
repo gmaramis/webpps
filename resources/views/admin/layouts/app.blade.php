@@ -16,8 +16,13 @@
             <span class="pointer-events-none absolute inset-y-0 left-0 w-px bg-gradient-to-b from-sky-400/80 via-primary to-teal-500/60" aria-hidden="true"></span>
             <div class="relative z-10 px-3 pt-4">
                 <div class="rounded-2xl bg-gradient-to-br from-slate-50 to-white px-3.5 py-3.5 ring-1 ring-slate-200/80 shadow-sm">
-                    <a href="{{ route('admin.dashboard') }}" class="block font-display-admin text-lg font-bold tracking-tight text-primary transition hover:text-primary-light">Admin PPS</a>
-                    <p class="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Pascasarjana UNIMA</p>
+                    <div class="flex items-center gap-2.5">
+                        <img src="{{ asset('logo-unima.png') }}" alt="Logo UNIMA" class="h-10 w-10 shrink-0 object-contain">
+                        <div class="min-w-0">
+                            <a href="{{ route('admin.dashboard') }}" class="block font-display-admin text-lg font-bold tracking-tight text-primary transition hover:text-primary-light">Admin PPS</a>
+                            <p class="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Pascasarjana UNIMA</p>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="relative z-10 min-h-0 flex-1 pb-2 pt-1">

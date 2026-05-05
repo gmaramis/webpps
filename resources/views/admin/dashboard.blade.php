@@ -73,6 +73,8 @@
                 ['label' => 'Total berita', 'value' => $newsStats['total'], 'sub' => 'Semua entri', 'tone' => 'sky', 'icon' => 'newspaper'],
                 ['label' => 'Terbit', 'value' => $newsStats['published'], 'sub' => 'Di situs publik', 'tone' => 'teal', 'icon' => 'check'],
                 ['label' => 'Draf', 'value' => $newsStats['draft'], 'sub' => 'Belum tayang', 'tone' => 'amber', 'icon' => 'draft'],
+                ['label' => 'Pengumuman aktif bulan ini', 'value' => $announcementMonthlyPublished, 'sub' => 'Published', 'tone' => 'sky', 'icon' => 'megaphone'],
+                ['label' => 'Agenda aktif bulan ini', 'value' => $agendaMonthlyPublished, 'sub' => 'Published', 'tone' => 'teal', 'icon' => 'calendar'],
                 ['label' => 'Notifikasi', 'value' => $translationNotifyUnread, 'sub' => 'Belum dibaca', 'tone' => 'rose', 'icon' => 'bell'],
             ];
         @endphp
@@ -112,6 +114,14 @@
                         <span class="flex h-12 w-12 items-center justify-center rounded-2xl {{ $iconBg }} shadow-inner transition group-hover:scale-105">
                             <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
                         </span>
+                    @elseif($sc['icon'] === 'megaphone')
+                        <span class="flex h-12 w-12 items-center justify-center rounded-2xl {{ $iconBg }} shadow-inner transition group-hover:scale-105">
+                            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10.34 3.94c3.33-.82 6.66 1.68 7.48 5.58l.31 1.5c.82 3.9-1.2 7.74-4.52 8.56l-5.74 1.41a1.5 1.5 0 01-1.82-1.09l-1.9-7.72a1.5 1.5 0 011.1-1.82l5.1-1.26zM14.5 6.5l3.5-.86M15.5 10.5l3.5-.86M6.5 14.75l-1.05 3.97a1 1 0 001.9.5l1.01-3.82"/></svg>
+                        </span>
+                    @elseif($sc['icon'] === 'calendar')
+                        <span class="flex h-12 w-12 items-center justify-center rounded-2xl {{ $iconBg }} shadow-inner transition group-hover:scale-105">
+                            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3.75 8.25h16.5M4.5 5.25h15A1.5 1.5 0 0121 6.75v12A1.5 1.5 0 0119.5 20.25h-15A1.5 1.5 0 013 18.75v-12A1.5 1.5 0 014.5 5.25z"/></svg>
+                        </span>
                     @else
                         <span class="flex h-12 w-12 items-center justify-center rounded-2xl {{ $iconBg }} shadow-inner transition group-hover:scale-105">
                             <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0"/></svg>
@@ -128,7 +138,6 @@
             <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100/90 bg-gradient-to-r from-slate-50/80 to-white px-5 py-4 md:px-6">
                 <div>
                     <h2 id="dash-notify-heading" class="font-display-admin text-base font-bold tracking-tight text-slate-900">Aktivitas terjemahan</h2>
-                    <p class="mt-0.5 text-xs text-slate-500">Sinkron dengan lonceng di header.</p>
                 </div>
                 @if($translationNotifyUnread > 0)
                     <span class="rounded-full bg-gradient-to-r from-primary to-primary-light px-3 py-1 text-xs font-bold text-white shadow-md shadow-primary/25">{{ $translationNotifyUnread }} baru</span>
@@ -180,81 +189,6 @@
             @endif
         </section>
 
-        <aside class="rounded-3xl border border-slate-200/80 bg-white/90 p-5 shadow-xl shadow-slate-900/[0.04] ring-1 ring-white/70 backdrop-blur-md md:p-6">
-            <h2 class="font-display-admin text-base font-bold tracking-tight text-slate-900">Pintasan</h2>
-            <ul class="mt-4 flex flex-col gap-1">
-                <li>
-                    <a href="{{ route('admin.news.index') }}" class="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[13px] font-semibold text-primary transition hover:bg-sky-50/90 hover:shadow-sm">
-                        <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-sm text-slate-500" aria-hidden="true">→</span>
-                        Daftar berita
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.news.create') }}" class="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[13px] font-semibold text-primary transition hover:bg-sky-50/90 hover:shadow-sm">
-                        <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-sm text-slate-500" aria-hidden="true">→</span>
-                        Berita baru
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.slideshow.index') }}" class="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[13px] font-semibold text-primary transition hover:bg-sky-50/90 hover:shadow-sm">
-                        <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-sm text-slate-500" aria-hidden="true">→</span>
-                        Slideshow beranda
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.pengumuman.index') }}" class="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[13px] font-semibold text-primary transition hover:bg-sky-50/90 hover:shadow-sm">
-                        <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-sm text-slate-500" aria-hidden="true">→</span>
-                        Pengumuman
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.agenda.index') }}" class="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[13px] font-semibold text-primary transition hover:bg-sky-50/90 hover:shadow-sm">
-                        <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-sm text-slate-500" aria-hidden="true">→</span>
-                        Agenda
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.visi-misi.edit') }}" class="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[13px] font-semibold text-primary transition hover:bg-sky-50/90 hover:shadow-sm">
-                        <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-sm text-slate-500" aria-hidden="true">→</span>
-                        Visi &amp; Misi
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.struktur-pimpinan.index') }}" class="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[13px] font-semibold text-primary transition hover:bg-sky-50/90 hover:shadow-sm">
-                        <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-sm text-slate-500" aria-hidden="true">→</span>
-                        Struktur pimpinan
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.kerjasama.index') }}" class="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[13px] font-semibold text-primary transition hover:bg-sky-50/90 hover:shadow-sm">
-                        <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-sm text-slate-500" aria-hidden="true">→</span>
-                        Kerjasama
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.dosen.index') }}" class="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[13px] font-semibold text-primary transition hover:bg-sky-50/90 hover:shadow-sm">
-                        <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-sm text-slate-500" aria-hidden="true">→</span>
-                        Dosen
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('admin.profile.edit') }}" class="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[13px] font-semibold text-slate-700 transition hover:bg-slate-50 hover:shadow-sm">
-                        <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-sm text-slate-500" aria-hidden="true">→</span>
-                        Profil akun
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('home') }}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-[13px] font-semibold text-slate-700 transition hover:bg-slate-50 hover:shadow-sm">
-                        <span class="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-100 text-sm text-slate-500" aria-hidden="true">↗</span>
-                        Situs publik
-                    </a>
-                </li>
-            </ul>
-            <div class="mt-6 rounded-2xl border border-slate-100 bg-slate-50/90 p-4 text-xs leading-relaxed text-slate-600">
-                <p class="font-display-admin text-[13px] font-bold text-slate-800">Tips</p>
-                <p class="mt-1.5">Antrean: <code class="rounded-md bg-white px-1.5 py-0.5 font-mono text-[11px] text-slate-800 shadow-sm">php artisan queue:work</code></p>
-            </div>
-        </aside>
     </div>
 </div>
 @endsection

@@ -10,6 +10,7 @@ use JsonException;
 
 #[Fillable([
     'sort_order',
+    'is_published',
     'day',
     'month_id',
     'month_en',
@@ -19,6 +20,13 @@ use JsonException;
 ])]
 class AgendaItem extends Model
 {
+    protected function casts(): array
+    {
+        return [
+            'is_published' => 'boolean',
+        ];
+    }
+
     protected static function booted(): void
     {
         static::saved(static fn () => PpsContent::flush());
@@ -75,6 +83,7 @@ class AgendaItem extends Model
 
                 static::query()->create([
                     'sort_order' => $index,
+                    'is_published' => true,
                     'day' => (string) ($row['day'] ?? ''),
                     'month_id' => (string) ($month['id'] ?? ''),
                     'month_en' => isset($month['en']) ? (string) $month['en'] : null,

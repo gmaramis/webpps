@@ -5,24 +5,45 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AgendaItemRequest;
 use App\Models\AgendaItem;
+use App\Support\AdminRedirect;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 use JsonException;
 
 class AgendaItemController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $agendaItems = AgendaItem::query()
+        $status = $request->query('status', 'all');
+        if (! in_array($status, ['all', 'published', 'draft'], true)) {
+            $status = 'all';
+        }
+
+        $query = AgendaItem::query()
             ->orderBy('sort_order')
-            ->orderBy('id')
-            ->get();
+            ->orderBy('id');
+
+        if ($status === 'published') {
+            $query->where('is_published', true);
+        } elseif ($status === 'draft') {
+            $query->where('is_published', false);
+        }
+
+        $agendaItems = $query
+            ->paginate(15)
+            ->withQueryString();
+        $statusCounts = [
+            'all' => AgendaItem::query()->count(),
+            'published' => AgendaItem::query()->where('is_published', true)->count(),
+            'draft' => AgendaItem::query()->where('is_published', false)->count(),
+        ];
 
         $ppsPath = resource_path('data/pps-content.json');
         $ppsJsonExists = is_readable($ppsPath);
 
-        return view('admin.agenda.index', compact('agendaItems', 'ppsJsonExists'));
+        return view('admin.agenda.index', compact('agendaItems', 'ppsJsonExists', 'status', 'statusCounts'));
     }
 
     public function create(): View
@@ -36,6 +57,7 @@ class AgendaItemController extends Controller
                 'month_id' => 'JAN',
                 'month_en' => 'JAN',
                 'href' => '#',
+                'is_published' => false,
             ]),
         ]);
     }
@@ -63,7 +85,16 @@ class AgendaItemController extends Controller
     {
         $agenda->delete();
 
-        return redirect()->route('admin.agenda.index')->with('status', 'Agenda dihapus.');
+        return AdminRedirect::toIndexRoute('admin.agenda.index')->with('status', 'Agenda dihapus.');
+    }
+
+    public function togglePublish(AgendaItem $agenda): RedirectResponse
+    {
+        $agenda->update(['is_published' => ! $agenda->is_published]);
+
+        $label = $agenda->is_published ? 'ditayangkan' : 'disembunyikan dari publik';
+
+        return AdminRedirect::toIndexRoute('admin.agenda.index')->with('status', "Status: agenda {$label}.");
     }
 
     public function importJson(): RedirectResponse

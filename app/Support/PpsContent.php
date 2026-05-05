@@ -2,17 +2,34 @@
 
 namespace App\Support;
 
+use App\Models\AcademicGuide;
+use App\Models\AcademicPortalSetting;
+use App\Models\AccreditationDocument;
 use App\Models\AgendaItem;
+use App\Models\AlumniActivity;
 use App\Models\AnnouncementItem;
 use App\Models\CooperationPartner;
 use App\Models\HeroSlide;
 use App\Models\LeadershipPerson;
 use App\Models\Lecturer;
 use App\Models\NewsItem;
+use App\Models\S2Program;
+use App\Models\S3Program;
+use App\Models\StopGratifikasiBullet;
+use App\Models\StopGratifikasiPageContent;
+use App\Models\StopKorupsiBullet;
+use App\Models\StopKorupsiPageContent;
+use App\Models\StudentActivity;
+use App\Models\ZiComplaintChannel;
+use App\Models\ZiGalleryItem;
+use App\Models\ZiPageIntro;
+use App\Models\ZiPillar;
+use App\Models\ZiUpdateItem;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use JsonException;
 
 class PpsContent
@@ -33,14 +50,25 @@ class PpsContent
 
         $path = resource_path('data/pps-content.json');
         if (! File::exists($path)) {
-            self::$cache = [];
+            self::$cache = [
+                'ACADEMIC_EXTERNAL_URLS' => AcademicPortalSetting::resolvedUrls(),
+            ];
 
             return self::$cache;
         }
 
         $data = json_decode(File::get($path), true, 512, JSON_THROW_ON_ERROR);
+
+        if (! isset($data['ACCREDITATION_DOCUMENTS']) || ! is_array($data['ACCREDITATION_DOCUMENTS'])) {
+            $data['ACCREDITATION_DOCUMENTS'] = [];
+        }
+
+        $academicUrls = AcademicPortalSetting::resolvedUrls();
+        $data['ACADEMIC_EXTERNAL_URLS'] = $academicUrls;
+
         if (! empty($data['NAV']) && is_array($data['NAV'])) {
             $data['NAV'] = self::normalizeNav($data['NAV']);
+            $data['NAV'] = self::applyAcademicExternalNavHrefs($data['NAV'], $academicUrls);
         }
         $leadersPath = resource_path('data/leaders.json');
         if (File::exists($leadersPath)) {
@@ -94,6 +122,89 @@ class PpsContent
             $data['LECTURERS'] = $lecturersFromDb;
         }
 
+        if (empty($data['ACADEMIC_GUIDES']) || ! is_array($data['ACADEMIC_GUIDES'])) {
+            $data['ACADEMIC_GUIDES'] = [];
+        }
+        $guidesFromDb = self::academicGuidesFromDatabase();
+        if ($guidesFromDb !== null) {
+            $data['ACADEMIC_GUIDES'] = $guidesFromDb;
+        }
+
+        if (empty($data['PROGRAMS_DOKTOR']) || ! is_array($data['PROGRAMS_DOKTOR'])) {
+            $data['PROGRAMS_DOKTOR'] = [];
+        }
+        $data['PROGRAMS_DOKTOR'] = self::normalizeProgramListFromJson($data['PROGRAMS_DOKTOR']);
+        $s3FromDb = self::programsDoktorFromDatabase();
+        if ($s3FromDb !== null) {
+            $data['PROGRAMS_DOKTOR'] = $s3FromDb;
+        }
+
+        if (empty($data['PROGRAMS_MAGISTER']) || ! is_array($data['PROGRAMS_MAGISTER'])) {
+            $data['PROGRAMS_MAGISTER'] = [];
+        }
+        $data['PROGRAMS_MAGISTER'] = self::normalizeProgramListFromJson($data['PROGRAMS_MAGISTER']);
+        $s2FromDb = self::programsMagisterFromDatabase();
+        if ($s2FromDb !== null) {
+            $data['PROGRAMS_MAGISTER'] = $s2FromDb;
+        }
+
+        if (empty($data['STUDENT_ACTIVITIES']) || ! is_array($data['STUDENT_ACTIVITIES'])) {
+            $data['STUDENT_ACTIVITIES'] = [];
+        }
+        $studentActivitiesFromDb = self::studentActivitiesFromDatabase();
+        if ($studentActivitiesFromDb !== null) {
+            $data['STUDENT_ACTIVITIES'] = $studentActivitiesFromDb;
+        }
+
+        if (empty($data['ALUMNI_ACTIVITIES']) || ! is_array($data['ALUMNI_ACTIVITIES'])) {
+            $data['ALUMNI_ACTIVITIES'] = [];
+        }
+        $alumniActivitiesFromDb = self::alumniActivitiesFromDatabase();
+        if ($alumniActivitiesFromDb !== null) {
+            $data['ALUMNI_ACTIVITIES'] = $alumniActivitiesFromDb;
+        }
+
+        $ziIntro = self::ziPageIntroFromDatabase();
+        if ($ziIntro !== null) {
+            $data['ZI_PAGE_INTRO'] = $ziIntro;
+        }
+
+        if (empty($data['ZI_PILLARS']) || ! is_array($data['ZI_PILLARS'])) {
+            $data['ZI_PILLARS'] = [];
+        }
+        $ziPillarsDb = self::ziPillarsFromDatabase();
+        if ($ziPillarsDb !== null) {
+            $data['ZI_PILLARS'] = $ziPillarsDb;
+        }
+
+        if (empty($data['ZI_GALLERY']) || ! is_array($data['ZI_GALLERY'])) {
+            $data['ZI_GALLERY'] = [];
+        }
+        $ziGalleryDb = self::ziGalleryFromDatabase();
+        if ($ziGalleryDb !== null) {
+            $data['ZI_GALLERY'] = $ziGalleryDb;
+        }
+
+        if (empty($data['ZI_COMPLAINT_CHANNELS']) || ! is_array($data['ZI_COMPLAINT_CHANNELS'])) {
+            $data['ZI_COMPLAINT_CHANNELS'] = [];
+        }
+        $ziChannelsDb = self::ziComplaintChannelsFromDatabase();
+        if ($ziChannelsDb !== null) {
+            $data['ZI_COMPLAINT_CHANNELS'] = $ziChannelsDb;
+        }
+
+        if (empty($data['ZI_UPDATES']) || ! is_array($data['ZI_UPDATES'])) {
+            $data['ZI_UPDATES'] = [];
+        }
+        $ziUpdatesDb = self::ziUpdatesFromDatabase();
+        if ($ziUpdatesDb !== null) {
+            $data['ZI_UPDATES'] = $ziUpdatesDb;
+        }
+
+        self::mergeStopKorupsiFromDatabase($data);
+        self::mergeStopGratifikasiFromDatabase($data);
+        self::mergeAccreditationDocumentsFromDatabase($data);
+
         self::$cache = $data;
 
         return self::$cache;
@@ -138,6 +249,48 @@ class PpsContent
         unset($item);
 
         return $nav;
+    }
+
+    /**
+     * Menu Akademik: href Portal / LMS / SPADA diambil dari basis data (bukan hard code di JSON).
+     *
+     * @param  list<array<string, mixed>>  $nav
+     * @param  array{portal: string, lms: string, spada: string}  $urls
+     * @return list<array<string, mixed>>
+     */
+    protected static function applyAcademicExternalNavHrefs(array $nav, array $urls): array
+    {
+        $map = static function (array $items) use ($urls, &$map): array {
+            $out = [];
+            foreach ($items as $item) {
+                if (! is_array($item)) {
+                    $out[] = $item;
+
+                    continue;
+                }
+                $slot = $item['linkSlot'] ?? null;
+                if (is_string($slot) && isset($urls[$slot])) {
+                    $item['href'] = $urls[$slot];
+                } else {
+                    $labelId = is_array($item['label'] ?? null) ? (string) ($item['label']['id'] ?? '') : '';
+                    if ($labelId === 'Portal Akademik') {
+                        $item['href'] = $urls['portal'];
+                    } elseif ($labelId === 'LMS') {
+                        $item['href'] = $urls['lms'];
+                    } elseif ($labelId === 'SPADA Indonesia') {
+                        $item['href'] = $urls['spada'];
+                    }
+                }
+                if (isset($item['children']) && is_array($item['children'])) {
+                    $item['children'] = $map($item['children']);
+                }
+                $out[] = $item;
+            }
+
+            return $out;
+        };
+
+        return $map($nav);
     }
 
     protected static function normalizeHref(string $href): string
@@ -239,6 +392,540 @@ class PpsContent
     }
 
     /**
+     * Panduan akademik dari DB — bentuk sama seperti ACADEMIC_GUIDES di pps-content.json.
+     *
+     * @return list<array<string, mixed>>|null null jika kosong atau tabel tidak ada
+     */
+    protected static function academicGuidesFromDatabase(): ?array
+    {
+        try {
+            if (! Schema::hasTable('academic_guides')) {
+                return null;
+            }
+
+            $rows = AcademicGuide::query()
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
+
+            if ($rows->isEmpty()) {
+                return null;
+            }
+
+            return $rows->map(fn (AcademicGuide $row): array => $row->toFrontArray())->values()->all();
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * Slug & official_url untuk daftar program dari JSON (S2 / S3, sebelum override basis data).
+     *
+     * @param  list<array<string, mixed>>  $rows
+     * @return list<array<string, mixed>>
+     */
+    protected static function normalizeProgramListFromJson(array $rows): array
+    {
+        $used = [];
+
+        return collect($rows)->filter(fn ($row): bool => is_array($row))->values()->map(function (array $row) use (&$used): array {
+            $name = $row['name'] ?? [];
+            $nameId = (string) ($name['id'] ?? '');
+            $base = Str::slug($nameId);
+            if ($base === '') {
+                $base = 'program';
+            }
+
+            $slug = trim((string) ($row['slug'] ?? ''));
+            if ($slug === '') {
+                $slug = $base;
+                $n = 2;
+                while (isset($used[$slug])) {
+                    $slug = $base.'-'.$n;
+                    $n++;
+                }
+            } else {
+                $orig = $slug;
+                $n = 2;
+                while (isset($used[$slug])) {
+                    $slug = $orig.'-'.$n;
+                    $n++;
+                }
+            }
+            $used[$slug] = true;
+            $row['slug'] = $slug;
+
+            $url = $row['official_url'] ?? null;
+            $row['official_url'] = is_string($url) && trim($url) !== '' ? trim($url) : null;
+
+            return $row;
+        })->all();
+    }
+
+    /**
+     * Program doktor (S3) dari DB — bentuk sama seperti PROGRAMS_DOKTOR di pps-content.json + slug & official_url.
+     *
+     * @return list<array<string, mixed>>|null null jika kosong atau tabel tidak ada
+     */
+    protected static function programsDoktorFromDatabase(): ?array
+    {
+        try {
+            if (! Schema::hasTable('s3_programs')) {
+                return null;
+            }
+
+            $rows = S3Program::query()
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
+
+            if ($rows->isEmpty()) {
+                return null;
+            }
+
+            return $rows->map(fn (S3Program $row): array => $row->toFrontArray())->values()->all();
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * Program magister (S2) dari DB — bentuk sama seperti PROGRAMS_MAGISTER di pps-content.json + slug & official_url.
+     *
+     * @return list<array<string, mixed>>|null null jika kosong atau tabel tidak ada
+     */
+    protected static function programsMagisterFromDatabase(): ?array
+    {
+        try {
+            if (! Schema::hasTable('s2_programs')) {
+                return null;
+            }
+
+            $rows = S2Program::query()
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
+
+            if ($rows->isEmpty()) {
+                return null;
+            }
+
+            return $rows->map(fn (S2Program $row): array => $row->toFrontArray())->values()->all();
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * Kegiatan mahasiswa dari DB — bentuk sama seperti STUDENT_ACTIVITIES di pps-content.json.
+     * Hanya baris is_published = true yang dikirim ke halaman publik.
+     *
+     * @return list<array<string, mixed>>|null null jika tabel kosong / tidak ada; array (boleh kosong) jika ada data di tabel
+     */
+    protected static function studentActivitiesFromDatabase(): ?array
+    {
+        try {
+            if (! Schema::hasTable('student_activities')) {
+                return null;
+            }
+
+            if (! StudentActivity::query()->exists()) {
+                return null;
+            }
+
+            $rows = StudentActivity::query()
+                ->where('is_published', true)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
+
+            return $rows->map(fn (StudentActivity $row): array => $row->toFrontArray())->values()->all();
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * Kegiatan alumni dari DB — bentuk sama seperti ALUMNI_ACTIVITIES di pps-content.json.
+     * Hanya baris is_published = true yang dikirim ke halaman publik.
+     *
+     * @return list<array<string, mixed>>|null null jika tabel kosong / tidak ada; array (boleh kosong) jika ada data di tabel
+     */
+    protected static function alumniActivitiesFromDatabase(): ?array
+    {
+        try {
+            if (! Schema::hasTable('alumni_activities')) {
+                return null;
+            }
+
+            if (! AlumniActivity::query()->exists()) {
+                return null;
+            }
+
+            $rows = AlumniActivity::query()
+                ->where('is_published', true)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
+
+            return $rows->map(fn (AlumniActivity $row): array => $row->toFrontArray())->values()->all();
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * Stop Korupsi: dari stop_korupsi_page_contents. Jika simple_body_id terisi, halaman publik memakai satu blok isi
+     * (STOP_KORUPSI_SIMPLE); jika tidak, menimpa STRINGS per kunci seperti sebelumnya. Daftar poin dari basis data jika ada.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    protected static function mergeStopKorupsiFromDatabase(array &$data): void
+    {
+        try {
+            if (! Schema::hasTable('stop_korupsi_page_contents')) {
+                return;
+            }
+
+            $page = StopKorupsiPageContent::query()->first();
+            if ($page !== null) {
+                $simpleBodyId = trim((string) ($page->simple_body_id ?? ''));
+                $useSimple = $simpleBodyId !== '';
+
+                if ($useSimple) {
+                    $enBody = trim((string) ($page->simple_body_en ?? ''));
+                    $data['STOP_KORUPSI_SIMPLE'] = [
+                        'body' => [
+                            'id' => $simpleBodyId,
+                            'en' => $enBody !== '' ? $enBody : $simpleBodyId,
+                        ],
+                    ];
+                } else {
+                    unset($data['STOP_KORUPSI_SIMPLE']);
+                }
+
+                $map = [
+                    'stopKorupsiEyebrow' => ['id' => $page->eyebrow_id, 'en' => $page->eyebrow_en],
+                    'stopKorupsiTitle' => ['id' => $page->title_id, 'en' => $page->title_en],
+                    'stopKorupsiLead' => ['id' => $page->lead_id, 'en' => $page->lead_en],
+                    'stopKorupsiP1' => ['id' => $page->p1_id, 'en' => $page->p1_en],
+                    'stopKorupsiP2' => ['id' => $page->p2_id, 'en' => $page->p2_en],
+                    'stopKorupsiBulletsTitle' => ['id' => $page->bullets_title_id, 'en' => $page->bullets_title_en],
+                    'stopKorupsiCtaTitle' => ['id' => $page->cta_title_id, 'en' => $page->cta_title_en],
+                    'stopKorupsiCtaP' => ['id' => $page->cta_p_id, 'en' => $page->cta_p_en],
+                    'stopLinkInstrumenZi' => ['id' => $page->link_instrumen_zi_label_id, 'en' => $page->link_instrumen_zi_label_en],
+                    'stopLinkSpanLapor' => ['id' => $page->link_span_lapor_label_id, 'en' => $page->link_span_lapor_label_en],
+                ];
+
+                $skipWhenSimple = [
+                    'stopKorupsiLead',
+                    'stopKorupsiP1',
+                    'stopKorupsiP2',
+                    'stopKorupsiCtaTitle',
+                    'stopKorupsiCtaP',
+                ];
+
+                foreach (['id', 'en'] as $loc) {
+                    if (! isset($data['STRINGS'][$loc]) || ! is_array($data['STRINGS'][$loc])) {
+                        $data['STRINGS'][$loc] = [];
+                    }
+                }
+
+                foreach ($map as $strKey => $pair) {
+                    if ($useSimple && in_array($strKey, $skipWhenSimple, true)) {
+                        continue;
+                    }
+                    $idVal = trim((string) ($pair['id'] ?? ''));
+                    if ($idVal !== '') {
+                        $data['STRINGS']['id'][$strKey] = $idVal;
+                    }
+                    $enVal = $pair['en'] ?? null;
+                    $enTrim = is_string($enVal) ? trim($enVal) : '';
+                    if ($enTrim !== '') {
+                        $data['STRINGS']['en'][$strKey] = $enTrim;
+                    }
+                }
+
+                $url = $page->link_span_lapor_url;
+                if (is_string($url) && trim($url) !== '') {
+                    $data['STOP_KORUPSI_SPAN_LAPOR_URL'] = trim($url);
+                }
+            }
+
+            if (! Schema::hasTable('stop_korupsi_bullets')) {
+                return;
+            }
+
+            if (! StopKorupsiBullet::query()->exists()) {
+                return;
+            }
+
+            $rows = StopKorupsiBullet::query()
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
+
+            $data['STOP_KORUPSI_BULLETS'] = $rows
+                ->map(fn (StopKorupsiBullet $b): array => $b->toFrontArray())
+                ->values()
+                ->all();
+        } catch (\Throwable) {
+            //
+        }
+    }
+
+    /**
+     * Stop Gratifikasi: dari stop_gratifikasi_page_contents. Jika simple_body_id terisi, halaman publik memakai satu blok isi
+     * (STOP_GRATIFIKASI_SIMPLE); jika tidak, menimpa STRINGS per kunci seperti JSON. Tombol utama boleh pakai STOP_GRATIFIKASI_INSTRUMEN_URL.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    protected static function mergeStopGratifikasiFromDatabase(array &$data): void
+    {
+        try {
+            if (! Schema::hasTable('stop_gratifikasi_page_contents')) {
+                return;
+            }
+
+            $page = StopGratifikasiPageContent::query()->first();
+            if ($page !== null) {
+                $simpleBodyId = trim((string) ($page->simple_body_id ?? ''));
+                $useSimple = $simpleBodyId !== '';
+
+                if ($useSimple) {
+                    $enBody = trim((string) ($page->simple_body_en ?? ''));
+                    $data['STOP_GRATIFIKASI_SIMPLE'] = [
+                        'body' => [
+                            'id' => $simpleBodyId,
+                            'en' => $enBody !== '' ? $enBody : $simpleBodyId,
+                        ],
+                    ];
+                } else {
+                    unset($data['STOP_GRATIFIKASI_SIMPLE']);
+                }
+
+                $map = [
+                    'stopGratifikasiEyebrow' => ['id' => $page->eyebrow_id, 'en' => $page->eyebrow_en],
+                    'stopGratifikasiTitle' => ['id' => $page->title_id, 'en' => $page->title_en],
+                    'stopGratifikasiLead' => ['id' => $page->lead_id, 'en' => $page->lead_en],
+                    'stopGratifikasiP1' => ['id' => $page->p1_id, 'en' => $page->p1_en],
+                    'stopGratifikasiP2' => ['id' => $page->p2_id, 'en' => $page->p2_en],
+                    'stopGratifikasiBulletsTitle' => ['id' => $page->bullets_title_id, 'en' => $page->bullets_title_en],
+                    'stopGratifikasiCtaTitle' => ['id' => $page->cta_title_id, 'en' => $page->cta_title_en],
+                    'stopGratifikasiCtaP' => ['id' => $page->cta_p_id, 'en' => $page->cta_p_en],
+                    'stopGratifikasiLinkZi' => ['id' => $page->link_instrumen_zi_label_id, 'en' => $page->link_instrumen_zi_label_en],
+                ];
+
+                $skipWhenSimple = [
+                    'stopGratifikasiLead',
+                    'stopGratifikasiP1',
+                    'stopGratifikasiP2',
+                    'stopGratifikasiCtaTitle',
+                    'stopGratifikasiCtaP',
+                ];
+
+                foreach (['id', 'en'] as $loc) {
+                    if (! isset($data['STRINGS'][$loc]) || ! is_array($data['STRINGS'][$loc])) {
+                        $data['STRINGS'][$loc] = [];
+                    }
+                }
+
+                foreach ($map as $strKey => $pair) {
+                    if ($useSimple && in_array($strKey, $skipWhenSimple, true)) {
+                        continue;
+                    }
+                    $idVal = trim((string) ($pair['id'] ?? ''));
+                    if ($idVal !== '') {
+                        $data['STRINGS']['id'][$strKey] = $idVal;
+                    }
+                    $enVal = $pair['en'] ?? null;
+                    $enTrim = is_string($enVal) ? trim($enVal) : '';
+                    if ($enTrim !== '') {
+                        $data['STRINGS']['en'][$strKey] = $enTrim;
+                    }
+                }
+
+                $ziUrl = $page->link_instrumen_zi_url;
+                if (is_string($ziUrl) && trim($ziUrl) !== '') {
+                    $data['STOP_GRATIFIKASI_INSTRUMEN_URL'] = trim($ziUrl);
+                }
+            }
+
+            if (! Schema::hasTable('stop_gratifikasi_bullets')) {
+                return;
+            }
+
+            if (! StopGratifikasiBullet::query()->exists()) {
+                return;
+            }
+
+            $rows = StopGratifikasiBullet::query()
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
+
+            $data['STOP_GRATIFIKASI_BULLETS'] = $rows
+                ->map(fn (StopGratifikasiBullet $b): array => $b->toFrontArray())
+                ->values()
+                ->all();
+        } catch (\Throwable) {
+            //
+        }
+    }
+
+    /**
+     * Dokumen akreditasi dari basis data menggantikan daftar statis — hanya PDF yang is_published = true.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    protected static function mergeAccreditationDocumentsFromDatabase(array &$data): void
+    {
+        try {
+            if (! Schema::hasTable('accreditation_documents')) {
+                return;
+            }
+
+            $rows = AccreditationDocument::query()
+                ->where('is_published', true)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
+
+            $data['ACCREDITATION_DOCUMENTS'] = $rows
+                ->map(fn (AccreditationDocument $doc): array => $doc->toFrontArray())
+                ->values()
+                ->all();
+        } catch (\Throwable) {
+            //
+        }
+    }
+
+    protected static function ziPageIntroFromDatabase(): ?array
+    {
+        try {
+            if (! Schema::hasTable('zi_page_intros')) {
+                return null;
+            }
+
+            $row = ZiPageIntro::query()->first();
+            if ($row === null) {
+                return null;
+            }
+            if (trim($row->intro_heading_id) === '' && trim($row->intro_p1_id) === '' && trim($row->intro_p2_id) === '') {
+                return null;
+            }
+
+            return $row->toPpsIntroArray();
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * @return list<array<string, mixed>>|null
+     */
+    protected static function ziPillarsFromDatabase(): ?array
+    {
+        try {
+            if (! Schema::hasTable('zi_pillars')) {
+                return null;
+            }
+            if (! ZiPillar::query()->exists()) {
+                return null;
+            }
+
+            return ZiPillar::query()
+                ->where('is_published', true)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get()
+                ->map(fn (ZiPillar $row): array => $row->toFrontArray())
+                ->values()
+                ->all();
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * @return list<array<string, mixed>>|null
+     */
+    protected static function ziGalleryFromDatabase(): ?array
+    {
+        try {
+            if (! Schema::hasTable('zi_gallery_items')) {
+                return null;
+            }
+            if (! ZiGalleryItem::query()->exists()) {
+                return null;
+            }
+
+            return ZiGalleryItem::query()
+                ->where('is_published', true)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get()
+                ->map(fn (ZiGalleryItem $row): array => $row->toFrontArray())
+                ->values()
+                ->all();
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * @return list<array<string, mixed>>|null
+     */
+    protected static function ziComplaintChannelsFromDatabase(): ?array
+    {
+        try {
+            if (! Schema::hasTable('zi_complaint_channels')) {
+                return null;
+            }
+            if (! ZiComplaintChannel::query()->exists()) {
+                return null;
+            }
+
+            return ZiComplaintChannel::query()
+                ->where('is_published', true)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get()
+                ->map(fn (ZiComplaintChannel $row): array => $row->toFrontArray())
+                ->values()
+                ->all();
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * @return list<array<string, mixed>>|null
+     */
+    protected static function ziUpdatesFromDatabase(): ?array
+    {
+        try {
+            if (! Schema::hasTable('zi_update_items')) {
+                return null;
+            }
+            if (! ZiUpdateItem::query()->exists()) {
+                return null;
+            }
+
+            return ZiUpdateItem::query()
+                ->where('is_published', true)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get()
+                ->map(fn (ZiUpdateItem $row): array => $row->toFrontArray())
+                ->values()
+                ->all();
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
      * Slideshow beranda dari DB — susunan string path gambar seperti SLIDE_IMAGES.
      *
      * @return list<string>|null null jika kosong / tabel belum ada → pakai HeroSlide::BUILTIN_SLIDE_PATHS
@@ -278,6 +965,7 @@ class PpsContent
             }
 
             $rows = AnnouncementItem::query()
+                ->where('is_published', true)
                 ->orderBy('sort_order')
                 ->orderByDesc('date_iso')
                 ->orderByDesc('id')
@@ -306,6 +994,7 @@ class PpsContent
             }
 
             $rows = AgendaItem::query()
+                ->where('is_published', true)
                 ->orderBy('sort_order')
                 ->orderBy('id')
                 ->get();

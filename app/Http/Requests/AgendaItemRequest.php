@@ -18,6 +18,10 @@ class AgendaItemRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        $this->merge([
+            'is_published' => $this->boolean('is_published'),
+        ]);
+
         foreach (['month_en', 'title_en'] as $key) {
             $value = $this->input($key);
             if ($value !== null && trim((string) $value) === '') {
@@ -38,6 +42,7 @@ class AgendaItemRequest extends FormRequest
     {
         return [
             'sort_order' => ['required', 'integer', 'min:0', 'max:65535'],
+            'is_published' => ['required', 'boolean'],
             'day' => ['required', 'regex:/^(0[1-9]|[12][0-9]|3[01])$/'],
             'month_id' => ['required', Rule::in(self::MONTH_ID_VALUES)],
             'month_en' => ['nullable', Rule::in(self::MONTH_EN_VALUES)],

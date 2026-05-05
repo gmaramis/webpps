@@ -25,7 +25,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
-                    @foreach($docs as $d)
+                    @forelse($docs as $d)
                         @php
                             $name = $d['name'][$loc] ?? $d['name']['id'] ?? '';
                             $href = asset(ltrim($d['file'] ?? '', '/'));
@@ -36,7 +36,11 @@
                                 <a href="{{ $href }}" download class="inline-flex rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-dark">{{ $t['accreditationDownloadBtn'] }}</a>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="2" class="px-4 py-10 text-center text-sm text-slate-500">{{ $t['accreditationEmptyHint'] ?? 'Belum ada dokumen yang dipublikasikan. Pengunjung dapat menghubungi administrasi untuk informasi lebih lanjut.' }}</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AcademicGuide;
 use App\Models\NewsItem;
 use App\Models\VisionMissionContent;
 use App\Support\PpsContent;
@@ -69,7 +70,8 @@ class PpsPageController extends Controller
 
     public function kalenderAkademik(Request $request): View
     {
-        $calendars = PpsContent::all()['ACADEMIC_CALENDARS'] ?? [];
+        $guides = PpsContent::all()['ACADEMIC_GUIDES'] ?? [];
+        $calendars = AcademicGuide::calendarPageEntriesFromGuideList($guides);
         $requested = $request->query('tahun');
         $active = $requested
             ? collect($calendars)->firstWhere('id', $requested)
@@ -111,13 +113,54 @@ class PpsPageController extends Controller
         return view('pages.dokumen-akreditasi');
     }
 
-    public function programS2(): View
+    public function programS2(Request $request): View
     {
-        return view('pages.program-s2');
+        $programs = PpsContent::all()['PROGRAMS_MAGISTER'] ?? [];
+
+        return view('pages.program-s2', array_merge(
+            ['programs' => $programs],
+            $this->resolveStudyProgramSelection($programs, $request)
+        ));
     }
 
-    public function programS3(): View
+    public function programS3(Request $request): View
     {
-        return view('pages.program-s3');
+        $programs = PpsContent::all()['PROGRAMS_DOKTOR'] ?? [];
+
+        return view('pages.program-s3', array_merge(
+            ['programs' => $programs],
+            $this->resolveStudyProgramSelection($programs, $request)
+        ));
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $programs
+     * @return array{active: array<string, mixed>|null, selectedSlug: string, invalidProgramSelection: bool}
+     */
+    private function resolveStudyProgramSelection(array $programs, Request $request): array
+    {
+        $querySlug = trim((string) $request->query('program', ''));
+        $active = null;
+        $selectedSlug = '';
+        $invalidProgramSelection = false;
+
+        if ($programs !== []) {
+            if ($querySlug === '') {
+                $active = $programs[0];
+                $selectedSlug = (string) ($active['slug'] ?? '');
+            } else {
+                $active = collect($programs)->first(
+                    fn (array $p): bool => (string) ($p['slug'] ?? '') === $querySlug
+                );
+                if ($active !== null) {
+                    $selectedSlug = $querySlug;
+                } else {
+                    $invalidProgramSelection = true;
+                    $selectedSlug = $querySlug;
+                }
+            }
+        }
+
+        return compact('active', 'selectedSlug', 'invalidProgramSelection');
     }
 }

@@ -5,25 +5,46 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AnnouncementItemRequest;
 use App\Models\AnnouncementItem;
+use App\Support\AdminRedirect;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 use JsonException;
 
 class AnnouncementItemController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $announcements = AnnouncementItem::query()
+        $status = $request->query('status', 'all');
+        if (! in_array($status, ['all', 'published', 'draft'], true)) {
+            $status = 'all';
+        }
+
+        $query = AnnouncementItem::query()
             ->orderBy('sort_order')
             ->orderByDesc('date_iso')
-            ->orderByDesc('id')
-            ->get();
+            ->orderByDesc('id');
+
+        if ($status === 'published') {
+            $query->where('is_published', true);
+        } elseif ($status === 'draft') {
+            $query->where('is_published', false);
+        }
+
+        $announcements = $query
+            ->paginate(15)
+            ->withQueryString();
+        $statusCounts = [
+            'all' => AnnouncementItem::query()->count(),
+            'published' => AnnouncementItem::query()->where('is_published', true)->count(),
+            'draft' => AnnouncementItem::query()->where('is_published', false)->count(),
+        ];
 
         $ppsPath = resource_path('data/pps-content.json');
         $ppsJsonExists = is_readable($ppsPath);
 
-        return view('admin.pengumuman.index', compact('announcements', 'ppsJsonExists'));
+        return view('admin.pengumuman.index', compact('announcements', 'ppsJsonExists', 'status', 'statusCounts'));
     }
 
     public function create(): View
@@ -35,6 +56,7 @@ class AnnouncementItemController extends Controller
                 'sort_order' => $nextOrder,
                 'date_iso' => now()->format('Y-m-d'),
                 'href' => '#',
+                'is_published' => false,
             ]),
         ]);
     }
@@ -62,7 +84,16 @@ class AnnouncementItemController extends Controller
     {
         $announcement->delete();
 
-        return redirect()->route('admin.pengumuman.index')->with('status', 'Pengumuman dihapus.');
+        return AdminRedirect::toIndexRoute('admin.pengumuman.index')->with('status', 'Pengumuman dihapus.');
+    }
+
+    public function togglePublish(AnnouncementItem $announcement): RedirectResponse
+    {
+        $announcement->update(['is_published' => ! $announcement->is_published]);
+
+        $label = $announcement->is_published ? 'ditayangkan' : 'disembunyikan dari publik';
+
+        return AdminRedirect::toIndexRoute('admin.pengumuman.index')->with('status', "Status: pengumuman {$label}.");
     }
 
     public function importJson(): RedirectResponse

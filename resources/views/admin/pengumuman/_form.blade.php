@@ -2,6 +2,20 @@
     /** @var \App\Models\AnnouncementItem $announcement */
 @endphp
 <div class="space-y-6">
+    <div class="rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3">
+        <label class="flex items-start gap-3 text-sm text-slate-700">
+            <input type="hidden" name="is_published" value="0">
+            <input type="checkbox" name="is_published" value="1" class="mt-1 h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary/30" @checked(old('is_published', $announcement->is_published ?? false))>
+            <span>
+                <span class="font-semibold text-slate-800">Tayangkan di situs publik</span>
+                <span class="mt-0.5 block text-xs text-slate-500">Jika tidak dicentang, item tetap sebagai draf dan tidak tampil di beranda.</span>
+            </span>
+        </label>
+        @error('is_published')
+            <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+        @enderror
+    </div>
+
     <div>
         <label for="sort_order" class="mb-1 block text-xs font-semibold text-slate-700">Urutan tampil</label>
         <input id="sort_order" type="number" name="sort_order" min="0" max="65535" required value="{{ old('sort_order', $announcement->sort_order ?? 0) }}"

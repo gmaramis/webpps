@@ -10,7 +10,7 @@
         <div>
             <h3 class="mb-3 text-sm font-bold uppercase tracking-wider text-white">{{ $t['footerAcademic'] }}</h3>
             <ul class="m-0 flex list-none flex-col gap-2 p-0">
-                <li><a href="https://lms.unima.ac.id/" target="_blank" rel="noopener noreferrer" class="text-sm text-slate-200 no-underline hover:text-white hover:underline">{{ $t['linkElearning'] }}</a></li>
+                <li><a href="{{ data_get($ppsData, 'ACADEMIC_EXTERNAL_URLS.lms', 'https://lms.unima.ac.id/') }}" target="_blank" rel="noopener noreferrer" class="text-sm text-slate-200 no-underline hover:text-white hover:underline">{{ $t['linkElearning'] }}</a></li>
                 <li><a href="#" class="text-sm text-slate-200 no-underline hover:text-white hover:underline">{{ $t['linkSister'] }}</a></li>
                 <li><a href="#" class="text-sm text-slate-200 no-underline hover:text-white hover:underline">{{ $t['linkJurnal'] }}</a></li>
             </ul>

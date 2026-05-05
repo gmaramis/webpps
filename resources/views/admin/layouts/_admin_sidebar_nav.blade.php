@@ -25,11 +25,38 @@
         if (str_ends_with($trim, '/dosen')) {
             return route('admin.dosen.index');
         }
+        if (str_ends_with($trim, '/panduan-akademik')) {
+            return route('admin.panduan-akademik.index');
+        }
+        if (str_ends_with($trim, '/s2')) {
+            return route('admin.prodi-s2.index');
+        }
+        if (str_ends_with($trim, '/s3')) {
+            return route('admin.prodi-s3.index');
+        }
         if (str_ends_with($trim, '/pengumuman')) {
             return route('admin.pengumuman.index');
         }
         if (str_ends_with($trim, '/agenda')) {
             return route('admin.agenda.index');
+        }
+        if (str_ends_with($trim, '/kegiatan-mahasiswa')) {
+            return route('admin.kegiatan-mahasiswa.index');
+        }
+        if (str_ends_with($trim, '/kegiatan-alumni')) {
+            return route('admin.kegiatan-alumni.index');
+        }
+        if (str_ends_with($trim, '/instrumen-zona-integritas')) {
+            return route('admin.zi.hub');
+        }
+        if (str_ends_with($trim, '/stop-korupsi')) {
+            return route('admin.stop-korupsi.hub');
+        }
+        if (str_ends_with($trim, '/stop-gratifikasi')) {
+            return route('admin.stop-gratifikasi.hub');
+        }
+        if (str_ends_with($trim, '/dokumen-akreditasi')) {
+            return route('admin.dokumen-akreditasi.index');
         }
 
         return $href;
@@ -59,52 +86,66 @@
     .admin-sidebar-details[open] > summary .admin-sidebar-chevron {
         transform: rotate(180deg);
     }
+    /* Override hover agar selalu terlihat abu-abu gelap di sidebar admin. */
+    .admin-sidebar-details > summary:hover {
+        background-color: #94a3b8 !important; /* slate-400 */
+        color: #020617 !important; /* slate-950 */
+    }
+    .admin-sidebar-details a:hover {
+        background-color: #94a3b8 !important; /* slate-400 */
+        color: #020617 !important; /* slate-950 */
+    }
+    .admin-sidebar-top-link:hover {
+        background-color: #94a3b8 !important; /* slate-400 */
+        border-color: #475569 !important; /* slate-600 */
+        color: #020617 !important; /* slate-950 */
+    }
 </style>
 
 @php
     $navActive = fn (bool $cond): string => $cond
         ? 'bg-gradient-to-r from-primary/[0.1] via-sky-500/[0.07] to-transparent font-semibold text-primary shadow-inner shadow-white/30 ring-1 ring-primary/[0.12]'
-        : 'text-slate-600 ring-1 ring-transparent hover:bg-white/90 hover:text-slate-900 hover:shadow-sm';
+        : 'text-slate-600 ring-1 ring-transparent hover:bg-slate-400 hover:text-slate-950 hover:shadow-sm';
 @endphp
 
 <nav class="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-2.5 py-2 text-[13px] font-medium" aria-label="Menu admin dan tautan situs">
     <p class="mb-1.5 px-3 pt-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">Admin</p>
 
     <details open class="admin-sidebar-details overflow-hidden rounded-2xl border border-slate-200/70 bg-white/70 shadow-md shadow-slate-900/[0.03] backdrop-blur-sm">
-        <summary class="flex cursor-pointer items-center gap-2 rounded-t-2xl px-3.5 py-3 text-[13px] font-bold tracking-tight text-slate-800 hover:bg-white/80">
+        <summary class="flex cursor-pointer items-center gap-2 rounded-t-2xl px-3.5 py-3 text-[13px] font-bold tracking-tight text-slate-800 transition-colors duration-200 ease-out hover:bg-slate-400">
             @include('admin.layouts.sidebar-icon', ['name' => 'panel', 'class' => 'h-4 w-4 shrink-0 text-slate-500'])
             <span class="min-w-0 flex-1 text-left">Panel</span>
             <svg class="admin-sidebar-chevron h-4 w-4 shrink-0 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
         </summary>
         <div class="space-y-1 border-t border-slate-100/90 bg-white/95 p-2">
-            <a href="{{ route('admin.dashboard') }}" class="{{ $navActive(request()->routeIs('admin.dashboard')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition">
+            <a href="{{ route('admin.dashboard') }}" class="{{ $navActive(request()->routeIs('admin.dashboard')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
                 @include('admin.layouts.sidebar-icon', ['name' => 'dashboard', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
                 <span class="min-w-0 flex-1">Dasbor</span>
             </a>
-            <a href="{{ route('admin.news.index') }}" class="{{ $navActive(request()->routeIs('admin.news.*')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition">
+            <a href="{{ route('admin.news.index') }}" class="{{ $navActive(request()->routeIs('admin.news.*')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
                 @include('admin.layouts.sidebar-icon', ['name' => 'newspaper', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
                 <span class="min-w-0 flex-1">Berita</span>
                 @if(($newsCounts['total'] ?? 0) > 0)
                     <span class="flex h-5 min-w-[1.35rem] shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-white shadow-sm shadow-primary/30">{{ $newsCounts['total'] > 99 ? '99+' : $newsCounts['total'] }}</span>
                 @endif
             </a>
-            <a href="{{ route('admin.slideshow.index') }}" class="{{ $navActive(request()->routeIs('admin.slideshow.*')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition">
+            <a href="{{ route('admin.slideshow.index') }}" class="{{ $navActive(request()->routeIs('admin.slideshow.*')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
                 @include('admin.layouts.sidebar-icon', ['name' => 'photo', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
                 <span class="min-w-0 flex-1">Slideshow beranda</span>
             </a>
-            <a href="{{ route('admin.pengumuman.index') }}" class="{{ $navActive(request()->routeIs('admin.pengumuman.*')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition">
+            <a href="{{ route('admin.pengumuman.index') }}" class="{{ $navActive(request()->routeIs('admin.pengumuman.*')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
                 @include('admin.layouts.sidebar-icon', ['name' => 'megaphone', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
                 <span class="min-w-0 flex-1">Pengumuman</span>
             </a>
-            <a href="{{ route('admin.agenda.index') }}" class="{{ $navActive(request()->routeIs('admin.agenda.*')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition">
+            <a href="{{ route('admin.agenda.index') }}" class="{{ $navActive(request()->routeIs('admin.agenda.*')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
                 @include('admin.layouts.sidebar-icon', ['name' => 'calendar', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
                 <span class="min-w-0 flex-1">Agenda</span>
             </a>
-            <a href="{{ route('admin.profile.edit') }}" class="{{ $navActive(request()->routeIs('admin.profile.edit')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition">
+            <a href="{{ route('admin.profile.edit') }}" class="{{ $navActive(request()->routeIs('admin.profile.edit')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
                 @include('admin.layouts.sidebar-icon', ['name' => 'account', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
                 <span class="min-w-0 flex-1">Profil akun</span>
             </a>
-            <a href="{{ route('admin.profile.password.edit') }}" class="{{ $navActive(request()->routeIs('admin.profile.password.edit')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition">
+            <a href="{{ route('admin.profile.password.edit') }}" class="{{ $navActive(request()->routeIs('admin.profile.password.edit')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
                 @include('admin.layouts.sidebar-icon', ['name' => 'lock', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
                 <span class="min-w-0 flex-1">Ubah kata sandi</span>
             </a>
@@ -130,8 +171,8 @@
             };
         @endphp
         @if (! empty($navItem['children']) && is_array($navItem['children']))
-            <details class="admin-sidebar-details overflow-hidden rounded-2xl border border-slate-200/70 bg-white/65 shadow-md shadow-slate-900/[0.03] backdrop-blur-sm">
-                <summary class="flex cursor-pointer items-center gap-2 px-3.5 py-3 text-[13px] font-bold tracking-tight text-slate-800 hover:bg-white/90">
+            <details class="admin-sidebar-details overflow-hidden rounded-2xl border border-slate-200/70 bg-white/65 shadow-md shadow-slate-900/[0.03] backdrop-blur-sm" @if ($topKey === 'Akademik' && request()->routeIs('admin.tautan-portal-akademik.*')) open @endif @if ($topKey === 'Program Studi' && (request()->routeIs('admin.prodi-s2.*') || request()->routeIs('admin.prodi-s3.*'))) open @endif @if ($topKey === 'Unit Penjamin Mutu' && (request()->routeIs('admin.stop-korupsi.*') || request()->routeIs('admin.stop-gratifikasi.*'))) open @endif>
+                <summary class="flex cursor-pointer items-center gap-2 px-3.5 py-3 text-[13px] font-bold tracking-tight text-slate-800 transition-colors duration-200 ease-out hover:bg-slate-400">
                     @include('admin.layouts.sidebar-icon', ['name' => $groupIcon, 'class' => 'h-4 w-4 shrink-0 text-slate-500'])
                     <span class="min-w-0 flex-1 text-left leading-snug">{{ $topLabel }}</span>
                     <svg class="admin-sidebar-chevron h-4 w-4 shrink-0 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
@@ -139,11 +180,20 @@
                 <div class="border-t border-slate-100/90 bg-white/95 py-1.5">
                     @foreach ($navItem['children'] as $child)
                         @php
+                            $slot = $child['linkSlot'] ?? null;
+                            $labelId = (string) ($child['label']['id'] ?? '');
+                            $skipExternalAcademicLinks = is_string($slot) && in_array($slot, ['portal', 'lms', 'spada'], true)
+                                || ($topKey === 'Akademik' && in_array($labelId, ['Portal Akademik', 'LMS', 'SPADA Indonesia'], true));
+                        @endphp
+                        @if ($skipExternalAcademicLinks)
+                            @continue
+                        @endif
+                        @php
                             $childLabel = $child['label'][$navLocale] ?? $child['label']['id'] ?? $child['label']['en'] ?? '';
                             $href = $adminSidebarHref((string) ($child['href'] ?? '#'));
                             $childExternal = $sidebarOpenExternal($href);
                         @endphp
-                        <a href="{{ $href }}" @if ($childExternal) target="_blank" rel="noopener noreferrer" @endif class="mx-1 flex items-center gap-2 rounded-xl px-3 py-2 pl-9 text-[13px] font-medium text-slate-600 transition hover:bg-white hover:text-primary hover:shadow-sm">
+                        <a href="{{ $href }}" @if ($childExternal) target="_blank" rel="noopener noreferrer" @endif class="mx-1 flex items-center gap-2 rounded-xl px-3 py-2 pl-9 text-[13px] font-medium text-slate-600 transition-all duration-200 ease-out hover:bg-slate-400 hover:text-slate-950 hover:shadow-sm">
                             @if ($childExternal)
                                 @include('admin.layouts.sidebar-icon', ['name' => 'link', 'class' => 'h-3.5 w-3.5 shrink-0 opacity-70'])
                             @else
@@ -152,6 +202,12 @@
                             <span class="min-w-0 flex-1">{{ $childLabel }}</span>
                         </a>
                     @endforeach
+                    @if ($topKey === 'Akademik')
+                        <a href="{{ route('admin.tautan-portal-akademik.edit') }}" class="{{ $navActive(request()->routeIs('admin.tautan-portal-akademik.*')) }} mx-1 flex items-center gap-2 rounded-xl px-3 py-2 pl-9 text-[13px] font-medium text-slate-600 transition-all duration-200 ease-out hover:bg-slate-400 hover:text-slate-950 hover:shadow-sm">
+                            @include('admin.layouts.sidebar-icon', ['name' => 'link', 'class' => 'h-3.5 w-3.5 shrink-0 opacity-70'])
+                            <span class="min-w-0 flex-1">Tautan portal akademik</span>
+                        </a>
+                    @endif
                 </div>
             </details>
         @elseif (! empty($navItem['href']))
@@ -159,7 +215,7 @@
                 $href = $adminSidebarHref((string) $navItem['href']);
                 $topExternal = $sidebarOpenExternal($href);
             @endphp
-            <a href="{{ $href }}" @if ($topExternal) target="_blank" rel="noopener noreferrer" @endif class="flex items-center gap-2 rounded-2xl border border-slate-200/70 bg-white/90 px-3.5 py-2.5 text-[13px] font-semibold text-slate-800 shadow-md shadow-slate-900/[0.03] backdrop-blur-sm transition hover:border-sky-200/80 hover:bg-white hover:text-primary">
+            <a href="{{ $href }}" @if ($topExternal) target="_blank" rel="noopener noreferrer" @endif class="admin-sidebar-top-link flex items-center gap-2 rounded-2xl border border-slate-200/70 bg-white/90 px-3.5 py-2.5 text-[13px] font-semibold text-slate-800 shadow-md shadow-slate-900/[0.03] backdrop-blur-sm transition-all duration-200 ease-out hover:border-slate-600 hover:bg-slate-400 hover:text-slate-950">
                 @include('admin.layouts.sidebar-icon', ['name' => 'home', 'class' => 'h-4 w-4 shrink-0 text-slate-500'])
                 <span class="min-w-0 flex-1 text-left">{{ $topLabel }}</span>
                 @if ($topExternal)

@@ -4,7 +4,10 @@
 
 @php
     $loc = app()->getLocale();
-    $programs = $ppsData['PROGRAMS_DOKTOR'] ?? [];
+    $programs = $programs ?? [];
+    $active = $active ?? null;
+    $selectedSlug = $selectedSlug ?? '';
+    $invalidProgramSelection = $invalidProgramSelection ?? false;
     $hero = $ppsData['DOKTOR_HERO'] ?? 'programs/doktor-photo.png';
     $heroSrc = asset(ltrim($hero, '/'));
 @endphp
@@ -23,20 +26,48 @@
             </div>
         </div>
 
-        <section class="mt-14">
-            <h2 class="font-display text-xl font-bold text-primary">{{ $loc === 'id' ? 'Program Doktor (S3)' : 'Doctoral programs (S3)' }}</h2>
-            <ul class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                @foreach($programs as $p)
+        <section class="mt-14" aria-labelledby="s3-programs-heading">
+            <h2 id="s3-programs-heading" class="font-display text-xl font-bold text-primary">{{ $loc === 'id' ? 'Program Doktor (S3)' : 'Doctoral programs (S3)' }}</h2>
+            <p class="mt-2 max-w-3xl text-sm text-slate-600">{{ $loc === 'id' ? 'Deskripsi program tampil di bawah; gunakan pil untuk memilih program lain.' : 'The programme description appears below; use the chips to switch programme.' }}</p>
+
+            @if(count($programs) === 0)
+                <p class="mt-8 text-slate-600">{{ $loc === 'id' ? 'Belum ada program S3 yang dipublikasikan.' : 'No doctoral (S3) programmes are published yet.' }}</p>
+            @else
+                <ul class="mt-6 flex flex-wrap gap-2">
+                    @foreach($programs as $p)
+                        @php
+                            $slug = (string) ($p['slug'] ?? '');
+                            $name = $p['name'][$loc] ?? $p['name']['id'] ?? '';
+                            $isActive = $slug !== '' && $slug === $selectedSlug;
+                            $href = $slug !== '' ? route('program.s3', ['program' => $slug]) : route('program.s3');
+                        @endphp
+                        <li>
+                            <a href="{{ $href }}" class="inline-flex rounded-full border px-4 py-2 text-sm font-semibold transition {{ $isActive ? 'border-primary bg-primary text-white shadow-md shadow-primary/20' : 'border-slate-200 bg-white text-slate-800 hover:border-primary/40 hover:text-primary' }}">{{ $name }}</a>
+                        </li>
+                    @endforeach
+                </ul>
+
+                @if($active && is_array($active))
                     @php
-                        $name = $p['name'][$loc] ?? $p['name']['id'] ?? '';
-                        $blurb = $p['blurb'][$loc] ?? $p['blurb']['id'] ?? '';
+                        $dName = $active['name'][$loc] ?? $active['name']['id'] ?? '';
+                        $dBlurb = $active['blurb'][$loc] ?? $active['blurb']['id'] ?? '';
+                        $official = isset($active['official_url']) && is_string($active['official_url']) ? trim($active['official_url']) : '';
                     @endphp
-                    <li class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                        <p class="font-display text-lg font-bold text-primary">{{ $name }}</p>
-                        <p class="mt-2 text-sm text-slate-600">{{ $blurb }}</p>
-                    </li>
-                @endforeach
-            </ul>
+                    <div class="mt-10 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-8">
+                        <h3 class="font-display text-2xl font-bold text-primary">{{ $dName }}</h3>
+                        <p class="mt-4 text-base leading-relaxed text-slate-700">{{ $dBlurb }}</p>
+                        @if($official !== '')
+                            <p class="mt-6">
+                                <a href="{{ $official }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-dark">{{ $loc === 'id' ? 'Situs web resmi prodi' : 'Official programme website' }} ↗</a>
+                            </p>
+                        @else
+                            <p class="mt-6 text-sm text-slate-500">{{ $loc === 'id' ? 'Tautan situs resmi prodi belum diatur.' : 'The official programme website link has not been set yet.' }}</p>
+                        @endif
+                    </div>
+                @elseif($invalidProgramSelection)
+                    <p class="mt-8 text-rose-700" role="status">{{ $loc === 'id' ? 'Program tidak ditemukan. Periksa parameter URL program.' : 'Programme not found. Check the programme URL parameter.' }}</p>
+                @endif
+            @endif
         </section>
     </div>
 </main>

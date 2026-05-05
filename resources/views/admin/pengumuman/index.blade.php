@@ -11,6 +11,37 @@
         <span class="font-medium text-slate-900">Pengumuman</span>
     </nav>
 
+    <form method="get" action="{{ route('admin.pengumuman.index') }}" class="flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-white/90 p-4 shadow-sm sm:flex-row sm:flex-wrap sm:items-end">
+        <div class="flex flex-wrap items-center gap-2 sm:mr-2">
+            <a href="{{ route('admin.pengumuman.index') }}" class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold transition {{ ($status ?? 'all') === 'all' ? 'border-primary/30 bg-sky-50 text-primary' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' }}">
+                <span>Semua</span>
+                <span class="rounded-full bg-white/80 px-1.5 py-0.5 text-[10px]">{{ $statusCounts['all'] ?? 0 }}</span>
+            </a>
+            <a href="{{ route('admin.pengumuman.index', ['status' => 'published']) }}" class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold transition {{ ($status ?? 'all') === 'published' ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' }}">
+                <span>Tayang</span>
+                <span class="rounded-full bg-white/80 px-1.5 py-0.5 text-[10px]">{{ $statusCounts['published'] ?? 0 }}</span>
+            </a>
+            <a href="{{ route('admin.pengumuman.index', ['status' => 'draft']) }}" class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-semibold transition {{ ($status ?? 'all') === 'draft' ? 'border-amber-300 bg-amber-50 text-amber-900' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50' }}">
+                <span>Draf</span>
+                <span class="rounded-full bg-white/80 px-1.5 py-0.5 text-[10px]">{{ $statusCounts['draft'] ?? 0 }}</span>
+            </a>
+        </div>
+        <div class="sm:w-56">
+            <label for="pengumuman-filter-status" class="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500">Status</label>
+            <select id="pengumuman-filter-status" name="status" class="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15">
+                <option value="all" @selected(($status ?? 'all') === 'all')>Semua</option>
+                <option value="published" @selected(($status ?? 'all') === 'published')>Tayang</option>
+                <option value="draft" @selected(($status ?? 'all') === 'draft')>Draf</option>
+            </select>
+        </div>
+        <div class="flex gap-2">
+            <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-dark">Terapkan</button>
+            @if (($status ?? 'all') !== 'all')
+                <a href="{{ route('admin.pengumuman.index') }}" class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Reset</a>
+            @endif
+        </div>
+    </form>
+
     <div class="flex flex-col gap-3 rounded-3xl border border-slate-200/80 bg-white/90 px-5 py-4 shadow-lg shadow-slate-900/[0.04] ring-1 ring-white/70 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
         <div>
             <p class="text-sm text-slate-600">Data ini ditampilkan di blok <strong class="text-slate-800">Pengumuman</strong> pada halaman beranda <code class="rounded bg-slate-100 px-1.5 py-0.5 text-xs">/</code>. Urutan kecil tampil dulu.</p>
@@ -32,16 +63,19 @@
 
     <div class="overflow-hidden rounded-3xl border border-slate-200/80 bg-white/90 shadow-xl shadow-slate-900/[0.04] ring-1 ring-white/70 backdrop-blur-sm">
         @if($announcements->isEmpty())
-            <p class="px-6 py-16 text-center text-sm text-slate-500">Belum ada pengumuman.</p>
+            <p class="px-6 py-16 text-center text-sm text-slate-500">
+                {{ ($status ?? 'all') === 'all' ? 'Belum ada pengumuman.' : 'Tidak ada pengumuman untuk status terpilih.' }}
+            </p>
         @else
             <div class="overflow-x-auto">
-                <table class="w-full min-w-[760px] text-left text-sm">
+                <table class="w-full min-w-[860px] text-left text-sm">
                     <thead>
                         <tr class="border-b border-slate-100 bg-slate-50/90 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
                             <th class="px-4 py-3 pl-6">Urutan</th>
                             <th class="px-4 py-3">Tanggal</th>
                             <th class="px-4 py-3">Judul (ID)</th>
                             <th class="hidden px-4 py-3 md:table-cell">Tautan</th>
+                            <th class="px-4 py-3">Status</th>
                             <th class="px-4 py-3 pr-6 text-right">Aksi</th>
                         </tr>
                     </thead>
@@ -53,6 +87,13 @@
                                 <td class="max-w-[22rem] px-4 py-3 font-semibold text-slate-900">{{ \Illuminate\Support\Str::limit($item->title_id, 120) }}</td>
                                 <td class="hidden max-w-[14rem] px-4 py-3 text-xs text-slate-500 md:table-cell">
                                     <code class="rounded bg-slate-100 px-1 py-0.5 break-all">{{ $item->href }}</code>
+                                </td>
+                                <td class="px-4 py-3">
+                                    @include('admin.components.toggle-published', [
+                                        'published' => $item->is_published,
+                                        'action' => route('admin.pengumuman.toggle-publish', $item),
+                                        'scope' => 'blok pengumuman beranda',
+                                    ])
                                 </td>
                                 <td class="whitespace-nowrap px-4 py-3 pr-6 text-right">
                                     <a href="{{ route('admin.pengumuman.edit', $item) }}" class="mr-2 inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-primary transition hover:bg-sky-100">Edit</a>
@@ -66,6 +107,13 @@
                         @endforeach
                     </tbody>
                 </table>
+            </div>
+
+            <div class="flex flex-col gap-3 border-t border-slate-100 bg-slate-50/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-xs text-slate-600">
+                    Menampilkan <strong>{{ $announcements->firstItem() }}</strong>–<strong>{{ $announcements->lastItem() }}</strong> dari <strong>{{ $announcements->total() }}</strong> pengumuman
+                </p>
+                <div class="min-w-0 overflow-x-auto">{{ $announcements->links() }}</div>
             </div>
         @endif
     </div>

@@ -4,10 +4,21 @@
 
 @php
     $loc = app()->getLocale();
+    $ziIntro = $ppsData['ZI_PAGE_INTRO'] ?? null;
     $pillars = $ppsData['ZI_PILLARS'] ?? [];
     $gallery = $ppsData['ZI_GALLERY'] ?? [];
     $channels = $ppsData['ZI_COMPLAINT_CHANNELS'] ?? [];
     $updates = $ppsData['ZI_UPDATES'] ?? [];
+    $ziLine = static function (?array $block, string $loc, string $fallbackKey) use ($t): string {
+        if ($block !== null) {
+            $v = $block[$loc] ?? $block['id'] ?? '';
+            if (is_string($v) && trim($v) !== '') {
+                return $v;
+            }
+        }
+
+        return (string) ($t[$fallbackKey] ?? '');
+    };
 @endphp
 
 @section('content')
@@ -20,9 +31,9 @@
         </header>
 
         <section class="mb-12 rounded-2xl border border-sky-100 bg-white p-6 shadow-sm md:p-8">
-            <h2 class="font-display text-xl font-bold text-primary">{{ $t['ziIntroHeading'] }}</h2>
-            <p class="mt-4 text-sm leading-relaxed text-slate-700 md:text-base">{{ $t['ziIntroP1'] }}</p>
-            <p class="mt-4 text-sm leading-relaxed text-slate-700 md:text-base">{{ $t['ziIntroP2'] }}</p>
+            <h2 class="font-display text-xl font-bold text-primary">{{ $ziLine($ziIntro !== null ? ($ziIntro['heading'] ?? null) : null, $loc, 'ziIntroHeading') }}</h2>
+            <p class="mt-4 text-sm leading-relaxed text-slate-700 md:text-base">{{ $ziLine($ziIntro !== null ? ($ziIntro['p1'] ?? null) : null, $loc, 'ziIntroP1') }}</p>
+            <p class="mt-4 text-sm leading-relaxed text-slate-700 md:text-base">{{ $ziLine($ziIntro !== null ? ($ziIntro['p2'] ?? null) : null, $loc, 'ziIntroP2') }}</p>
         </section>
 
         <section class="mb-12">

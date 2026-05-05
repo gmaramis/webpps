@@ -10,6 +10,7 @@ use JsonException;
 
 #[Fillable([
     'sort_order',
+    'is_published',
     'title_id',
     'title_en',
     'date_iso',
@@ -17,6 +18,14 @@ use JsonException;
 ])]
 class AnnouncementItem extends Model
 {
+    protected function casts(): array
+    {
+        return [
+            'is_published' => 'boolean',
+            'date_iso' => 'date',
+        ];
+    }
+
     protected static function booted(): void
     {
         static::saved(static fn () => PpsContent::flush());
@@ -66,6 +75,7 @@ class AnnouncementItem extends Model
                 $title = is_array($row['title'] ?? null) ? $row['title'] : [];
                 static::query()->create([
                     'sort_order' => $index,
+                    'is_published' => true,
                     'title_id' => (string) ($title['id'] ?? ''),
                     'title_en' => isset($title['en']) ? (string) $title['en'] : null,
                     'date_iso' => (string) ($row['dateISO'] ?? now()->format('Y-m-d')),

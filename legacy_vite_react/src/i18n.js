@@ -1245,7 +1245,6 @@ export const NAV = [
     children: [
       { href: '#/panduan-akademik', label: { id: 'Panduan Akademik', en: 'Academic Guidebook' } },
       { href: '#/kalender-akademik', label: { id: 'Kalender Akademik', en: 'Academic Calendar' } },
-      { href: '#', label: { id: 'Jadwal Kuliah', en: 'Class Schedule' } },
       { href: 'https://si.unima.ac.id/gtakademik_portal/', label: { id: 'Portal Akademik', en: 'Academic Portal' } },
       { href: 'https://lms.unima.ac.id/', label: { id: 'LMS', en: 'LMS' } },
       { href: 'https://spada.kemdiktisaintek.go.id', label: { id: 'SPADA Indonesia', en: 'SPADA Indonesia' } },
@@ -1271,7 +1270,6 @@ export const NAV = [
       { href: '#/instrumen-zona-integritas', label: { id: 'Instrumen Zona Integritas', en: 'Integrity Zone Instruments' } },
       { href: '#/stop-korupsi', label: { id: 'Stop Korupsi', en: 'Stop Corruption' } },
       { href: '#/stop-gratifikasi', label: { id: 'Stop Gratifikasi', en: 'Stop Gratification' } },
-      { href: '#', label: { id: 'DLL', en: 'Etc.' } },
     ],
   },
   {
