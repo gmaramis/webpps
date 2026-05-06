@@ -14,4 +14,6 @@ return [
 
     'seed_name' => env('ADMIN_NAME', 'Administrator'),
 
+    'seed_role' => env('ADMIN_ROLE', 'admin'),
+
 ];

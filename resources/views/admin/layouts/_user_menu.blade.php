@@ -1,6 +1,7 @@
 @php
     $u = Auth::user();
     $initial = mb_strtoupper(mb_substr(trim($u->name !== '' ? $u->name : $u->email), 0, 1));
+    $canManageUsers = $u->can('users.manage');
 @endphp
 <div class="relative z-[100] shrink-0">
     <details class="group relative">
@@ -14,6 +15,9 @@
             <p class="border-b border-slate-100/90 px-4 py-2.5 text-xs text-slate-500">{{ $u->email }}</p>
             <a href="{{ route('admin.profile.edit') }}" class="block px-4 py-2.5 text-[13px] font-medium text-slate-700 transition hover:bg-slate-50 {{ request()->routeIs('admin.profile.edit') ? 'bg-sky-50/90 font-semibold text-primary' : '' }}">Profil</a>
             <a href="{{ route('admin.profile.password.edit') }}" class="block px-4 py-2.5 text-[13px] font-medium text-slate-700 transition hover:bg-slate-50 {{ request()->routeIs('admin.profile.password.edit') ? 'bg-sky-50/90 font-semibold text-primary' : '' }}">Ubah kata sandi</a>
+            @if($canManageUsers)
+                <a href="{{ route('admin.users.index') }}" class="block px-4 py-2.5 text-[13px] font-medium text-slate-700 transition hover:bg-slate-50 {{ request()->routeIs('admin.users.*') ? 'bg-sky-50/90 font-semibold text-primary' : '' }}">Kelola user</a>
+            @endif
             <div class="my-1 border-t border-slate-100"></div>
             <form method="post" action="{{ route('admin.logout') }}" class="px-1.5 pb-1.5">
                 @csrf

@@ -2,6 +2,8 @@
     $navLocale = 'id';
     $navRoot = $ppsData['NAV'] ?? [];
     $newsCounts = $adminSidebarNewsCounts ?? ['total' => 0, 'published' => 0, 'draft' => 0];
+    $can = static fn (string $permission): bool => auth()->user()?->can($permission) ?? false;
+    $canManageUsers = auth()->user()?->can('users.manage') ?? false;
 
     /** Di panel admin, tautan menu situs yang sama dengan halaman CMS mengarah ke backend, bukan URL publik. */
     $adminSidebarHref = static function (string $href): string {
@@ -62,6 +64,29 @@
         return $href;
     };
 
+    $permissionFromPath = static function (string $path): ?string {
+        $trim = rtrim($path, '/');
+
+        return match (true) {
+            str_ends_with($trim, '/visi-misi') => 'visi-misi.manage',
+            str_ends_with($trim, '/struktur-pimpinan') => 'struktur-pimpinan.manage',
+            str_ends_with($trim, '/kerjasama') => 'kerjasama.manage',
+            str_ends_with($trim, '/dosen') => 'dosen.manage',
+            str_ends_with($trim, '/panduan-akademik') => 'panduan-akademik.manage',
+            str_ends_with($trim, '/s2') => 'prodi-s2.manage',
+            str_ends_with($trim, '/s3') => 'prodi-s3.manage',
+            str_ends_with($trim, '/pengumuman') => 'pengumuman.manage',
+            str_ends_with($trim, '/agenda') => 'agenda.manage',
+            str_ends_with($trim, '/kegiatan-mahasiswa') => 'kegiatan-mahasiswa.manage',
+            str_ends_with($trim, '/kegiatan-alumni') => 'kegiatan-alumni.manage',
+            str_ends_with($trim, '/instrumen-zona-integritas') => 'zi.manage',
+            str_ends_with($trim, '/stop-korupsi') => 'stop-korupsi.manage',
+            str_ends_with($trim, '/stop-gratifikasi') => 'stop-gratifikasi.manage',
+            str_ends_with($trim, '/dokumen-akreditasi') => 'dokumen-akreditasi.manage',
+            default => null,
+        };
+    };
+
     /** URL absolut ke luar backend admin → tab baru (path mengandung segmen /admin/ diabaikan). */
     $sidebarOpenExternal = static function (string $href): bool {
         if (! \Illuminate\Support\Str::startsWith($href, ['http://', 'https://'])) {
@@ -118,37 +143,55 @@
             <svg class="admin-sidebar-chevron h-4 w-4 shrink-0 text-slate-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
         </summary>
         <div class="space-y-1 border-t border-slate-100/90 bg-white/95 p-2">
-            <a href="{{ route('admin.dashboard') }}" class="{{ $navActive(request()->routeIs('admin.dashboard')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
-                @include('admin.layouts.sidebar-icon', ['name' => 'dashboard', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
-                <span class="min-w-0 flex-1">Dasbor</span>
-            </a>
-            <a href="{{ route('admin.news.index') }}" class="{{ $navActive(request()->routeIs('admin.news.*')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
-                @include('admin.layouts.sidebar-icon', ['name' => 'newspaper', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
-                <span class="min-w-0 flex-1">Berita</span>
-                @if(($newsCounts['total'] ?? 0) > 0)
-                    <span class="flex h-5 min-w-[1.35rem] shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-white shadow-sm shadow-primary/30">{{ $newsCounts['total'] > 99 ? '99+' : $newsCounts['total'] }}</span>
-                @endif
-            </a>
-            <a href="{{ route('admin.slideshow.index') }}" class="{{ $navActive(request()->routeIs('admin.slideshow.*')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
-                @include('admin.layouts.sidebar-icon', ['name' => 'photo', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
-                <span class="min-w-0 flex-1">Slideshow beranda</span>
-            </a>
-            <a href="{{ route('admin.pengumuman.index') }}" class="{{ $navActive(request()->routeIs('admin.pengumuman.*')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
-                @include('admin.layouts.sidebar-icon', ['name' => 'megaphone', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
-                <span class="min-w-0 flex-1">Pengumuman</span>
-            </a>
-            <a href="{{ route('admin.agenda.index') }}" class="{{ $navActive(request()->routeIs('admin.agenda.*')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
-                @include('admin.layouts.sidebar-icon', ['name' => 'calendar', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
-                <span class="min-w-0 flex-1">Agenda</span>
-            </a>
-            <a href="{{ route('admin.profile.edit') }}" class="{{ $navActive(request()->routeIs('admin.profile.edit')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
-                @include('admin.layouts.sidebar-icon', ['name' => 'account', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
-                <span class="min-w-0 flex-1">Profil akun</span>
-            </a>
-            <a href="{{ route('admin.profile.password.edit') }}" class="{{ $navActive(request()->routeIs('admin.profile.password.edit')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
-                @include('admin.layouts.sidebar-icon', ['name' => 'lock', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
-                <span class="min-w-0 flex-1">Ubah kata sandi</span>
-            </a>
+            @if ($can('dashboard.view'))
+                <a href="{{ route('admin.dashboard') }}" class="{{ $navActive(request()->routeIs('admin.dashboard')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
+                    @include('admin.layouts.sidebar-icon', ['name' => 'dashboard', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
+                    <span class="min-w-0 flex-1">Dasbor</span>
+                </a>
+            @endif
+            @if ($can('news.manage'))
+                <a href="{{ route('admin.news.index') }}" class="{{ $navActive(request()->routeIs('admin.news.*')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
+                    @include('admin.layouts.sidebar-icon', ['name' => 'newspaper', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
+                    <span class="min-w-0 flex-1">Berita</span>
+                    @if(($newsCounts['total'] ?? 0) > 0)
+                        <span class="flex h-5 min-w-[1.35rem] shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-white shadow-sm shadow-primary/30">{{ $newsCounts['total'] > 99 ? '99+' : $newsCounts['total'] }}</span>
+                    @endif
+                </a>
+            @endif
+            @if ($can('slideshow.manage'))
+                <a href="{{ route('admin.slideshow.index') }}" class="{{ $navActive(request()->routeIs('admin.slideshow.*')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
+                    @include('admin.layouts.sidebar-icon', ['name' => 'photo', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
+                    <span class="min-w-0 flex-1">Slideshow beranda</span>
+                </a>
+            @endif
+            @if ($can('pengumuman.manage'))
+                <a href="{{ route('admin.pengumuman.index') }}" class="{{ $navActive(request()->routeIs('admin.pengumuman.*')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
+                    @include('admin.layouts.sidebar-icon', ['name' => 'megaphone', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
+                    <span class="min-w-0 flex-1">Pengumuman</span>
+                </a>
+            @endif
+            @if ($can('agenda.manage'))
+                <a href="{{ route('admin.agenda.index') }}" class="{{ $navActive(request()->routeIs('admin.agenda.*')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
+                    @include('admin.layouts.sidebar-icon', ['name' => 'calendar', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
+                    <span class="min-w-0 flex-1">Agenda</span>
+                </a>
+            @endif
+            @if ($can('profile.manage'))
+                <a href="{{ route('admin.profile.edit') }}" class="{{ $navActive(request()->routeIs('admin.profile.edit')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
+                    @include('admin.layouts.sidebar-icon', ['name' => 'account', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
+                    <span class="min-w-0 flex-1">Profil akun</span>
+                </a>
+                <a href="{{ route('admin.profile.password.edit') }}" class="{{ $navActive(request()->routeIs('admin.profile.password.edit')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
+                    @include('admin.layouts.sidebar-icon', ['name' => 'lock', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
+                    <span class="min-w-0 flex-1">Ubah kata sandi</span>
+                </a>
+            @endif
+            @if ($canManageUsers)
+                <a href="{{ route('admin.users.index') }}" class="{{ $navActive(request()->routeIs('admin.users.*')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
+                    @include('admin.layouts.sidebar-icon', ['name' => 'users', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
+                    <span class="min-w-0 flex-1">Kelola user</span>
+                </a>
+            @endif
         </div>
     </details>
 
@@ -192,7 +235,12 @@
                             $childLabel = $child['label'][$navLocale] ?? $child['label']['id'] ?? $child['label']['en'] ?? '';
                             $href = $adminSidebarHref((string) ($child['href'] ?? '#'));
                             $childExternal = $sidebarOpenExternal($href);
+                            $path = parse_url($href, PHP_URL_PATH) ?: '';
+                            $childPermission = $permissionFromPath($path);
                         @endphp
+                        @if ($childPermission && ! $can($childPermission))
+                            @continue
+                        @endif
                         <a href="{{ $href }}" @if ($childExternal) target="_blank" rel="noopener noreferrer" @endif class="mx-1 flex items-center gap-2 rounded-xl px-3 py-2 pl-9 text-[13px] font-medium text-slate-600 transition-all duration-200 ease-out hover:bg-slate-400 hover:text-slate-950 hover:shadow-sm">
                             @if ($childExternal)
                                 @include('admin.layouts.sidebar-icon', ['name' => 'link', 'class' => 'h-3.5 w-3.5 shrink-0 opacity-70'])
@@ -202,7 +250,7 @@
                             <span class="min-w-0 flex-1">{{ $childLabel }}</span>
                         </a>
                     @endforeach
-                    @if ($topKey === 'Akademik')
+                    @if ($topKey === 'Akademik' && $can('tautan-portal-akademik.manage'))
                         <a href="{{ route('admin.tautan-portal-akademik.edit') }}" class="{{ $navActive(request()->routeIs('admin.tautan-portal-akademik.*')) }} mx-1 flex items-center gap-2 rounded-xl px-3 py-2 pl-9 text-[13px] font-medium text-slate-600 transition-all duration-200 ease-out hover:bg-slate-400 hover:text-slate-950 hover:shadow-sm">
                             @include('admin.layouts.sidebar-icon', ['name' => 'link', 'class' => 'h-3.5 w-3.5 shrink-0 opacity-70'])
                             <span class="min-w-0 flex-1">Tautan portal akademik</span>
