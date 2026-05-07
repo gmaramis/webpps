@@ -48,11 +48,12 @@ class EnsureSuperAdminUser extends Command
 
         $user = User::query()->updateOrCreate(
             ['email' => $email],
-            ['name' => $name],
+            [
+                'name' => $name,
+                'password' => $password,
+            ],
         );
 
-        $user->password = $password;
-        $user->save();
         $user->syncRoles([AdminRoles::SUPER_ADMIN]);
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
