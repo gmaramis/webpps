@@ -15,6 +15,7 @@ final class AdminPermissions
             'users.manage',
             'news.manage',
             'slideshow.manage',
+            'program-heroes.manage',
             'pengumuman.manage',
             'agenda.manage',
             'visi-misi.manage',
@@ -56,6 +57,7 @@ final class AdminPermissions
             'users.manage' => 'Kelola user, role, dan permission',
             'news.manage' => 'Kelola berita',
             'slideshow.manage' => 'Kelola slideshow beranda',
+            'program-heroes.manage' => 'Kelola gambar hero Magister & Doktor di beranda',
             'pengumuman.manage' => 'Kelola pengumuman',
             'agenda.manage' => 'Kelola agenda',
             'visi-misi.manage' => 'Kelola halaman visi misi',
@@ -89,6 +91,7 @@ final class AdminPermissions
             'Konten utama' => [
                 'news.manage',
                 'slideshow.manage',
+                'program-heroes.manage',
                 'pengumuman.manage',
                 'agenda.manage',
             ],

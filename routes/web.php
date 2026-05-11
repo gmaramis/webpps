@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\HeroSlideController;
 use App\Http\Controllers\Admin\LeadershipPersonController;
 use App\Http\Controllers\Admin\LecturerController;
 use App\Http\Controllers\Admin\NewsItemController;
+use App\Http\Controllers\Admin\ProgramHeroSettingsController;
 use App\Http\Controllers\Admin\S2ProgramController;
 use App\Http\Controllers\Admin\S3ProgramController;
 use App\Http\Controllers\Admin\StopGratifikasiBulletController;
@@ -87,6 +88,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function (): v
     Route::resource('agenda', AgendaItemController::class)->except(['show'])->parameters(['agenda' => 'agenda'])->middleware('permission:agenda.manage');
     Route::post('slideshow/restore-built-in', [HeroSlideController::class, 'restoreBuiltIn'])->middleware('permission:slideshow.manage')->name('slideshow.restore-built-in');
     Route::resource('slideshow', HeroSlideController::class)->except(['show'])->parameters(['slideshow' => 'slide'])->middleware('permission:slideshow.manage');
+    Route::get('tampilan-program-beranda', [ProgramHeroSettingsController::class, 'edit'])->middleware('permission:program-heroes.manage')->name('program-heroes.edit');
+    Route::patch('tampilan-program-beranda', [ProgramHeroSettingsController::class, 'update'])->middleware('permission:program-heroes.manage')->name('program-heroes.update');
     Route::post('news/{news}/puter-translation', [NewsItemController::class, 'applyPuterTranslation'])->middleware('permission:news.manage')->name('news.puter-translation');
     Route::post('news/{news}/translation-retry', [NewsItemController::class, 'retryTranslation'])->middleware('permission:news.manage')->name('news.translation-retry');
     Route::resource('news', NewsItemController::class)->except(['show'])->middleware('permission:news.manage');

@@ -15,7 +15,7 @@ class S2ProgramRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        foreach (['name_en', 'blurb_en', 'official_url'] as $key) {
+        foreach (['name_en', 'blurb_en', 'excerpt_id', 'excerpt_en', 'official_url'] as $key) {
             $v = $this->input($key);
             if ($v !== null && trim((string) $v) === '') {
                 $this->merge([$key => null]);
@@ -47,6 +47,8 @@ class S2ProgramRequest extends FormRequest
             'name_en' => ['nullable', 'string', 'max:255'],
             'blurb_id' => ['required', 'string', 'max:5000'],
             'blurb_en' => ['nullable', 'string', 'max:5000'],
+            'excerpt_id' => ['nullable', 'string', 'max:2000'],
+            'excerpt_en' => ['nullable', 'string', 'max:2000'],
             'official_url' => ['nullable', 'string', 'url', 'max:2048'],
         ];
     }

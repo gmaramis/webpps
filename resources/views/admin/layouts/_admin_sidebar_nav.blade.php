@@ -164,6 +164,12 @@
                     <span class="min-w-0 flex-1">Slideshow beranda</span>
                 </a>
             @endif
+            @if ($can('program-heroes.manage'))
+                <a href="{{ route('admin.program-heroes.edit') }}" class="{{ $navActive(request()->routeIs('admin.program-heroes.*')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
+                    @include('admin.layouts.sidebar-icon', ['name' => 'photo', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
+                    <span class="min-w-0 flex-1">Hero program beranda</span>
+                </a>
+            @endif
             @if ($can('pengumuman.manage'))
                 <a href="{{ route('admin.pengumuman.index') }}" class="{{ $navActive(request()->routeIs('admin.pengumuman.*')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
                     @include('admin.layouts.sidebar-icon', ['name' => 'megaphone', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
@@ -214,7 +220,7 @@
             };
         @endphp
         @if (! empty($navItem['children']) && is_array($navItem['children']))
-            <details class="admin-sidebar-details overflow-hidden rounded-2xl border border-slate-200/70 bg-white/65 shadow-md shadow-slate-900/[0.03] backdrop-blur-sm" @if ($topKey === 'Akademik' && request()->routeIs('admin.tautan-portal-akademik.*')) open @endif @if ($topKey === 'Program Studi' && (request()->routeIs('admin.prodi-s2.*') || request()->routeIs('admin.prodi-s3.*'))) open @endif @if ($topKey === 'Unit Penjamin Mutu' && (request()->routeIs('admin.stop-korupsi.*') || request()->routeIs('admin.stop-gratifikasi.*'))) open @endif>
+            <details class="admin-sidebar-details overflow-hidden rounded-2xl border border-slate-200/70 bg-white/65 shadow-md shadow-slate-900/[0.03] backdrop-blur-sm" @if ($topKey === 'Akademik' && request()->routeIs('admin.tautan-portal-akademik.*')) open @endif @if ($topKey === 'Program Studi' && (request()->routeIs('admin.prodi-s2.*') || request()->routeIs('admin.prodi-s3.*') || request()->routeIs('admin.program-heroes.*'))) open @endif @if ($topKey === 'Unit Penjamin Mutu' && (request()->routeIs('admin.stop-korupsi.*') || request()->routeIs('admin.stop-gratifikasi.*'))) open @endif>
                 <summary class="flex cursor-pointer items-center gap-2 px-3.5 py-3 text-[13px] font-bold tracking-tight text-slate-800 transition-colors duration-200 ease-out hover:bg-slate-400">
                     @include('admin.layouts.sidebar-icon', ['name' => $groupIcon, 'class' => 'h-4 w-4 shrink-0 text-slate-500'])
                     <span class="min-w-0 flex-1 text-left leading-snug">{{ $topLabel }}</span>

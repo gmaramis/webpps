@@ -10,6 +10,8 @@
     $gridNews = array_slice($news, 1);
     $magister = $ppsData['PROGRAMS_MAGISTER'] ?? [];
     $doktor = $ppsData['PROGRAMS_DOKTOR'] ?? [];
+    $magisterHeroSrc = \App\Models\HomepageProgramDisplay::publicHeroUrl($ppsData['MAGISTER_HERO'] ?? null, 'programs/magister-photo.png');
+    $doktorHeroSrc = \App\Models\HomepageProgramDisplay::publicHeroUrl($ppsData['DOKTOR_HERO'] ?? null, 'programs/doktor-photo.png');
     $announcements = $ppsData['ANNOUNCEMENTS'] ?? [];
     $agenda = $ppsData['AGENDA'] ?? [];
     $newsHref = function (?array $entry, string $loc): string {
@@ -80,9 +82,20 @@
             </div>
             <div class="news-feature relative overflow-hidden rounded-2xl bg-[#221E1B] text-white shadow-[0_28px_50px_-28px_rgba(0,0,0,0.45)] ring-1 ring-black/20 md:rounded-3xl">
                 <div class="grid lg:grid-cols-2 lg:items-stretch">
-                    <div class="relative flex h-44 w-full shrink-0 items-center justify-center overflow-hidden bg-[#2a2420] px-2 sm:h-48 md:h-52 lg:h-56">
-                        <img src="{{ asset(ltrim($featured['image'], '/')) }}" alt="{{ $featured['imageAlt'][$loc] }}" width="640" height="400" class="news-feature-img relative z-0 h-auto max-h-full w-auto max-w-full object-contain object-center" decoding="async">
-                        <div class="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/45 via-transparent to-black/15 lg:bg-gradient-to-r lg:from-transparent lg:via-transparent lg:to-[#221E1B]/90" aria-hidden="true"></div>
+                    @php
+                        $featuredImgSrc = asset(ltrim($featured['image'], '/'));
+                        $featuredImgAlt = $featured['imageAlt'][$loc] ?? '';
+                        $newsZoomLabel = $loc === 'id' ? 'Perbesar gambar' : 'Enlarge image';
+                    @endphp
+                    <div class="relative isolate h-44 min-h-[11rem] w-full shrink-0 overflow-hidden bg-[#2a2420] sm:h-48 sm:min-h-[12rem] md:h-52 md:min-h-[13rem] lg:h-full lg:min-h-[15rem]">
+                        <button type="button"
+                            class="news-feature-media group absolute inset-0 z-0 block h-full w-full cursor-zoom-in border-0 bg-transparent p-0 text-left focus-visible:outline focus-visible:ring-2 focus-visible:ring-amber-400/90 focus-visible:ring-offset-2 focus-visible:ring-offset-[#2a2420]"
+                            data-news-lightbox-src="{{ $featuredImgSrc }}"
+                            data-news-lightbox-alt="{{ $featuredImgAlt }}"
+                            aria-label="{{ $newsZoomLabel }}">
+                            <img src="{{ $featuredImgSrc }}" alt="{{ $featuredImgAlt }}" width="640" height="400" class="news-feature-img pointer-events-none h-full w-full object-cover object-center transition duration-300 ease-out group-hover:scale-[1.02]" decoding="async" fetchpriority="high">
+                            <span class="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/45 via-transparent to-black/15 lg:bg-gradient-to-r lg:from-transparent lg:via-transparent lg:to-[#221E1B]/90" aria-hidden="true"></span>
+                        </button>
                     </div>
                     <div class="flex flex-col justify-center px-5 py-8 md:px-10 md:py-10 lg:max-w-xl lg:pr-12">
                         <h3 class="font-display text-2xl font-bold leading-tight tracking-tight text-white md:text-3xl lg:text-[1.85rem]">{{ $featured['title'][$loc] }}</h3>
@@ -104,23 +117,39 @@
             @if(count($gridNews))
             <ul id="news-list" class="news-list m-0 mt-12 grid list-none gap-8 p-0 md:mt-14 md:grid-cols-3">
                 @foreach($gridNews as $i => $n)
+                    @php
+                        $gridImgSrc = asset(ltrim($n['image'], '/'));
+                        $gridImgAlt = $n['imageAlt'][$loc] ?? '';
+                    @endphp
                     <li class="news-card group flex flex-col">
-                        <a href="{{ $newsHref($n, $loc) }}" class="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white no-underline shadow-sm ring-1 ring-slate-900/[0.03] transition hover:border-slate-300 hover:shadow-md">
-                            <div class="relative flex h-36 w-full shrink-0 items-center justify-center overflow-hidden bg-slate-100 px-2 sm:h-40">
-                                <img src="{{ asset(ltrim($n['image'], '/')) }}" alt="{{ $n['imageAlt'][$loc] }}" width="480" height="320" class="h-auto max-h-full w-auto max-w-full object-contain object-center transition duration-500 ease-out group-hover:scale-[1.02]" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" decoding="async">
-                            </div>
-                            <div class="flex flex-1 flex-col px-1 pb-5 pt-4 md:px-2">
+                        <article class="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm ring-1 ring-slate-900/[0.03] transition hover:border-slate-300 hover:shadow-md">
+                            <button type="button"
+                                class="relative flex h-36 w-full shrink-0 cursor-zoom-in overflow-hidden bg-slate-100 sm:h-40 border-0 p-0 text-left focus-visible:outline focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-inset"
+                                data-news-lightbox-src="{{ $gridImgSrc }}"
+                                data-news-lightbox-alt="{{ $gridImgAlt }}"
+                                aria-label="{{ $newsZoomLabel }}">
+                                <img src="{{ $gridImgSrc }}" alt="{{ $gridImgAlt }}" width="480" height="320" class="pointer-events-none h-full w-full object-cover object-center transition duration-500 ease-out group-hover:scale-[1.02]" loading="{{ $i === 0 ? 'eager' : 'lazy' }}" decoding="async">
+                            </button>
+                            <a href="{{ $newsHref($n, $loc) }}" class="flex flex-1 flex-col px-1 pb-5 pt-4 no-underline text-inherit md:px-2">
                                 <h3 class="font-display text-lg font-bold leading-snug tracking-tight text-slate-900 group-hover:text-primary md:text-[1.05rem]">{{ $n['title'][$loc] }}</h3>
                                 <p class="mt-auto flex items-center gap-1.5 pt-4 text-[11px] font-medium uppercase tracking-[0.08em] text-slate-500 md:text-xs">
                                     <svg class="h-3.5 w-3.5 shrink-0 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" d="M12 6v6l4 2"/></svg>
                                     <span>{{ \App\Support\PpsContent::formatAnnouncementDate($n['date'], $loc) }}</span>
                                 </p>
-                            </div>
-                        </a>
+                            </a>
+                        </article>
                     </li>
                 @endforeach
             </ul>
             @endif
+
+            <dialog id="news-image-lightbox" class="news-image-lightbox" aria-labelledby="news-image-lightbox-title">
+                <div class="news-image-lightbox__inner">
+                    <h2 id="news-image-lightbox-title" class="sr-only">{{ $loc === 'id' ? 'Gambar berita' : 'News image' }}</h2>
+                    <button type="button" id="news-image-lightbox-close" class="news-image-lightbox__close" aria-label="{{ $loc === 'id' ? 'Tutup' : 'Close' }}">×</button>
+                    <img id="news-image-lightbox-img" src="" alt="" class="news-image-lightbox__img" width="1100" height="800" decoding="async">
+                </div>
+            </dialog>
         </div>
     </section>
     @endif
@@ -131,31 +160,38 @@
         <div class="pointer-events-none absolute bottom-0 left-0 h-48 w-48 rounded-full bg-cyan-300/15 blur-2xl" aria-hidden="true"></div>
         <div class="relative mx-auto max-w-6xl px-4">
             <div class="grid items-center gap-12 lg:grid-cols-12 lg:gap-10">
-                <div class="order-2 lg:order-1 lg:col-span-5 xl:col-span-5">
+                <div class="order-2 min-w-0 lg:order-1 lg:col-span-5 xl:col-span-5">
                     <div class="magister-panel rounded-3xl border border-slate-200/70 bg-white/95 p-6 shadow-[0_24px_60px_-24px_rgba(15,23,42,0.14)] backdrop-blur-md md:p-8">
                         <span class="inline-flex items-center rounded-full border border-sky-200/90 bg-gradient-to-r from-sky-50 to-cyan-50 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-sky-900">{{ $loc === 'en' ? 'Master (S2)' : 'Magister (S2)' }}</span>
                         <h2 class="font-display mt-5 text-3xl font-bold tracking-tight text-primary md:text-4xl">{{ $t['magisterTitle'] }}</h2>
                         <p class="mt-3 max-w-xl text-base leading-relaxed text-slate-600 md:text-lg">{{ $t['magisterLead'] }}</p>
                         <ul class="mt-8 grid list-none gap-3 p-0 sm:grid-cols-2">
                             @foreach($magister as $p)
-                                <li class="magister-card rounded-2xl border border-slate-200/70 bg-gradient-to-br from-white to-sky-50/50 p-4 shadow-sm">
-                                    <div class="flex items-start gap-3">
-                                        <span class="program-study-accent program-study-accent--sky mt-0.5 shrink-0" aria-hidden="true"></span>
-                                        <div class="min-w-0">
-                                            <h3 class="text-[1.02rem] font-semibold leading-snug text-primary">{{ $p['name'][$loc] }}</h3>
-                                            <p class="mt-1 text-sm leading-relaxed text-slate-600">{{ $p['blurb'][$loc] }}</p>
+                                @php
+                                    $excerptText = trim((string) (($p['excerpt'] ?? [])[$loc] ?? ''));
+                                    $cardTeaser = $excerptText !== '' ? $excerptText : ($loc === 'id' ? 'Lihat deskripsi lengkap program di halaman Magister.' : "See the full program description on the Master's page.");
+                                @endphp
+                                <li class="magister-card rounded-2xl border border-slate-200/70 bg-gradient-to-br from-white to-sky-50/50 shadow-sm transition hover:border-sky-300/80 hover:shadow-md">
+                                    <a href="{{ route('program.s2', ['program' => $p['slug'] ?? '']) }}" class="group block rounded-2xl p-4 no-underline text-inherit outline-none ring-primary/25 focus-visible:ring-2">
+                                        <div class="flex items-start gap-3">
+                                            <span class="program-study-accent program-study-accent--sky mt-0.5 shrink-0" aria-hidden="true"></span>
+                                            <div class="min-w-0">
+                                                <h3 class="text-[1.02rem] font-semibold leading-snug text-primary group-hover:underline">{{ $p['name'][$loc] }}</h3>
+                                                <p class="mt-1 text-sm leading-relaxed text-slate-600">{{ $cardTeaser }}</p>
+                                                <p class="mt-2 text-xs font-semibold text-primary">{{ $loc === 'id' ? 'Selengkapnya' : 'Learn more' }} <span aria-hidden="true">→</span></p>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </a>
                                 </li>
                             @endforeach
                         </ul>
                     </div>
                 </div>
-                <div class="order-1 lg:order-2 lg:col-span-7 xl:col-span-7">
+                <div class="order-1 min-w-0 lg:order-2 lg:col-span-7 xl:col-span-7">
                     <div class="relative mx-auto max-w-xl lg:mx-0 lg:max-w-none">
                         <div class="absolute -inset-3 rounded-[1.75rem] bg-gradient-to-br from-sky-400/35 via-cyan-300/15 to-transparent opacity-70 blur-2xl md:-inset-5 md:rounded-[2rem]" aria-hidden="true"></div>
                         <figure class="program-hero-frame program-hero-frame--showcase relative overflow-hidden rounded-3xl ring-1 ring-slate-900/[0.06] shadow-[0_28px_60px_-18px_rgba(15,23,42,0.28)]">
-                            <img src="{{ asset(ltrim($ppsData['MAGISTER_HERO'] ?? 'programs/magister-photo.png', '/')) }}" alt="" width="960" height="600" class="program-hero-img h-full w-full" loading="lazy" decoding="async">
+                            <img src="{{ $magisterHeroSrc }}" alt="" width="960" height="600" class="program-hero-img h-full w-full" loading="lazy" decoding="async">
                         </figure>
                     </div>
                 </div>
@@ -169,29 +205,36 @@
         <div class="pointer-events-none absolute bottom-10 right-0 h-56 w-56 rounded-full bg-indigo-400/15 blur-2xl" aria-hidden="true"></div>
         <div class="relative mx-auto max-w-6xl px-4">
             <div class="grid items-center gap-12 lg:grid-cols-12 lg:gap-10">
-                <div class="order-1 lg:col-span-7 xl:col-span-7">
+                <div class="order-1 min-w-0 lg:col-span-7 xl:col-span-7">
                     <div class="relative mx-auto max-w-xl lg:mx-0 lg:max-w-none">
                         <div class="absolute -inset-3 rounded-[1.75rem] bg-gradient-to-br from-violet-500/30 via-indigo-400/15 to-transparent opacity-70 blur-2xl md:-inset-5 md:rounded-[2rem]" aria-hidden="true"></div>
                         <figure class="program-hero-frame program-hero-frame--showcase relative overflow-hidden rounded-3xl ring-1 ring-slate-900/[0.06] shadow-[0_28px_60px_-18px_rgba(30,27,75,0.32)]">
-                            <img src="{{ asset(ltrim($ppsData['DOKTOR_HERO'] ?? 'programs/doktor-photo.png', '/')) }}" alt="" width="960" height="600" class="program-hero-img h-full w-full" loading="lazy" decoding="async">
+                            <img src="{{ $doktorHeroSrc }}" alt="" width="960" height="600" class="program-hero-img h-full w-full" loading="lazy" decoding="async">
                         </figure>
                     </div>
                 </div>
-                <div class="order-2 lg:col-span-5 xl:col-span-5">
+                <div class="order-2 min-w-0 lg:col-span-5 xl:col-span-5">
                     <div class="doktor-panel rounded-3xl border border-slate-200/70 bg-white/95 p-6 shadow-[0_24px_60px_-24px_rgba(15,23,42,0.14)] backdrop-blur-md md:p-8">
                         <span class="inline-flex items-center rounded-full border border-violet-200/90 bg-gradient-to-r from-violet-50 to-indigo-50 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-indigo-950">{{ $loc === 'en' ? 'Doctorate (S3)' : 'Doktor (S3)' }}</span>
                         <h2 class="font-display mt-5 text-3xl font-bold tracking-tight text-primary md:text-4xl">{{ $t['doktorTitle'] }}</h2>
                         <p class="mt-3 max-w-xl text-base leading-relaxed text-slate-600 md:text-lg">{{ $t['doktorLead'] }}</p>
                         <ul class="mt-8 grid list-none gap-3 p-0 sm:grid-cols-2">
                             @foreach($doktor as $p)
-                                <li class="doktor-card rounded-2xl border border-slate-200/70 bg-gradient-to-br from-white to-violet-50/40 p-4 shadow-sm">
-                                    <div class="flex items-start gap-3">
-                                        <span class="program-study-accent program-study-accent--violet mt-0.5 shrink-0" aria-hidden="true"></span>
-                                        <div class="min-w-0">
-                                            <h3 class="text-[1.02rem] font-semibold leading-snug text-primary">{{ $p['name'][$loc] }}</h3>
-                                            <p class="mt-1 text-sm leading-relaxed text-slate-600">{{ $p['blurb'][$loc] }}</p>
+                                @php
+                                    $excerptText = trim((string) (($p['excerpt'] ?? [])[$loc] ?? ''));
+                                    $cardTeaser = $excerptText !== '' ? $excerptText : ($loc === 'id' ? 'Lihat deskripsi lengkap program di halaman Doktor.' : 'See the full program description on the Doctoral page.');
+                                @endphp
+                                <li class="doktor-card rounded-2xl border border-slate-200/70 bg-gradient-to-br from-white to-violet-50/40 shadow-sm transition hover:border-violet-300/80 hover:shadow-md">
+                                    <a href="{{ route('program.s3', ['program' => $p['slug'] ?? '']) }}" class="group block rounded-2xl p-4 no-underline text-inherit outline-none ring-primary/25 focus-visible:ring-2">
+                                        <div class="flex items-start gap-3">
+                                            <span class="program-study-accent program-study-accent--violet mt-0.5 shrink-0" aria-hidden="true"></span>
+                                            <div class="min-w-0">
+                                                <h3 class="text-[1.02rem] font-semibold leading-snug text-primary group-hover:underline">{{ $p['name'][$loc] }}</h3>
+                                                <p class="mt-1 text-sm leading-relaxed text-slate-600">{{ $cardTeaser }}</p>
+                                                <p class="mt-2 text-xs font-semibold text-primary">{{ $loc === 'id' ? 'Selengkapnya' : 'Learn more' }} <span aria-hidden="true">→</span></p>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </a>
                                 </li>
                             @endforeach
                         </ul>

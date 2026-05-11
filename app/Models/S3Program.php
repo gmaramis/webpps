@@ -16,6 +16,8 @@ use JsonException;
     'name_en',
     'blurb_id',
     'blurb_en',
+    'excerpt_id',
+    'excerpt_en',
     'official_url',
 ])]
 class S3Program extends Model
@@ -57,6 +59,8 @@ class S3Program extends Model
     {
         $nameEn = $this->name_en !== null && trim($this->name_en) !== '' ? $this->name_en : $this->name_id;
         $blurbEn = $this->blurb_en !== null && trim($this->blurb_en) !== '' ? $this->blurb_en : $this->blurb_id;
+        $excerptId = $this->excerpt_id !== null ? trim((string) $this->excerpt_id) : '';
+        $excerptEn = $this->excerpt_en !== null && trim((string) $this->excerpt_en) !== '' ? trim((string) $this->excerpt_en) : $excerptId;
 
         return [
             'id' => (string) $this->getKey(),
@@ -68,6 +72,10 @@ class S3Program extends Model
             'blurb' => [
                 'id' => $this->blurb_id,
                 'en' => $blurbEn,
+            ],
+            'excerpt' => [
+                'id' => $excerptId,
+                'en' => $excerptEn,
             ],
             'official_url' => $this->official_url !== null && trim($this->official_url) !== ''
                 ? trim($this->official_url)
@@ -99,7 +107,10 @@ class S3Program extends Model
             foreach (array_values($rows) as $index => $row) {
                 $name = $row['name'] ?? [];
                 $blurb = $row['blurb'] ?? [];
+                $excerpt = $row['excerpt'] ?? [];
                 $nameId = (string) ($name['id'] ?? '');
+                $excerptId = is_array($excerpt) ? trim((string) ($excerpt['id'] ?? '')) : '';
+                $excerptEnRaw = is_array($excerpt) && isset($excerpt['en']) ? trim((string) $excerpt['en']) : '';
 
                 static::query()->create([
                     'sort_order' => $index,
@@ -108,6 +119,8 @@ class S3Program extends Model
                     'name_en' => isset($name['en']) ? (string) $name['en'] : null,
                     'blurb_id' => (string) ($blurb['id'] ?? ''),
                     'blurb_en' => isset($blurb['en']) ? (string) $blurb['en'] : null,
+                    'excerpt_id' => $excerptId !== '' ? $excerptId : null,
+                    'excerpt_en' => $excerptEnRaw !== '' ? $excerptEnRaw : null,
                     'official_url' => isset($row['official_url']) && is_string($row['official_url']) && trim($row['official_url']) !== ''
                         ? trim($row['official_url'])
                         : null,

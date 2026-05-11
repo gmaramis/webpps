@@ -43,7 +43,28 @@
     </div>
     <div class="grid gap-4 sm:grid-cols-2">
         <div>
-            <label for="blurb_id" class="mb-1 block text-xs font-semibold text-slate-700">Deskripsi singkat (Bahasa Indonesia)</label>
+            <label for="excerpt_id" class="mb-1 block text-xs font-semibold text-slate-700">Ringkasan beranda (Bahasa Indonesia) <span class="font-normal text-slate-400">(opsional)</span></label>
+            <p class="mb-2 text-[11px] text-slate-500">Teks singkat untuk kartu program di beranda. Kosongkan untuk menampilkan kalimat pengganti singkat di situs publik.</p>
+            <textarea id="excerpt_id" name="excerpt_id" rows="3" maxlength="2000"
+                class="w-full resize-y rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm transition focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 @error('excerpt_id') border-rose-400 @enderror">{{ old('excerpt_id', $program->excerpt_id) }}</textarea>
+            @error('excerpt_id')
+                <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+            @enderror
+        </div>
+        <div>
+            <label for="excerpt_en" class="mb-1 block text-xs font-semibold text-slate-700">Ringkasan beranda (English) <span class="font-normal text-slate-400">(opsional)</span></label>
+            <p class="mb-2 text-[11px] text-slate-500">Versi Inggris untuk beranda (locale EN).</p>
+            <textarea id="excerpt_en" name="excerpt_en" rows="3" maxlength="2000"
+                class="w-full resize-y rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm transition focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 @error('excerpt_en') border-rose-400 @enderror">{{ old('excerpt_en', $program->excerpt_en) }}</textarea>
+            @error('excerpt_en')
+                <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+            @enderror
+        </div>
+    </div>
+    <div class="grid gap-4 sm:grid-cols-2">
+        <div>
+            <label for="blurb_id" class="mb-1 block text-xs font-semibold text-slate-700">Deskripsi lengkap (Bahasa Indonesia)</label>
+            <p class="mb-2 text-[11px] text-slate-500">Teks panjang di halaman <span class="font-mono">/s3</span> saat program dipilih.</p>
             <textarea id="blurb_id" name="blurb_id" rows="5" required maxlength="5000"
                 class="w-full resize-y rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm transition focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 @error('blurb_id') border-rose-400 @enderror">{{ old('blurb_id', $program->blurb_id) }}</textarea>
             @error('blurb_id')
@@ -51,7 +72,7 @@
             @enderror
         </div>
         <div>
-            <label for="blurb_en" class="mb-1 block text-xs font-semibold text-slate-700">Deskripsi singkat (English) <span class="font-normal text-slate-400">(opsional)</span></label>
+            <label for="blurb_en" class="mb-1 block text-xs font-semibold text-slate-700">Deskripsi lengkap (English) <span class="font-normal text-slate-400">(opsional)</span></label>
             <textarea id="blurb_en" name="blurb_en" rows="5" maxlength="5000"
                 class="w-full resize-y rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm transition focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 @error('blurb_en') border-rose-400 @enderror">{{ old('blurb_en', $program->blurb_en) }}</textarea>
             @error('blurb_en')

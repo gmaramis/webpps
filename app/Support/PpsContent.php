@@ -10,6 +10,7 @@ use App\Models\AlumniActivity;
 use App\Models\AnnouncementItem;
 use App\Models\CooperationPartner;
 use App\Models\HeroSlide;
+use App\Models\HomepageProgramDisplay;
 use App\Models\LeadershipPerson;
 use App\Models\Lecturer;
 use App\Models\NewsItem;
@@ -82,8 +83,26 @@ class PpsContent
             $data['LEADERS'] = $leadersFromDb;
         }
         $data['SLIDE_IMAGES'] = self::slidesFromDatabase() ?? HeroSlide::BUILTIN_SLIDE_PATHS;
-        $data['MAGISTER_HERO'] = 'programs/magister-photo.png';
-        $data['DOKTOR_HERO'] = 'programs/doktor-photo.png';
+
+        $magisterHeroJson = $data['MAGISTER_HERO'] ?? null;
+        $data['MAGISTER_HERO'] = is_string($magisterHeroJson) && trim($magisterHeroJson) !== ''
+            ? ltrim(trim($magisterHeroJson), '/')
+            : 'programs/magister-photo.png';
+
+        $doktorHeroJson = $data['DOKTOR_HERO'] ?? null;
+        $data['DOKTOR_HERO'] = is_string($doktorHeroJson) && trim($doktorHeroJson) !== ''
+            ? ltrim(trim($doktorHeroJson), '/')
+            : 'programs/doktor-photo.png';
+
+        $dbHeroPaths = HomepageProgramDisplay::heroPathsFromDatabase();
+        if ($dbHeroPaths !== null) {
+            if ($dbHeroPaths['magister'] !== null) {
+                $data['MAGISTER_HERO'] = $dbHeroPaths['magister'];
+            }
+            if ($dbHeroPaths['doktor'] !== null) {
+                $data['DOKTOR_HERO'] = $dbHeroPaths['doktor'];
+            }
+        }
 
         $newsFromDb = self::newsFromDatabase();
         if ($newsFromDb !== null) {
@@ -457,6 +476,18 @@ class PpsContent
 
             $url = $row['official_url'] ?? null;
             $row['official_url'] = is_string($url) && trim($url) !== '' ? trim($url) : null;
+
+            $excerpt = $row['excerpt'] ?? [];
+            if (is_array($excerpt)) {
+                $exId = trim((string) ($excerpt['id'] ?? ''));
+                $exEn = isset($excerpt['en']) ? trim((string) $excerpt['en']) : '';
+                $row['excerpt'] = [
+                    'id' => $exId,
+                    'en' => $exEn !== '' ? $exEn : $exId,
+                ];
+            } else {
+                $row['excerpt'] = ['id' => '', 'en' => ''];
+            }
 
             return $row;
         })->all();

@@ -621,6 +621,85 @@
     animation: news-feature-img-in 0.26s ease-out;
   }
 
+  /* Tab program studi (/s2, /s3) */
+  .study-program-tab {
+    @apply inline-flex shrink-0 items-center rounded-t-lg border border-transparent border-b-0 bg-slate-100 px-3.5 py-2.5 text-left text-sm font-semibold text-slate-700 transition hover:bg-white hover:text-primary focus-visible:outline focus-visible:ring-2 focus-visible:ring-primary/35 sm:px-4;
+  }
+
+  .study-program-tab--active {
+    @apply z-[1] -mb-px border-slate-200 border-b-white bg-white font-bold text-primary shadow-sm;
+  }
+
+  /* Lightbox gambar berita (beranda) */
+  .news-image-lightbox {
+    margin: auto;
+    max-width: min(96vw, 1200px);
+    width: max-content;
+    max-height: 92vh;
+    border: 0;
+    padding: 0.5rem;
+    background: transparent;
+    color: #fff;
+  }
+
+  .news-image-lightbox::backdrop {
+    background-color: rgb(0 0 0 / 0.88);
+    backdrop-filter: blur(4px);
+  }
+
+  .news-image-lightbox:focus {
+    outline: none;
+  }
+
+  .news-image-lightbox__inner {
+    display: flex;
+    max-height: min(90vh, 900px);
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .news-image-lightbox__img {
+    display: block;
+    max-width: min(94vw, 1100px);
+    max-height: min(82vh, 800px);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 0.5rem;
+    box-shadow: 0 24px 60px -20px rgb(0 0 0 / 0.65);
+  }
+
+  .news-image-lightbox__close {
+    flex-shrink: 0;
+    align-self: flex-end;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    border-radius: 9999px;
+    border: 1px solid rgb(255 255 255 / 0.25);
+    background: rgb(255 255 255 / 0.12);
+    color: #fff;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease;
+  }
+
+  .news-image-lightbox__close:hover {
+    background: rgb(255 255 255 / 0.22);
+    border-color: rgb(255 255 255 / 0.45);
+  }
+
+  .news-image-lightbox__close:focus-visible {
+    outline: 2px solid rgb(250 204 21 / 0.95);
+    outline-offset: 2px;
+  }
+
   @keyframes news-feature-img-in {
     from {
       opacity: 0.92;

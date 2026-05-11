@@ -63,6 +63,107 @@ function initMobileNav() {
     });
 }
 
+/** Klik gambar berita di beranda → modal gambar besar */
+function initNewsImageLightbox() {
+    const dialog = document.getElementById('news-image-lightbox');
+    const img = document.getElementById('news-image-lightbox-img');
+    const closeBtn = document.getElementById('news-image-lightbox-close');
+    if (!dialog || !img || typeof dialog.showModal !== 'function') {
+        return;
+    }
+
+    const open = (src, alt) => {
+        if (!src) return;
+        img.removeAttribute('src');
+        img.setAttribute('src', src);
+        img.alt = alt || '';
+        dialog.showModal();
+        window.requestAnimationFrame(() => {
+            closeBtn?.focus();
+        });
+    };
+
+    document.querySelectorAll('[data-news-lightbox-src]').forEach((el) => {
+        el.addEventListener('click', (e) => {
+            const src = el.getAttribute('data-news-lightbox-src');
+            const alt = el.getAttribute('data-news-lightbox-alt') || '';
+            if (!src) return;
+            e.preventDefault();
+            e.stopPropagation();
+            open(src, alt);
+        });
+    });
+
+    dialog.addEventListener('click', (e) => {
+        if (e.target === dialog) {
+            dialog.close();
+        }
+    });
+
+    closeBtn?.addEventListener('click', () => dialog.close());
+
+    dialog.addEventListener('close', () => {
+        img.removeAttribute('src');
+        img.alt = '';
+    });
+}
+
+/** Tab program studi (halaman /s2 dan /s3): panel penjelasan + tautan resmi */
+function initStudyProgramTabs() {
+    document.querySelectorAll('[data-study-program-tabs]').forEach((root) => {
+        const tablist = root.querySelector('[role="tablist"]');
+        if (!tablist) return;
+
+        const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
+        if (tabs.length === 0) return;
+
+        const path = root.getAttribute('data-program-path') || '';
+        const panels = tabs.map((tab) => {
+            const id = tab.getAttribute('aria-controls');
+            return id ? document.getElementById(id) : null;
+        });
+
+        const activate = (tab, updateUrl) => {
+            tabs.forEach((t, i) => {
+                const sel = t === tab;
+                t.setAttribute('aria-selected', sel ? 'true' : 'false');
+                t.tabIndex = sel ? 0 : -1;
+                t.classList.toggle('study-program-tab--active', sel);
+                const p = panels[i];
+                if (p) p.hidden = !sel;
+            });
+
+            if (updateUrl && path && window.history?.replaceState) {
+                const slug = tab.getAttribute('data-tab-slug') || '';
+                const q = slug ? `?program=${encodeURIComponent(slug)}` : '';
+                window.history.replaceState({}, '', `${path}${q}`);
+            }
+        };
+
+        tabs.forEach((tab, i) => {
+            tab.addEventListener('click', () => activate(tab, true));
+            tab.addEventListener('keydown', (e) => {
+                if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft' && e.key !== 'Home' && e.key !== 'End') {
+                    return;
+                }
+                e.preventDefault();
+                let next = i;
+                if (e.key === 'ArrowRight') next = (i + 1) % tabs.length;
+                else if (e.key === 'ArrowLeft') next = (i - 1 + tabs.length) % tabs.length;
+                else if (e.key === 'Home') next = 0;
+                else if (e.key === 'End') next = tabs.length - 1;
+                const t = tabs[next];
+                t?.focus();
+                activate(t, true);
+            });
+        });
+
+        const initial = root.getAttribute('data-initial-slug') || '';
+        const match = tabs.find((t) => (t.getAttribute('data-tab-slug') || '') === initial);
+        activate(match || tabs[0], false);
+    });
+}
+
 function initNewsCardsObserver() {
     if (prefersReducedMotion()) return;
     const list = document.getElementById('news-list');
@@ -115,6 +216,8 @@ function initActivitiesCardsDelayedReveal() {
 document.addEventListener('DOMContentLoaded', () => {
     initHeroSlider();
     initMobileNav();
+    initNewsImageLightbox();
+    initStudyProgramTabs();
     initNewsCardsObserver();
     initActivitiesCardsDelayedReveal();
 });
