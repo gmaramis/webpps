@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\AgendaItemController;
 use App\Http\Controllers\Admin\AlumniActivityController;
 use App\Http\Controllers\Admin\AnnouncementItemController;
 use App\Http\Controllers\Admin\CooperationPartnerController;
+use App\Http\Controllers\Admin\DirectorGreetingController;
 use App\Http\Controllers\Admin\HeroSlideController;
 use App\Http\Controllers\Admin\LeadershipPersonController;
 use App\Http\Controllers\Admin\LecturerController;
@@ -90,6 +91,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function (): v
     Route::resource('slideshow', HeroSlideController::class)->except(['show'])->parameters(['slideshow' => 'slide'])->middleware('permission:slideshow.manage');
     Route::get('tampilan-program-beranda', [ProgramHeroSettingsController::class, 'edit'])->middleware('permission:program-heroes.manage')->name('program-heroes.edit');
     Route::patch('tampilan-program-beranda', [ProgramHeroSettingsController::class, 'update'])->middleware('permission:program-heroes.manage')->name('program-heroes.update');
+    Route::get('sambutan-direktur', [DirectorGreetingController::class, 'edit'])->middleware('permission:director-greeting.manage|slideshow.manage|program-heroes.manage')->name('director-greeting.edit');
+    Route::patch('sambutan-direktur', [DirectorGreetingController::class, 'update'])->middleware('permission:director-greeting.manage|slideshow.manage|program-heroes.manage')->name('director-greeting.update');
     Route::post('news/{news}/puter-translation', [NewsItemController::class, 'applyPuterTranslation'])->middleware('permission:news.manage')->name('news.puter-translation');
     Route::post('news/{news}/translation-retry', [NewsItemController::class, 'retryTranslation'])->middleware('permission:news.manage')->name('news.translation-retry');
     Route::resource('news', NewsItemController::class)->except(['show'])->middleware('permission:news.manage');

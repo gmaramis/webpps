@@ -73,7 +73,7 @@
     @if(is_array($directorGreeting) && $directorGreeting !== [])
         @php
             $dirPhotoRaw = isset($directorGreeting['photo']) && is_string($directorGreeting['photo']) ? trim($directorGreeting['photo']) : '';
-            $dirPhotoSrc = $dirPhotoRaw !== '' ? asset(ltrim($dirPhotoRaw, '/')) : asset('faculty/faculty-1.svg');
+            $dirPhotoSrc = \App\Support\PpsContent::directorGreetingPublicPhotoUrl($dirPhotoRaw);
             $dirNameBlock = $directorGreeting['name'] ?? [];
             $dirName = is_array($dirNameBlock) ? (string) ($dirNameBlock[$loc] ?? $dirNameBlock['id'] ?? '') : '';
             $dirRoleBlock = $directorGreeting['role'] ?? [];

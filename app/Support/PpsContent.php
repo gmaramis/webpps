@@ -9,6 +9,7 @@ use App\Models\AgendaItem;
 use App\Models\AlumniActivity;
 use App\Models\AnnouncementItem;
 use App\Models\CooperationPartner;
+use App\Models\DirectorGreeting;
 use App\Models\HeroSlide;
 use App\Models\HomepageProgramDisplay;
 use App\Models\LeadershipPerson;
@@ -222,6 +223,7 @@ class PpsContent
 
         self::mergeStopKorupsiFromDatabase($data);
         self::mergeStopGratifikasiFromDatabase($data);
+        self::mergeDirectorGreetingFromDatabase($data);
         self::mergeAccreditationDocumentsFromDatabase($data);
 
         self::$cache = $data;
@@ -244,6 +246,25 @@ class PpsContent
     public static function flush(): void
     {
         self::$cache = null;
+    }
+
+    /**
+     * URL publik untuk foto sambutan direktur (path publik atau file di disk public).
+     */
+    public static function directorGreetingPublicPhotoUrl(?string $photo): string
+    {
+        $photo = trim((string) $photo);
+        if ($photo === '') {
+            return asset('faculty/faculty-1.svg');
+        }
+        if (str_starts_with($photo, 'http://') || str_starts_with($photo, 'https://')) {
+            return $photo;
+        }
+        if (str_starts_with($photo, 'director-greeting/')) {
+            return asset('storage/'.$photo);
+        }
+
+        return asset(ltrim($photo, '/'));
     }
 
     /**
@@ -809,6 +830,34 @@ class PpsContent
      *
      * @param  array<string, mixed>  $data
      */
+    protected static function mergeDirectorGreetingFromDatabase(array &$data): void
+    {
+        try {
+            if (! Schema::hasTable('director_greetings')) {
+                return;
+            }
+
+            $row = DirectorGreeting::query()->find(1);
+            if ($row === null) {
+                return;
+            }
+
+            $data['DIRECTOR_GREETING'] = $row->toPpsContentDirectorBlock();
+
+            $data['STRINGS'] ??= [];
+            $data['STRINGS']['id'] ??= [];
+            $data['STRINGS']['en'] ??= [];
+            $data['STRINGS']['id']['directorGreetingEyebrow'] = (string) ($row->section_eyebrow_id ?? '');
+            $data['STRINGS']['en']['directorGreetingEyebrow'] = (string) ($row->section_eyebrow_en ?? '');
+            $data['STRINGS']['id']['directorGreetingTitle'] = (string) ($row->section_title_id ?? '');
+            $data['STRINGS']['en']['directorGreetingTitle'] = (string) ($row->section_title_en ?? '');
+            $data['STRINGS']['id']['directorGreetingQuoteLabel'] = (string) ($row->section_quote_label_id ?? '');
+            $data['STRINGS']['en']['directorGreetingQuoteLabel'] = (string) ($row->section_quote_label_en ?? '');
+        } catch (\Throwable) {
+            //
+        }
+    }
+
     protected static function mergeAccreditationDocumentsFromDatabase(array &$data): void
     {
         try {
