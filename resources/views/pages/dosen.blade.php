@@ -5,8 +5,17 @@
 @php
     $loc = app()->getLocale();
     $lecturersLead = $loc === 'id'
-        ? 'Cari dan urutkan daftar dosen Pascasarjana UNIMA. Profil dilengkapi foto, nama, NIDN, NIP, program studi, jabatan fungsional, dan kontak.'
-        : 'Search and sort UNIMA Graduate School faculty. Each profile includes a photo, name, NIDN, NIP, study program, academic rank, and contact.';
+        ? 'Cari dan urutkan daftar dosen. Tabel menampilkan ringkasan; NIDN, NIP, dan jabatan fungsional ada di jendela detail (tombol "Detail").'
+        : 'Search and sort the directory. The table shows a summary; NIDN, employee ID, and academic rank appear in the detail dialog (the "Details" button).';
+    $lecturerDetailLabels = [
+        'title' => $t['lecturersDetailModalTitle'] ?? ($loc === 'id' ? 'Detail dosen' : 'Faculty details'),
+        'close' => $t['lecturersDetailModalClose'] ?? ($loc === 'id' ? 'Tutup' : 'Close'),
+        'openLabel' => $t['lecturersOpenDetail'] ?? ($loc === 'id' ? 'Detail' : 'Details'),
+        'nidn' => $t['lecturersColNidn'] ?? 'NIDN',
+        'nip' => $t['lecturersColNip'] ?? 'NIP',
+        'functional' => $t['lecturersColFunctional'] ?? '',
+        'empty' => '—',
+    ];
     $lecturerRows = collect($ppsData['LECTURERS'] ?? [])->map(function ($l) use ($loc) {
         $photo = $l['photo'] ?? '';
         $photoUrl = \App\Models\Lecturer::publicPhotoUrl($photo);
@@ -18,6 +27,8 @@
             'program' => $l['studyProgram'][$loc] ?? $l['studyProgram']['id'] ?? '',
             'functional' => $l['functionalRole'][$loc] ?? $l['functionalRole']['id'] ?? '',
             'phone' => $l['phone'] ?? '',
+            'email' => $l['email'] ?? '',
+            'scholarUrl' => $l['googleScholarUrl'] ?? '',
             'photoUrl' => $photoUrl,
         ];
     })->values();
@@ -45,6 +56,8 @@
             data-lecturers='@json($lecturerRows)'
             data-page-template="{{ e($pageTpl) }}"
             data-empty-msg="{{ e($emptyMsg) }}"
+            data-scholar-label="{{ e($t['lecturersScholarLink'] ?? 'Google Scholar') }}"
+            data-detail-labels='@json($lecturerDetailLabels)'
         >
             <div class="border-b border-slate-100 bg-gradient-to-br from-slate-50/95 via-white to-sky-50/30 px-4 py-5 md:px-6 md:py-6">
                 <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -64,6 +77,7 @@
                                 <option value="nip">{{ $t['lecturersSortByNip'] }}</option>
                                 <option value="functional">{{ $t['lecturersSortByFunctional'] }}</option>
                                 <option value="program">{{ $t['lecturersColProgram'] }}</option>
+                                <option value="email">{{ $t['lecturersSortByEmail'] }}</option>
                             </select>
                         </label>
                         <label class="w-full min-w-[5.5rem] text-sm font-semibold text-slate-800 sm:w-auto">
@@ -79,16 +93,21 @@
             </div>
 
             <div class="overflow-x-auto px-1 pb-1 md:px-2">
-                <table class="lecturers-table w-full min-w-[820px] border-collapse text-left text-sm">
+                <table class="lecturers-table w-full min-w-[640px] border-collapse text-left text-sm md:min-w-0">
+                    <caption class="sr-only">
+                        {{ $loc === 'id'
+                            ? 'Tabel dosen: foto, nama, program studi, telepon, email, Google Scholar, dan tombol detail (NIDN, NIP, jabatan di modal).'
+                            : 'Faculty table: photo, name, study programme, phone, email, Google Scholar, and a detail button (NIDN, ID, rank in a dialog).' }}
+                    </caption>
                     <thead>
                         <tr class="bg-gradient-to-r from-primary to-primary-light text-[11px] font-bold uppercase tracking-wider text-white shadow-inner">
-                            <th class="rounded-tl-xl px-4 py-3.5 pl-5 md:w-[5.5rem]">{{ $t['lecturersColPhoto'] }}</th>
-                            <th class="px-4 py-3.5">{{ $t['lecturersColName'] }}</th>
-                            <th class="px-4 py-3.5">{{ $t['lecturersColNidn'] }}</th>
-                            <th class="px-4 py-3.5">{{ $t['lecturersColNip'] }}</th>
-                            <th class="min-w-[8rem] px-4 py-3.5">{{ $t['lecturersColProgram'] }}</th>
-                            <th class="min-w-[7rem] px-4 py-3.5">{{ $t['lecturersColFunctional'] }}</th>
-                            <th class="rounded-tr-xl px-4 py-3.5 pr-5">{{ $t['lecturersColPhone'] }}</th>
+                            <th scope="col" class="rounded-tl-xl px-4 py-3.5 pl-5 md:w-[5.5rem]">{{ $t['lecturersColPhoto'] }}</th>
+                            <th scope="col" class="min-w-[12rem] px-4 py-3.5">{{ $t['lecturersColName'] }}</th>
+                            <th scope="col" class="min-w-[7rem] px-4 py-3.5">{{ $t['lecturersColProgram'] }}</th>
+                            <th scope="col" class="min-w-[6.5rem] px-4 py-3.5">{{ $t['lecturersColPhone'] }}</th>
+                            <th scope="col" class="min-w-[8rem] px-4 py-3.5">{{ $t['lecturersColEmail'] }}</th>
+                            <th scope="col" class="min-w-[5.5rem] px-4 py-3.5">{{ $t['lecturersColScholar'] }}</th>
+                            <th scope="col" class="w-[1%] rounded-tr-xl px-4 py-3.5 pr-5 text-right"><span class="sr-only">{{ $t['lecturersOpenDetail'] ?? ($loc === 'id' ? 'Detail' : 'Details') }}</span></th>
                         </tr>
                     </thead>
                     <tbody id="lecturers-tbody" class="divide-y divide-slate-100 bg-white text-slate-700"></tbody>
@@ -101,6 +120,34 @@
                     <button type="button" id="lecturer-prev" class="inline-flex min-w-[6.5rem] items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-primary/30 hover:bg-sky-50 disabled:pointer-events-none disabled:opacity-40">{{ $t['lecturersPagePrev'] }}</button>
                     <button type="button" id="lecturer-next" class="inline-flex min-w-[6.5rem] items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-primary/25 transition hover:bg-primary-dark disabled:pointer-events-none disabled:opacity-40">{{ $t['lecturersPageNext'] }}</button>
                 </div>
+            </div>
+        </div>
+
+        <div
+            id="lecturer-detail-modal"
+            class="fixed inset-0 z-[100] hidden items-center justify-center p-4"
+            aria-hidden="true"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="lecturer-detail-title"
+        >
+            <div id="lecturer-detail-backdrop" class="absolute inset-0 bg-slate-900/50 backdrop-blur-[2px]" aria-hidden="true"></div>
+            <div class="relative z-10 flex max-h-[min(90vh,40rem)] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200/80">
+                <div class="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 bg-gradient-to-br from-slate-50/95 to-sky-50/40 px-5 py-4">
+                    <div class="min-w-0 flex-1 pr-2">
+                        <p id="lecturer-detail-eyebrow" class="text-[11px] font-bold uppercase tracking-widest text-primary"></p>
+                        <h2 id="lecturer-detail-title" class="mt-1 font-display text-lg font-bold leading-snug text-slate-900 md:text-xl"></h2>
+                    </div>
+                    <button
+                        type="button"
+                        id="lecturer-detail-close"
+                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-primary/30 hover:bg-sky-50 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        aria-label="{{ e($lecturerDetailLabels['close']) }}"
+                    >
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <div id="lecturer-detail-body" class="min-h-0 overflow-y-auto px-5 py-5"></div>
             </div>
         </div>
     </div>

@@ -5,13 +5,34 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LecturerRequest;
 use App\Models\Lecturer;
+use App\Models\S2Program;
+use App\Models\S3Program;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 use JsonException;
 
 class LecturerController extends Controller
 {
+    /**
+     * @return array{s2: Collection<int, S2Program>, s3: Collection<int, S3Program>}
+     */
+    protected function studyProgramGroupsForForm(): array
+    {
+        if (! Schema::hasTable('s2_programs') || ! Schema::hasTable('s3_programs')) {
+            return [
+                's2' => collect(),
+                's3' => collect(),
+            ];
+        }
+
+        return [
+            's2' => S2Program::query()->orderBy('sort_order')->orderBy('id')->get(['name_id', 'name_en']),
+            's3' => S3Program::query()->orderBy('sort_order')->orderBy('id')->get(['name_id', 'name_en']),
+        ];
+    }
+
     public function index(): View
     {
         $lecturers = Lecturer::query()
@@ -33,6 +54,7 @@ class LecturerController extends Controller
             'lecturer' => new Lecturer([
                 'sort_order' => $nextOrder,
             ]),
+            'studyProgramGroups' => $this->studyProgramGroupsForForm(),
         ]);
     }
 
@@ -51,7 +73,10 @@ class LecturerController extends Controller
 
     public function edit(Lecturer $lecturer): View
     {
-        return view('admin.dosen.edit', compact('lecturer'));
+        return view('admin.dosen.edit', [
+            'lecturer' => $lecturer,
+            'studyProgramGroups' => $this->studyProgramGroupsForForm(),
+        ]);
     }
 
     public function update(LecturerRequest $request, Lecturer $lecturer): RedirectResponse

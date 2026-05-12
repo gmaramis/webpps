@@ -712,6 +712,230 @@
     }
   }
 
+  /* Beranda: sambutan direktur — kartu menyatu + bingkai netral (hormati prefers-reduced-motion di bawah) */
+  .director-greeting-section__noise {
+    background-image:
+      radial-gradient(circle at 18% 22%, rgb(15 23 42 / 0.05) 0%, transparent 42%),
+      radial-gradient(circle at 82% 78%, rgb(15 23 42 / 0.055) 0%, transparent 38%),
+      radial-gradient(circle at 50% 50%, rgb(255 255 255 / 0.32) 0%, transparent 72%);
+  }
+
+  @keyframes director-greeting-blob-drift {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) scale(1);
+      opacity: 1;
+    }
+
+    33% {
+      transform: translate3d(10px, -14px, 0) scale(1.04);
+      opacity: 0.94;
+    }
+
+    66% {
+      transform: translate3d(-8px, 8px, 0) scale(0.99);
+      opacity: 0.9;
+    }
+  }
+
+  @keyframes director-greeting-blob-drift-alt {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) scale(1);
+      opacity: 1;
+    }
+
+    50% {
+      transform: translate3d(-12px, 10px, 0) scale(1.03);
+      opacity: 0.92;
+    }
+  }
+
+  .director-greeting-section.is-visible .director-greeting-blob--1 {
+    animation: director-greeting-blob-drift 16s ease-in-out infinite;
+  }
+
+  .director-greeting-section.is-visible .director-greeting-blob--2 {
+    animation: director-greeting-blob-drift-alt 20s ease-in-out infinite;
+  }
+
+  .director-greeting__unified {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+    transition:
+      opacity 0.72s cubic-bezier(0.19, 1, 0.22, 1),
+      transform 0.72s cubic-bezier(0.19, 1, 0.22, 1),
+      box-shadow 0.4s ease;
+  }
+
+  .director-greeting-section.is-visible .director-greeting__unified {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .director-greeting-section.is-visible .director-greeting__unified:hover {
+      box-shadow:
+        0 16px 40px -18px rgb(15 23 42 / 0.1),
+        0 0 0 1px rgb(15 23 42 / 0.05);
+    }
+  }
+
+  .director-greeting-section__head .director-greeting__eyebrow {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+    transition:
+      opacity 0.55s cubic-bezier(0.19, 1, 0.22, 1),
+      transform 0.55s cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  .director-greeting-section__head .director-greeting__title {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+    transition:
+      opacity 0.65s cubic-bezier(0.19, 1, 0.22, 1) 0.06s,
+      transform 0.65s cubic-bezier(0.19, 1, 0.22, 1) 0.06s;
+  }
+
+  .director-greeting-section__head .director-greeting__title-accent {
+    transform-origin: left center;
+    opacity: 0;
+    transform: scale3d(0.25, 1, 1);
+    transition:
+      opacity 0.5s cubic-bezier(0.19, 1, 0.22, 1) 0.18s,
+      transform 0.55s cubic-bezier(0.19, 1, 0.22, 1) 0.18s;
+  }
+
+  .director-greeting-section__head .director-greeting__subtitle {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+    transition:
+      opacity 0.55s cubic-bezier(0.19, 1, 0.22, 1) 0.22s,
+      transform 0.55s cubic-bezier(0.19, 1, 0.22, 1) 0.22s;
+  }
+
+  .director-greeting-section.is-visible .director-greeting-section__head .director-greeting__eyebrow,
+  .director-greeting-section.is-visible .director-greeting-section__head .director-greeting__title,
+  .director-greeting-section.is-visible .director-greeting-section__head .director-greeting__title-accent,
+  .director-greeting-section.is-visible .director-greeting-section__head .director-greeting__subtitle {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+  }
+
+  .director-greeting__photo-inner {
+    overflow: hidden;
+  }
+
+  .director-greeting__photo-img {
+    transform: scale3d(1.06, 1.06, 1);
+    transition: transform 0.95s cubic-bezier(0.19, 1, 0.22, 1) 0.12s;
+    will-change: transform;
+  }
+
+  .director-greeting-section.is-visible .director-greeting__photo-img {
+    transform: scale3d(1, 1, 1);
+    will-change: auto;
+  }
+
+  .director-greeting__caption {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+    transition:
+      opacity 0.5s cubic-bezier(0.19, 1, 0.22, 1) 0.35s,
+      transform 0.5s cubic-bezier(0.19, 1, 0.22, 1) 0.35s;
+  }
+
+  .director-greeting-section.is-visible .director-greeting__caption {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .director-greeting__quote-mark {
+    position: absolute;
+    left: 0.2rem;
+    top: 0.1rem;
+    pointer-events: none;
+    user-select: none;
+    opacity: 0;
+    transform: scale3d(0.88, 0.88, 1) translate3d(-4px, 8px, 0);
+    transition:
+      opacity 0.55s cubic-bezier(0.19, 1, 0.22, 1) 0.22s,
+      transform 0.6s cubic-bezier(0.19, 1, 0.22, 1) 0.22s;
+  }
+
+  .director-greeting-section.is-visible .director-greeting__quote-mark {
+    opacity: 1;
+    transform: scale3d(1, 1, 1) translate3d(0, 0, 0);
+  }
+
+  .director-greeting__para {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+    transition:
+      opacity 0.52s cubic-bezier(0.19, 1, 0.22, 1),
+      transform 0.55s cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  .director-greeting-section.is-visible .director-greeting__para:nth-child(1) {
+    transition-delay: 0.22s;
+  }
+
+  .director-greeting-section.is-visible .director-greeting__para:nth-child(2) {
+    transition-delay: 0.32s;
+  }
+
+  .director-greeting-section.is-visible .director-greeting__para:nth-child(3) {
+    transition-delay: 0.42s;
+  }
+
+  .director-greeting-section.is-visible .director-greeting__para:nth-child(4) {
+    transition-delay: 0.52s;
+  }
+
+  .director-greeting-section.is-visible .director-greeting__para:nth-child(5) {
+    transition-delay: 0.62s;
+  }
+
+  .director-greeting-section.is-visible .director-greeting__para:nth-child(n + 6) {
+    transition-delay: 0.72s;
+  }
+
+  .director-greeting-section.is-visible .director-greeting__para {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .director-greeting-section.is-visible .director-greeting-blob--1,
+    .director-greeting-section.is-visible .director-greeting-blob--2 {
+      animation: none !important;
+    }
+
+    .director-greeting-section__head .director-greeting__eyebrow,
+    .director-greeting-section__head .director-greeting__title,
+    .director-greeting-section__head .director-greeting__title-accent,
+    .director-greeting-section__head .director-greeting__subtitle,
+    .director-greeting__unified,
+    .director-greeting__caption,
+    .director-greeting__para,
+    .director-greeting__quote-mark {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+
+    .director-greeting-section.is-visible .director-greeting__photo-img {
+      transform: none !important;
+      transition: none !important;
+    }
+
+    @media (hover: hover) {
+      .director-greeting__unified:hover {
+        box-shadow: none !important;
+      }
+    }
+  }
+
   /* Section berita: parallax judul + kartu animasi in/out */
   .news-parallax-blob {
     transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);

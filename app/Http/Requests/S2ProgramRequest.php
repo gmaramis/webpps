@@ -50,6 +50,8 @@ class S2ProgramRequest extends FormRequest
             'excerpt_id' => ['nullable', 'string', 'max:2000'],
             'excerpt_en' => ['nullable', 'string', 'max:2000'],
             'official_url' => ['nullable', 'string', 'url', 'max:2048'],
+            'brochure_image' => ['nullable', 'image', 'max:5120'],
+            'remove_brochure' => ['sometimes', 'boolean'],
         ];
     }
 }

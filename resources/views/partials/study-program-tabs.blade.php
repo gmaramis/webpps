@@ -62,6 +62,22 @@
                 @else
                     <p class="mt-6 text-sm text-slate-500">{{ $loc === 'id' ? 'Tautan situs resmi prodi belum diatur.' : 'The official programme website link has not been set yet.' }}</p>
                 @endif
+                @php
+                    $brochureUrl = isset($p['brochure_image_url']) && is_string($p['brochure_image_url']) ? trim($p['brochure_image_url']) : '';
+                @endphp
+                @if($brochureUrl !== '')
+                    <div class="mt-8 border-t border-slate-100 pt-6">
+                        <p class="text-xs font-bold uppercase tracking-wide text-slate-500">{{ $loc === 'id' ? 'Brosur pendaftaran' : 'Admission brochure' }}</p>
+                        <button type="button"
+                            class="group mt-3 inline-flex max-w-full flex-col gap-1 rounded-xl border border-slate-200 bg-slate-50/80 p-2 text-left shadow-sm transition hover:border-primary/40 hover:bg-sky-50/80 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                            data-program-brochure-lightbox-src="{{ e($brochureUrl) }}"
+                            data-program-brochure-lightbox-alt="{{ e(($loc === 'id' ? 'Brosur ' : 'Brochure: ').$pName) }}">
+                            <span class="sr-only">{{ $loc === 'id' ? 'Buka brosur ukuran penuh' : 'Open brochure at full size' }}</span>
+                            <img src="{{ e($brochureUrl) }}" alt="" class="h-28 max-h-32 w-auto max-w-[14rem] rounded-lg border border-slate-200/90 object-contain object-left shadow-sm transition group-hover:border-primary/25" width="224" height="112" loading="lazy" decoding="async">
+                            <span class="text-[11px] font-semibold text-primary underline decoration-primary/30 underline-offset-2 group-hover:decoration-primary">{{ $loc === 'id' ? 'Klik untuk memperbesar' : 'Click to enlarge' }}</span>
+                        </button>
+                    </div>
+                @endif
             </div>
         @endforeach
     </div>

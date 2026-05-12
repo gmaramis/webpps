@@ -38,9 +38,13 @@ class S3ProgramController extends Controller
 
     public function store(S3ProgramRequest $request): RedirectResponse
     {
-        $data = $request->validated();
+        $data = collect($request->validated())->except(['brochure_image', 'remove_brochure'])->all();
         if (($data['slug'] ?? null) === null || $data['slug'] === '') {
             $data['slug'] = S3Program::uniqueSlugFrom((string) $data['name_id']);
+        }
+
+        if ($request->hasFile('brochure_image')) {
+            $data['brochure_image'] = $request->file('brochure_image')->store('program-brochures', 'public');
         }
 
         S3Program::query()->create($data);
@@ -55,9 +59,19 @@ class S3ProgramController extends Controller
 
     public function update(S3ProgramRequest $request, S3Program $program): RedirectResponse
     {
-        $data = $request->validated();
+        $data = collect($request->validated())->except(['brochure_image', 'remove_brochure'])->all();
         if (($data['slug'] ?? null) === null || $data['slug'] === '') {
             unset($data['slug']);
+        }
+
+        if ($request->boolean('remove_brochure')) {
+            S3Program::deleteStoredBrochure($program->brochure_image);
+            $data['brochure_image'] = null;
+        }
+
+        if ($request->hasFile('brochure_image')) {
+            S3Program::deleteStoredBrochure($program->brochure_image);
+            $data['brochure_image'] = $request->file('brochure_image')->store('program-brochures', 'public');
         }
 
         $program->update($data);

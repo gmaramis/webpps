@@ -1,6 +1,7 @@
 @php
     /** @var \App\Models\Lecturer $lecturer */
     $isEdit = $lecturer->exists;
+    $studyProgramGroups = $studyProgramGroups ?? ['s2' => collect(), 's3' => collect()];
 @endphp
 <div class="space-y-6">
     <div>
@@ -50,49 +51,103 @@
             @enderror
         </div>
     </div>
-    <div class="grid gap-4 sm:grid-cols-2">
-        <div>
-            <label for="study_program_id" class="mb-1 block text-xs font-semibold text-slate-700">Program studi (Bahasa Indonesia)</label>
-            <input id="study_program_id" type="text" name="study_program_id" required value="{{ old('study_program_id', $lecturer->study_program_id) }}" maxlength="255"
-                class="w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm transition focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 @error('study_program_id') border-rose-400 @enderror">
-            @error('study_program_id')
-                <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
-            @enderror
-        </div>
-        <div>
-            <label for="study_program_en" class="mb-1 block text-xs font-semibold text-slate-700">Program studi (English) <span class="font-normal text-slate-400">(opsional)</span></label>
-            <input id="study_program_en" type="text" name="study_program_en" value="{{ old('study_program_en', $lecturer->study_program_en) }}" maxlength="255"
-                class="w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm transition focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 @error('study_program_en') border-rose-400 @enderror">
-            @error('study_program_en')
-                <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
-            @enderror
-        </div>
-    </div>
-    <div class="grid gap-4 sm:grid-cols-2">
-        <div>
-            <label for="functional_role_id" class="mb-1 block text-xs font-semibold text-slate-700">Jabatan fungsional (Bahasa Indonesia)</label>
-            <input id="functional_role_id" type="text" name="functional_role_id" required value="{{ old('functional_role_id', $lecturer->functional_role_id) }}" maxlength="191"
-                class="w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm transition focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 @error('functional_role_id') border-rose-400 @enderror">
-            @error('functional_role_id')
-                <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
-            @enderror
-        </div>
-        <div>
-            <label for="functional_role_en" class="mb-1 block text-xs font-semibold text-slate-700">Jabatan fungsional (English) <span class="font-normal text-slate-400">(opsional)</span></label>
-            <input id="functional_role_en" type="text" name="functional_role_en" value="{{ old('functional_role_en', $lecturer->functional_role_en) }}" maxlength="191"
-                class="w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm transition focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 @error('functional_role_en') border-rose-400 @enderror">
-            @error('functional_role_en')
-                <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
-            @enderror
-        </div>
-    </div>
     <div>
-        <label for="phone" class="mb-1 block text-xs font-semibold text-slate-700">Kontak / telepon <span class="font-normal text-slate-400">(opsional)</span></label>
-        <input id="phone" type="text" name="phone" value="{{ old('phone', $lecturer->phone) }}" maxlength="64"
-            class="w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 font-mono text-sm transition focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 @error('phone') border-rose-400 @enderror">
-        @error('phone')
+        @php
+            $allowedProgramIds = \App\Models\Lecturer::studyProgramNameIdsFromDatabase();
+            $currentProgram = old('study_program_id', $lecturer->study_program_id ?? '');
+            $currentProgram = is_string($currentProgram) ? trim($currentProgram) : '';
+            $programValid = in_array($currentProgram, $allowedProgramIds, true);
+            $hasPrograms = $studyProgramGroups['s2']->isNotEmpty() || $studyProgramGroups['s3']->isNotEmpty();
+        @endphp
+        <label for="study_program_id" class="mb-1 block text-xs font-semibold text-slate-700">Program studi</label>
+        <select id="study_program_id" name="study_program_id" required
+            class="w-full max-w-2xl cursor-pointer rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5 text-sm transition focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 @error('study_program_id') border-rose-400 @enderror">
+            <option value="" {{ $programValid ? '' : 'selected' }}>— Pilih program studi —</option>
+            @if ($studyProgramGroups['s2']->isNotEmpty())
+                <optgroup label="Magister (S2)">
+                    @foreach ($studyProgramGroups['s2'] as $p)
+                        <option value="{{ $p->name_id }}" @selected($currentProgram === trim($p->name_id))>{{ $p->name_id }}</option>
+                    @endforeach
+                </optgroup>
+            @endif
+            @if ($studyProgramGroups['s3']->isNotEmpty())
+                <optgroup label="Doktor (S3)">
+                    @foreach ($studyProgramGroups['s3'] as $p)
+                        <option value="{{ $p->name_id }}" @selected($currentProgram === trim($p->name_id))>{{ $p->name_id }}</option>
+                    @endforeach
+                </optgroup>
+            @endif
+        </select>
+        <p class="mt-1.5 text-[11px] leading-relaxed text-slate-500">Daftar diambil dari program Magister dan Doktor di basis data. Teks bahasa Inggris di situs publik mengikuti nama program (EN) yang tersimpan di masing-masing prodi.</p>
+        @if (! $hasPrograms)
+            <p class="mt-2 rounded-lg border border-amber-200 bg-amber-50/90 px-3 py-2 text-[11px] leading-relaxed text-amber-900">
+                Belum ada program studi di basis data. Kelola dulu lewat
+                <a href="{{ route('admin.prodi-s2.index') }}" class="font-bold text-primary underline decoration-primary/40 underline-offset-2 hover:decoration-primary">Prodi Magister (S2)</a>
+                atau
+                <a href="{{ route('admin.prodi-s3.index') }}" class="font-bold text-primary underline decoration-primary/40 underline-offset-2 hover:decoration-primary">Prodi Doktor (S3)</a>.
+            </p>
+        @endif
+        @if (! $programValid && $currentProgram !== '')
+            <p class="mt-2 rounded-lg border border-amber-200 bg-amber-50/90 px-3 py-2 text-[11px] text-amber-900">Program saat ini tidak cocok dengan data prodi. Pilih ulang dari daftar lalu simpan.</p>
+        @endif
+        @error('study_program_id')
             <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
         @enderror
+    </div>
+    <div>
+        @php
+            $rankIds = \App\Models\Lecturer::functionalRankIds();
+            $currentRank = old('functional_role_id', $lecturer->functional_role_id ?? '');
+            $currentRank = is_string($currentRank) ? trim($currentRank) : '';
+            $rankValid = in_array($currentRank, $rankIds, true);
+        @endphp
+        <label for="functional_role_id" class="mb-1 block text-xs font-semibold text-slate-700">Jabatan fungsional</label>
+        <select id="functional_role_id" name="functional_role_id" required
+            class="w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2.5 text-sm transition focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 sm:max-w-md @error('functional_role_id') border-rose-400 @enderror">
+            <option value="" {{ $rankValid ? '' : 'selected' }}>— Pilih jabatan —</option>
+            @foreach ($rankIds as $rid)
+                <option value="{{ $rid }}" @selected($currentRank === $rid)>{{ $rid }}</option>
+            @endforeach
+        </select>
+        <p class="mt-1.5 text-[11px] leading-relaxed text-slate-500">Teks bahasa Inggris di situs publik mengikuti jabatan ini secara otomatis (mis. Lektor → Lecturer).</p>
+        @if (! $rankValid && $currentRank !== '')
+            <p class="mt-2 rounded-lg border border-amber-200 bg-amber-50/90 px-3 py-2 text-[11px] text-amber-900">Nilai saat ini tidak termasuk daftar standar. Pilih salah satu opsi di atas lalu simpan untuk menyelaraskan data.</p>
+        @endif
+        @error('functional_role_id')
+            <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+        @enderror
+    </div>
+    <div class="rounded-2xl border border-slate-200/90 bg-gradient-to-br from-slate-50/90 to-sky-50/20 p-4 shadow-sm ring-1 ring-slate-100/80 md:p-5">
+        <h2 class="text-sm font-bold tracking-tight text-slate-900">Kontak &amp; Google Scholar <span class="font-normal text-slate-500">(tampil di halaman publik <code class="rounded bg-white/80 px-1 py-0.5 text-[11px] font-mono text-slate-600">/dosen</code>)</span></h2>
+        <p class="mt-1.5 text-[11px] leading-relaxed text-slate-600">Isi email untuk tautan <code class="rounded bg-white/70 px-1">mailto:</code> di situs. URL Scholar harus lengkap (<code class="rounded bg-white/70 px-1">https://…</code>), biasanya halaman profil <em>citations?user=…</em> di Google Scholar.</p>
+        <div class="mt-4 space-y-4">
+            <div>
+                <label for="phone" class="mb-1 block text-xs font-semibold text-slate-700">Kontak / telepon <span class="font-normal text-slate-400">(opsional)</span></label>
+                <input id="phone" type="text" name="phone" value="{{ old('phone', $lecturer->phone) }}" maxlength="64"
+                    class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 @error('phone') border-rose-400 @enderror">
+                @error('phone')
+                    <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                @enderror
+            </div>
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label for="email" class="mb-1 block text-xs font-semibold text-slate-700">Email <span class="font-normal text-slate-400">(opsional)</span></label>
+                    <input id="email" type="email" name="email" value="{{ old('email', $lecturer->email) }}" maxlength="255" autocomplete="email"
+                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 @error('email') border-rose-400 @enderror">
+                    @error('email')
+                        <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                    @enderror
+                </div>
+                <div>
+                    <label for="google_scholar_url" class="mb-1 block text-xs font-semibold text-slate-700">URL Google Scholar <span class="font-normal text-slate-400">(opsional)</span></label>
+                    <input id="google_scholar_url" type="url" name="google_scholar_url" value="{{ old('google_scholar_url', $lecturer->google_scholar_url) }}" maxlength="512" placeholder="https://scholar.google.com/citations?user=…"
+                        class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-xs transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 @error('google_scholar_url') border-rose-400 @enderror">
+                    @error('google_scholar_url')
+                        <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+        </div>
     </div>
     <div>
         <label for="photo" class="mb-1 block text-xs font-semibold text-slate-700">Foto</label>

@@ -13,7 +13,7 @@
 
     <div class="flex flex-col gap-3 rounded-3xl border border-slate-200/80 bg-white/90 px-5 py-4 shadow-lg shadow-slate-900/[0.04] ring-1 ring-white/70 backdrop-blur-sm sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <p class="text-sm text-slate-600">Data menampil halaman publik <code class="rounded-md bg-slate-100 px-1.5 py-0.5 text-xs font-mono">/dosen</code>. Urutan baris di situs mengikuti kolom <strong class="text-slate-800">Urutan</strong> (angka kecil lebih dulu).</p>
+            <p class="text-sm text-slate-600">Data menampil halaman publik <code class="rounded-md bg-slate-100 px-1.5 py-0.5 text-xs font-mono">/dosen</code>. Urutan baris di situs mengikuti kolom <strong class="text-slate-800">Urutan</strong> (angka kecil lebih dulu). Kolom <strong class="text-slate-800">Email</strong> dan <strong class="text-slate-800">Scholar</strong> diisi lewat <strong class="text-slate-800">Tambah</strong> atau <strong class="text-slate-800">Edit</strong>.</p>
             @if($lecturers->isEmpty())
                 <p class="mt-2 text-xs font-medium text-amber-800">Belum ada data — impor dari <code class="rounded bg-amber-50 px-1 font-mono">pps-content.json</code> (key LECTURERS) atau tambah manual.</p>
             @endif
@@ -35,7 +35,7 @@
             <p class="px-6 py-16 text-center text-sm text-slate-500">Belum ada dosen.</p>
         @else
             <div class="overflow-x-auto">
-                <table class="w-full min-w-[720px] text-left text-sm">
+                <table class="w-full min-w-[960px] text-left text-sm">
                     <thead>
                         <tr class="border-b border-slate-100 bg-slate-50/90 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
                             <th class="px-4 py-3 pl-6">Urutan</th>
@@ -44,6 +44,8 @@
                             <th class="px-4 py-3">NIDN</th>
                             <th class="hidden px-4 py-3 md:table-cell">NIP</th>
                             <th class="hidden px-4 py-3 lg:table-cell">Program studi (ID)</th>
+                            <th class="hidden px-4 py-3 sm:table-cell">Email</th>
+                            <th class="hidden px-4 py-3 md:table-cell">Google Scholar</th>
                             <th class="px-4 py-3 pr-6 text-right">Aksi</th>
                         </tr>
                     </thead>
@@ -58,6 +60,20 @@
                                 <td class="whitespace-nowrap px-4 py-3 font-mono text-xs text-slate-600">{{ $lec->nidn ?: '—' }}</td>
                                 <td class="hidden whitespace-nowrap px-4 py-3 font-mono text-xs text-slate-600 md:table-cell">{{ $lec->nip ?: '—' }}</td>
                                 <td class="hidden max-w-[10rem] px-4 py-3 text-slate-600 lg:table-cell">{{ \Illuminate\Support\Str::limit($lec->study_program_id, 36) }}</td>
+                                <td class="hidden max-w-[11rem] px-4 py-3 sm:table-cell">
+                                    @if(filled($lec->email))
+                                        <a href="mailto:{{ e($lec->email) }}" class="break-all text-xs font-medium text-primary hover:underline" title="{{ e($lec->email) }}">{{ \Illuminate\Support\Str::limit($lec->email, 32) }}</a>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+                                <td class="hidden px-4 py-3 md:table-cell">
+                                    @if(filled($lec->google_scholar_url))
+                                        <a href="{{ $lec->google_scholar_url }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-bold text-primary shadow-sm transition hover:border-primary/30 hover:bg-sky-50" title="{{ e($lec->google_scholar_url) }}">Scholar<span class="sr-only">, buka di tab baru</span><span aria-hidden="true">↗</span></a>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
                                 <td class="whitespace-nowrap px-4 py-3 pr-6 text-right">
                                     <a href="{{ route('admin.dosen.edit', $lec) }}" class="mr-2 inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-primary transition hover:bg-sky-100">Edit</a>
                                     <form method="post" action="{{ route('admin.dosen.destroy', $lec) }}" class="inline" onsubmit="return confirm('Hapus data dosen ini?');">

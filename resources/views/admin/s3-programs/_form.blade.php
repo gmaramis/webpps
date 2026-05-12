@@ -89,4 +89,24 @@
             <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
         @enderror
     </div>
+    <div>
+        <label for="brochure_image" class="mb-1 block text-xs font-semibold text-slate-700">Brosur pendaftaran <span class="font-normal text-slate-400">(gambar, opsional)</span></label>
+        <p class="mb-2 text-[11px] text-slate-500">PNG, JPG, atau WebP — maks. 5&nbsp;MB. Tampil di halaman publik <span class="font-mono">/s3</span> sebagai pratinjau kecil; pengunjung dapat membuka ukuran besar.</p>
+        <input id="brochure_image" type="file" name="brochure_image" accept="image/jpeg,image/png,image/webp"
+            class="block w-full cursor-pointer rounded-xl border border-dashed border-slate-300 bg-slate-50/50 px-3 py-2 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:border-primary/40 @error('brochure_image') border-rose-400 @enderror">
+        @error('brochure_image')
+            <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+        @enderror
+        @if($isEdit && trim((string) ($program->brochure_image ?? '')) !== '')
+            <div class="mt-3 flex flex-wrap items-start gap-4">
+                <a href="{{ $program->resolvedBrochureUrl() }}" target="_blank" rel="noopener noreferrer" class="shrink-0 rounded-lg border border-slate-200 bg-white p-1 shadow-sm">
+                    <img src="{{ $program->resolvedBrochureUrl() }}" alt="" class="h-24 max-w-[10rem] rounded-md object-contain" width="160" height="96" loading="lazy">
+                </a>
+                <label class="flex cursor-pointer items-center gap-2 text-[11px] text-slate-600">
+                    <input type="checkbox" name="remove_brochure" value="1" class="rounded border-slate-300 text-primary focus:ring-primary/30">
+                    <span>Hapus brosur yang tersimpan</span>
+                </label>
+            </div>
+        @endif
+    </div>
 </div>

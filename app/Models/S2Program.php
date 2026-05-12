@@ -6,6 +6,7 @@ use App\Support\PpsContent;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use JsonException;
 
@@ -19,6 +20,7 @@ use JsonException;
     'excerpt_id',
     'excerpt_en',
     'official_url',
+    'brochure_image',
 ])]
 class S2Program extends Model
 {
@@ -35,6 +37,45 @@ class S2Program extends Model
 
         static::saved(static fn () => PpsContent::flush());
         static::deleted(static fn () => PpsContent::flush());
+
+        static::deleting(function (S2Program $program): void {
+            static::deleteStoredBrochure($program->brochure_image);
+        });
+    }
+
+    public function resolvedBrochureUrl(): string
+    {
+        return self::publicBrochureUrl($this->brochure_image);
+    }
+
+    public static function publicBrochureUrl(?string $path): string
+    {
+        $path = trim((string) $path);
+        if ($path === '') {
+            return '';
+        }
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+        if (str_starts_with($path, '/')) {
+            return asset(ltrim($path, '/'));
+        }
+        if (str_starts_with($path, 'program-brochures/')) {
+            return asset('storage/'.$path);
+        }
+
+        return asset(ltrim($path, '/'));
+    }
+
+    public static function deleteStoredBrochure(?string $path): void
+    {
+        if ($path === null || $path === '' || str_contains($path, '..')) {
+            return;
+        }
+        if (! str_starts_with($path, 'program-brochures/')) {
+            return;
+        }
+        Storage::disk('public')->delete($path);
     }
 
     public static function uniqueSlugFrom(string $nameId): string
@@ -80,6 +121,7 @@ class S2Program extends Model
             'official_url' => $this->official_url !== null && trim($this->official_url) !== ''
                 ? trim($this->official_url)
                 : null,
+            'brochure_image_url' => self::publicBrochureUrl($this->brochure_image),
         ];
     }
 
@@ -102,6 +144,9 @@ class S2Program extends Model
         }
 
         $count = static::withoutEvents(function () use ($rows): int {
+            foreach (static::query()->pluck('brochure_image') as $brochurePath) {
+                static::deleteStoredBrochure($brochurePath);
+            }
             static::query()->delete();
 
             foreach (array_values($rows) as $index => $row) {

@@ -14,6 +14,7 @@
     $doktorHeroSrc = \App\Models\HomepageProgramDisplay::publicHeroUrl($ppsData['DOKTOR_HERO'] ?? null, 'programs/doktor-photo.png');
     $announcements = $ppsData['ANNOUNCEMENTS'] ?? [];
     $agenda = $ppsData['AGENDA'] ?? [];
+    $directorGreeting = $ppsData['DIRECTOR_GREETING'] ?? null;
     $newsHref = function (?array $entry, string $loc): string {
         if ($entry === null) {
             return '#';
@@ -68,6 +69,74 @@
             </div>
         </div>
     </section>
+
+    @if(is_array($directorGreeting) && $directorGreeting !== [])
+        @php
+            $dirPhotoRaw = isset($directorGreeting['photo']) && is_string($directorGreeting['photo']) ? trim($directorGreeting['photo']) : '';
+            $dirPhotoSrc = $dirPhotoRaw !== '' ? asset(ltrim($dirPhotoRaw, '/')) : asset('faculty/faculty-1.svg');
+            $dirNameBlock = $directorGreeting['name'] ?? [];
+            $dirName = is_array($dirNameBlock) ? (string) ($dirNameBlock[$loc] ?? $dirNameBlock['id'] ?? '') : '';
+            $dirRoleBlock = $directorGreeting['role'] ?? [];
+            $dirRole = is_array($dirRoleBlock) ? (string) ($dirRoleBlock[$loc] ?? $dirRoleBlock['id'] ?? '') : '';
+            $dirParagraphs = $directorGreeting['paragraphs'] ?? [];
+            if (! is_array($dirParagraphs)) {
+                $dirParagraphs = [];
+            }
+        @endphp
+        @if($dirName !== '' || $dirRole !== '' || $dirParagraphs !== [])
+            <section id="sambutan-direktur" class="director-greeting-section relative isolate overflow-hidden border-y border-slate-300/45 bg-gradient-to-b from-slate-200/55 via-slate-100 to-slate-50 py-14 md:py-20" data-director-greeting aria-labelledby="director-greeting-heading">
+                <div class="director-greeting-blob director-greeting-blob--1 pointer-events-none absolute -left-24 top-1/4 h-72 w-72 rounded-full bg-slate-500/14 blur-3xl" aria-hidden="true"></div>
+                <div class="director-greeting-blob director-greeting-blob--2 pointer-events-none absolute -right-16 bottom-0 h-64 w-64 rounded-full bg-slate-600/10 blur-3xl" aria-hidden="true"></div>
+                <div class="director-greeting-section__noise pointer-events-none absolute inset-0 opacity-[0.22]" aria-hidden="true"></div>
+                <div class="relative z-[1] mx-auto w-full max-w-6xl px-4">
+                    <header class="director-greeting-section__head mb-8 max-w-2xl md:mb-10">
+                        <p class="director-greeting__eyebrow inline-flex items-center rounded-full border border-slate-300/80 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-600 shadow-sm backdrop-blur-sm md:text-xs">{{ $t['directorGreetingEyebrow'] ?? '' }}</p>
+                        <h2 id="director-greeting-heading" class="director-greeting__title mt-4 font-display text-3xl font-bold tracking-tight text-primary md:mt-5 md:text-4xl">{{ $t['directorGreetingTitle'] ?? '' }}</h2>
+                        <span class="director-greeting__title-accent mt-3 block h-0.5 w-14 rounded-full bg-slate-400 md:mt-4 md:w-16" aria-hidden="true"></span>
+                        <p class="director-greeting__subtitle mt-3 text-sm font-medium text-slate-600 md:mt-4 md:text-base">{{ $t['directorGreetingQuoteLabel'] ?? '' }}</p>
+                    </header>
+                    <div class="director-greeting__unified overflow-hidden rounded-2xl border border-slate-200/95 bg-white shadow-sm ring-1 ring-slate-900/[0.04] md:rounded-3xl md:shadow-md md:shadow-slate-900/8">
+                        <div class="director-greeting__grid grid grid-cols-1 items-stretch divide-y divide-slate-200/90 gap-0 md:grid-cols-[minmax(0,auto)_minmax(0,1fr)] md:divide-x md:divide-y-0 md:divide-slate-200/90">
+                            <div class="director-greeting__photo-col flex justify-center bg-slate-100/55 p-4 sm:p-5 md:justify-center md:p-5 lg:p-6">
+                                <div class="director-greeting__photo-frame relative w-[15rem] shrink-0 sm:w-[16.5rem] md:w-[16rem] lg:w-[17.25rem] xl:w-80 2xl:w-[21rem]">
+                                    <figure class="relative z-[1] m-0 overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-sm md:rounded-2xl">
+                                        <div class="director-greeting__photo-inner aspect-[3/4] w-full overflow-hidden bg-slate-100">
+                                            <img src="{{ $dirPhotoSrc }}" alt="{{ $dirName !== '' ? $dirName : ($t['directorGreetingTitle'] ?? 'Direktur') }}" class="director-greeting__photo-img h-full w-full object-cover object-top" width="300" height="400" decoding="async">
+                                        </div>
+                                        @if($dirName !== '' || $dirRole !== '')
+                                            <figcaption class="director-greeting__caption border-t border-slate-200/80 bg-white px-4 py-3 md:px-5 md:py-3.5">
+                                                @if($dirName !== '')
+                                                    <p class="font-display text-base font-bold leading-snug text-primary md:text-lg">{{ $dirName }}</p>
+                                                @endif
+                                                @if($dirRole !== '')
+                                                    <p class="mt-0.5 text-sm font-semibold text-slate-600 md:mt-1 md:text-[0.95rem]">{{ $dirRole }}</p>
+                                                @endif
+                                            </figcaption>
+                                        @endif
+                                    </figure>
+                                </div>
+                            </div>
+                            <div class="director-greeting__text-col flex min-h-0 flex-col bg-white">
+                                <div class="director-greeting__text-panel group relative flex flex-1 flex-col justify-center p-5 sm:p-6 md:p-6 lg:p-7 xl:p-8">
+                                    <span class="director-greeting__quote-mark font-display text-6xl font-bold leading-none text-slate-200 md:text-7xl" aria-hidden="true">&ldquo;</span>
+                                    <div class="director-greeting__text-body relative z-[1] space-y-3.5 text-sm leading-relaxed text-slate-700 md:space-y-4 md:pl-1 md:text-base md:leading-relaxed">
+                                        @foreach($dirParagraphs as $para)
+                                            @if(is_array($para))
+                                                @php $pText = (string) ($para[$loc] ?? $para['id'] ?? ''); @endphp
+                                                @if($pText !== '')
+                                                    <p class="director-greeting__para m-0">{{ $pText }}</p>
+                                                @endif
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        @endif
+    @endif
 
     @if($featured)
     <section id="berita" class="news-section relative isolate overflow-hidden border-y border-slate-200 bg-white py-12 md:py-16">

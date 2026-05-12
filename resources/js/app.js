@@ -108,6 +108,50 @@ function initNewsImageLightbox() {
     });
 }
 
+function initStudyProgramBrochureLightbox() {
+    const dialog = document.getElementById('study-program-brochure-lightbox');
+    const img = document.getElementById('study-program-brochure-lightbox-img');
+    const closeBtn = document.getElementById('study-program-brochure-lightbox-close');
+    if (!dialog || !img || typeof dialog.showModal !== 'function') {
+        return;
+    }
+
+    const open = (src, alt) => {
+        if (!src) return;
+        img.removeAttribute('src');
+        img.setAttribute('src', src);
+        img.alt = alt || '';
+        dialog.showModal();
+        window.requestAnimationFrame(() => {
+            closeBtn?.focus();
+        });
+    };
+
+    document.querySelectorAll('[data-program-brochure-lightbox-src]').forEach((el) => {
+        el.addEventListener('click', (e) => {
+            const src = el.getAttribute('data-program-brochure-lightbox-src');
+            const alt = el.getAttribute('data-program-brochure-lightbox-alt') || '';
+            if (!src) return;
+            e.preventDefault();
+            e.stopPropagation();
+            open(src, alt);
+        });
+    });
+
+    dialog.addEventListener('click', (e) => {
+        if (e.target === dialog) {
+            dialog.close();
+        }
+    });
+
+    closeBtn?.addEventListener('click', () => dialog.close());
+
+    dialog.addEventListener('close', () => {
+        img.removeAttribute('src');
+        img.alt = '';
+    });
+}
+
 /** Tab program studi (halaman /s2 dan /s3): panel penjelasan + tautan resmi */
 function initStudyProgramTabs() {
     document.querySelectorAll('[data-study-program-tabs]').forEach((root) => {
@@ -164,6 +208,37 @@ function initStudyProgramTabs() {
     });
 }
 
+/** Sambutan direktur beranda: muncul saat scroll (hormati prefers-reduced-motion). */
+function initDirectorGreetingReveal() {
+    const roots = document.querySelectorAll('[data-director-greeting]');
+    if (roots.length === 0) {
+        return;
+    }
+
+    const reveal = (el) => {
+        el.classList.add('is-visible');
+    };
+
+    if (prefersReducedMotion() || !('IntersectionObserver' in window)) {
+        roots.forEach(reveal);
+
+        return;
+    }
+
+    const obs = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((e) => {
+                if (e.isIntersecting) {
+                    reveal(e.target);
+                    obs.unobserve(e.target);
+                }
+            });
+        },
+        { root: null, rootMargin: '0px 0px -10% 0px', threshold: 0.12 }
+    );
+    roots.forEach((el) => obs.observe(el));
+}
+
 function initNewsCardsObserver() {
     if (prefersReducedMotion()) return;
     const list = document.getElementById('news-list');
@@ -217,7 +292,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initHeroSlider();
     initMobileNav();
     initNewsImageLightbox();
+    initStudyProgramBrochureLightbox();
     initStudyProgramTabs();
     initNewsCardsObserver();
+    initDirectorGreetingReveal();
     initActivitiesCardsDelayedReveal();
 });

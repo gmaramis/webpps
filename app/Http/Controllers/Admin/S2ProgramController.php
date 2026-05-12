@@ -38,9 +38,13 @@ class S2ProgramController extends Controller
 
     public function store(S2ProgramRequest $request): RedirectResponse
     {
-        $data = $request->validated();
+        $data = collect($request->validated())->except(['brochure_image', 'remove_brochure'])->all();
         if (($data['slug'] ?? null) === null || $data['slug'] === '') {
             $data['slug'] = S2Program::uniqueSlugFrom((string) $data['name_id']);
+        }
+
+        if ($request->hasFile('brochure_image')) {
+            $data['brochure_image'] = $request->file('brochure_image')->store('program-brochures', 'public');
         }
 
         S2Program::query()->create($data);
@@ -55,9 +59,19 @@ class S2ProgramController extends Controller
 
     public function update(S2ProgramRequest $request, S2Program $program): RedirectResponse
     {
-        $data = $request->validated();
+        $data = collect($request->validated())->except(['brochure_image', 'remove_brochure'])->all();
         if (($data['slug'] ?? null) === null || $data['slug'] === '') {
             unset($data['slug']);
+        }
+
+        if ($request->boolean('remove_brochure')) {
+            S2Program::deleteStoredBrochure($program->brochure_image);
+            $data['brochure_image'] = null;
+        }
+
+        if ($request->hasFile('brochure_image')) {
+            S2Program::deleteStoredBrochure($program->brochure_image);
+            $data['brochure_image'] = $request->file('brochure_image')->store('program-brochures', 'public');
         }
 
         $program->update($data);

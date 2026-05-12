@@ -14,7 +14,7 @@
     </nav>
 
     <div class="rounded-3xl border border-slate-200/80 bg-white/90 p-6 shadow-xl shadow-slate-900/[0.04] ring-1 ring-white/70 backdrop-blur-sm md:p-8">
-        <form method="post" action="{{ route('admin.prodi-s3.update', $program) }}" class="space-y-8">
+        <form method="post" action="{{ route('admin.prodi-s3.update', $program) }}" enctype="multipart/form-data" class="space-y-8">
             @csrf
             @method('PUT')
             @include('admin.s3-programs._form', ['program' => $program])
