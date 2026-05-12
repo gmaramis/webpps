@@ -176,6 +176,12 @@
                     <span class="min-w-0 flex-1">Sambutan direktur</span>
                 </a>
             @endif
+            @if ($can('beranda-sejarah.manage'))
+                <a href="{{ route('admin.beranda-sejarah.edit') }}" class="{{ $navActive(request()->routeIs('admin.beranda-sejarah.*')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
+                    @include('admin.layouts.sidebar-icon', ['name' => 'organization', 'class' => 'h-4 w-4 shrink-0 opacity-90'])
+                    <span class="min-w-0 flex-1">Sejarah beranda</span>
+                </a>
+            @endif
             @if ($can('pengumuman.manage'))
                 <a href="{{ route('admin.pengumuman.index') }}" class="{{ $navActive(request()->routeIs('admin.pengumuman.*')) }} mx-0.5 flex items-center gap-2.5 rounded-xl px-2.5 py-2 transition-all duration-200 ease-out">
                     @include('admin.layouts.sidebar-icon', ['name' => 'megaphone', 'class' => 'h-4 w-4 shrink-0 opacity-90'])

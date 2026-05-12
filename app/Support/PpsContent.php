@@ -10,6 +10,7 @@ use App\Models\AlumniActivity;
 use App\Models\AnnouncementItem;
 use App\Models\CooperationPartner;
 use App\Models\DirectorGreeting;
+use App\Models\GraduateSchoolHistoryContent;
 use App\Models\HeroSlide;
 use App\Models\HomepageProgramDisplay;
 use App\Models\LeadershipPerson;
@@ -224,6 +225,7 @@ class PpsContent
         self::mergeStopKorupsiFromDatabase($data);
         self::mergeStopGratifikasiFromDatabase($data);
         self::mergeDirectorGreetingFromDatabase($data);
+        self::mergeGraduateSchoolHistoryFromDatabase($data);
         self::mergeAccreditationDocumentsFromDatabase($data);
 
         self::$cache = $data;
@@ -826,7 +828,7 @@ class PpsContent
     }
 
     /**
-     * Dokumen akreditasi dari basis data menggantikan daftar statis — hanya PDF yang is_published = true.
+     * Sambutan direktur dan label bagian terkait di beranda.
      *
      * @param  array<string, mixed>  $data
      */
@@ -858,6 +860,57 @@ class PpsContent
         }
     }
 
+    /**
+     * Blok sejarah di beranda — menimpa kunci STRINGS history* dari basis data jika baris id=1 ada.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    protected static function mergeGraduateSchoolHistoryFromDatabase(array &$data): void
+    {
+        try {
+            if (! Schema::hasTable('graduate_school_history_contents')) {
+                return;
+            }
+            if (! Schema::hasColumn('graduate_school_history_contents', 'paragraph_id')) {
+                return;
+            }
+
+            $row = GraduateSchoolHistoryContent::query()->find(1);
+            if ($row === null) {
+                return;
+            }
+
+            $data['STRINGS'] ??= [];
+            $data['STRINGS']['id'] ??= [];
+            $data['STRINGS']['en'] ??= [];
+
+            $pairs = [
+                'historyEyebrow' => ['eyebrow_id', 'eyebrow_en'],
+                'historyTitle' => ['title_id', 'title_en'],
+                'historyParagraph' => ['paragraph_id', 'paragraph_en'],
+            ];
+
+            foreach ($pairs as $strKey => [$idCol, $enCol]) {
+                $idVal = trim((string) ($row->{$idCol} ?? ''));
+                $enRaw = trim((string) ($row->{$enCol} ?? ''));
+                $data['STRINGS']['id'][$strKey] = $idVal;
+                $data['STRINGS']['en'][$strKey] = $enRaw !== '' ? $enRaw : $idVal;
+            }
+
+            if (Schema::hasColumn('graduate_school_history_contents', 'image_path')) {
+                $img = trim((string) ($row->image_path ?? ''));
+                $data['GRADUATE_SCHOOL_HISTORY_IMAGE'] = $img !== '' ? GraduateSchoolHistoryContent::publicImageUrl($img) : null;
+            }
+        } catch (\Throwable) {
+            //
+        }
+    }
+
+    /**
+     * Dokumen akreditasi dari basis data menggantikan daftar statis — hanya PDF yang is_published = true.
+     *
+     * @param  array<string, mixed>  $data
+     */
     protected static function mergeAccreditationDocumentsFromDatabase(array &$data): void
     {
         try {

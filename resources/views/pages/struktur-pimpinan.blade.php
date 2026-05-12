@@ -4,7 +4,10 @@
 
 @php
     $loc = app()->getLocale();
-    $leaders = $ppsData['LEADERS'] ?? [];
+    $leaders = is_array($ppsData['LEADERS'] ?? null) ? $ppsData['LEADERS'] : [];
+    $director = $leaders[0] ?? null;
+    $viceLeft = $leaders[1] ?? null;
+    $viceRight = $leaders[2] ?? null;
 @endphp
 
 @section('content')
@@ -16,39 +19,111 @@
             <p class="mt-4 max-w-3xl text-base leading-relaxed text-slate-600 md:text-lg">{{ $t['leadersPageLead'] }}</p>
         </header>
 
-        <section class="mb-12">
-            <h2 class="mb-6 font-display text-lg font-bold text-primary">{{ $t['leadersDirectorTitle'] }} &amp; {{ $t['leadersViceTitle'] }}</h2>
-            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                @foreach($leaders as $person)
-                    @php
-                        $role = $person['role'][$loc] ?? $person['role']['id'] ?? '';
-                        $src = \App\Models\LeadershipPerson::publicPhotoUrl($person['photo'] ?? null);
-                    @endphp
-                    <article class="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                        <div class="aspect-[4/3] bg-slate-100">
-                            <img src="{{ $src }}" alt="" class="h-full w-full object-cover" width="400" height="300" loading="lazy" decoding="async">
-                        </div>
-                        <div class="flex flex-1 flex-col p-4">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-primary">{{ $role }}</p>
-                            <p class="mt-1 font-display text-base font-bold text-slate-900">{{ $person['name'] ?? '' }}</p>
-                            <p class="mt-2 text-xs text-slate-500"><span class="font-medium text-slate-600">{{ $t['leadersNipLabel'] }}</span> {{ $person['nip'] ?? '' }}</p>
-                        </div>
-                    </article>
-                @endforeach
-            </div>
-        </section>
+        <section class="mb-12 text-center">
+            <h2 class="mx-auto mb-6 max-w-2xl font-display text-lg font-bold leading-snug text-primary md:text-xl">
+                {{ $t['leadersDirectorTitle'] }} &amp; {{ $t['leadersViceTitle'] }}
+            </h2>
 
-        <section class="rounded-2xl border border-sky-100 bg-white p-6 shadow-sm md:p-8">
-            <h2 class="font-display text-lg font-bold text-primary">{{ $t['leadersStructureTitle'] }}</h2>
-            <p class="mt-2 text-sm text-slate-600">{{ $t['leadersOrgTopSub'] }}</p>
-            <ol class="mt-6 space-y-3 border-l-2 border-primary/30 pl-5 text-sm text-slate-800">
-                <li><span class="font-semibold text-primary">{{ $t['leadersFlow1'] }}</span></li>
-                <li><span class="font-semibold text-primary">{{ $t['leadersFlow2'] }}</span></li>
-                <li><span class="font-semibold text-primary">{{ $t['leadersFlow3'] }}</span></li>
-                <li><span class="font-semibold text-primary">{{ $t['leadersFlow4'] }}</span></li>
-            </ol>
+            @if(count($leaders) === 0)
+                <p class="rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-6 text-center text-sm text-slate-600">{{ $t['leadersPageLead'] }}</p>
+            @else
+                <div class="leadership-chart leadership-pyramid flex w-full flex-col items-center">
+                    @if($director !== null)
+                        @php
+                            $dRole = $director['role'][$loc] ?? $director['role']['id'] ?? '';
+                            $dSrc = \App\Models\LeadershipPerson::publicPhotoUrl($director['photo'] ?? null);
+                            $dName = (string) ($director['name'] ?? '');
+                        @endphp
+                        <div class="flex justify-center px-2">
+                            <article class="leader-card director-card leader-card--portrait flex w-full flex-col items-center overflow-hidden rounded-2xl border border-slate-200 bg-white text-center shadow-sm">
+                                <div class="leader-card-photo">
+                                    <div class="leader-card-photo__ring">
+                                        <div class="leader-card-photo__clip">
+                                            <img src="{{ $dSrc }}" alt="{{ $dName }}" class="leader-card-photo__img" width="320" height="320" loading="lazy" decoding="async">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="leader-card-body flex w-full flex-1 flex-col items-center break-words p-5 pt-4">
+                                    <p class="text-xs font-semibold uppercase tracking-wide text-primary">{{ $dRole }}</p>
+                                    <p class="mt-1 font-display text-base font-bold text-slate-900">{{ $dName }}</p>
+                                    <p class="mt-2 text-xs text-slate-500"><span class="font-medium text-slate-600">{{ $t['leadersNipLabel'] }}</span> {{ $director['nip'] ?? '' }}</p>
+                                </div>
+                            </article>
+                        </div>
+                    @endif
+
+                    @if($viceLeft !== null || $viceRight !== null)
+                        <div class="leadership-pyramid__connector w-full" aria-hidden="true">
+                            <svg class="leadership-pyramid__svg leadership-pyramid__svg--tree hidden w-full md:block" viewBox="0 0 400 72" preserveAspectRatio="xMidYMin meet" xmlns="http://www.w3.org/2000/svg">
+                                @if($viceLeft !== null && $viceRight !== null)
+                                    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M200 4 L200 26 M64 26 L336 26 M64 26 L64 66 M336 26 L336 66" />
+                                @elseif($viceLeft !== null)
+                                    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M200 4 L200 26 L88 26 L88 66" />
+                                @else
+                                    <path fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M200 4 L200 26 L312 26 L312 66" />
+                                @endif
+                            </svg>
+                            <div class="mx-auto flex justify-center md:hidden">
+                                <span class="block w-px rounded-full bg-primary/65" style="height: 1.25rem"></span>
+                            </div>
+                        </div>
+                        <div class="leadership-pyramid__vice-row mx-auto grid w-full max-w-6xl grid-cols-1 gap-10 px-2 sm:px-4 md:grid-cols-2 md:gap-x-32 md:gap-y-10 lg:max-w-7xl lg:gap-x-40">
+                            <div class="flex min-w-0 justify-center md:justify-end">
+                                @if($viceLeft !== null)
+                                    @php
+                                        $vlRole = $viceLeft['role'][$loc] ?? $viceLeft['role']['id'] ?? '';
+                                        $vlSrc = \App\Models\LeadershipPerson::publicPhotoUrl($viceLeft['photo'] ?? null);
+                                        $vlName = (string) ($viceLeft['name'] ?? '');
+                                    @endphp
+                                    <article class="leader-card vice-card leader-card--portrait flex w-full flex-col items-center overflow-hidden rounded-2xl border border-slate-200 bg-white text-center shadow-sm">
+                                        <div class="leader-card-photo">
+                                            <div class="leader-card-photo__ring">
+                                                <div class="leader-card-photo__clip">
+                                                    <img src="{{ $vlSrc }}" alt="{{ $vlName }}" class="leader-card-photo__img" width="320" height="320" loading="lazy" decoding="async">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="leader-card-body flex w-full flex-1 flex-col items-center break-words p-5 pt-4">
+                                            <p class="text-xs font-semibold uppercase tracking-wide text-primary">{{ $vlRole }}</p>
+                                            <p class="mt-1 font-display text-base font-bold text-slate-900">{{ $vlName }}</p>
+                                            <p class="mt-2 text-xs text-slate-500"><span class="font-medium text-slate-600">{{ $t['leadersNipLabel'] }}</span> {{ $viceLeft['nip'] ?? '' }}</p>
+                                        </div>
+                                    </article>
+                                @endif
+                            </div>
+                            @if($viceLeft !== null && $viceRight !== null)
+                                <div class="flex justify-center md:hidden" aria-hidden="true">
+                                    <span class="block w-px rounded-full bg-primary/65" style="height: 1rem"></span>
+                                </div>
+                            @endif
+                            <div class="flex min-w-0 justify-center md:justify-start">
+                                @if($viceRight !== null)
+                                    @php
+                                        $vrRole = $viceRight['role'][$loc] ?? $viceRight['role']['id'] ?? '';
+                                        $vrSrc = \App\Models\LeadershipPerson::publicPhotoUrl($viceRight['photo'] ?? null);
+                                        $vrName = (string) ($viceRight['name'] ?? '');
+                                    @endphp
+                                    <article class="leader-card vice-card leader-card--portrait flex w-full flex-col items-center overflow-hidden rounded-2xl border border-slate-200 bg-white text-center shadow-sm">
+                                        <div class="leader-card-photo">
+                                            <div class="leader-card-photo__ring">
+                                                <div class="leader-card-photo__clip">
+                                                    <img src="{{ $vrSrc }}" alt="{{ $vrName }}" class="leader-card-photo__img" width="320" height="320" loading="lazy" decoding="async">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="leader-card-body flex w-full flex-1 flex-col items-center break-words p-5 pt-4">
+                                            <p class="text-xs font-semibold uppercase tracking-wide text-primary">{{ $vrRole }}</p>
+                                            <p class="mt-1 font-display text-base font-bold text-slate-900">{{ $vrName }}</p>
+                                            <p class="mt-2 text-xs text-slate-500"><span class="font-medium text-slate-600">{{ $t['leadersNipLabel'] }}</span> {{ $viceRight['nip'] ?? '' }}</p>
+                                        </div>
+                                    </article>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            @endif
         </section>
-        <p class="mt-8 text-xs text-slate-500">{{ $t['leadersUpdatedLabel'] }}</p>
     </div>
 </main>
 @endsection

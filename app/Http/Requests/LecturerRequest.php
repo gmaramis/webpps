@@ -16,13 +16,6 @@ class LecturerRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        foreach (['name_en', 'nidn', 'nip', 'phone', 'email', 'google_scholar_url'] as $key) {
-            $v = $this->input($key);
-            if ($v !== null && trim((string) $v) === '') {
-                $this->merge([$key => null]);
-            }
-        }
-
         $rawSp = $this->input('study_program_id');
         if (is_string($rawSp)) {
             $spId = trim($rawSp);
@@ -62,20 +55,36 @@ class LecturerRequest extends FormRequest
             };
         }
 
+        $photoRules = $this->routeIs('admin.dosen.store')
+            ? ['required', 'image', 'max:4096']
+            : [
+                'nullable',
+                'image',
+                'max:4096',
+                Rule::requiredIf(function (): bool {
+                    $lec = $this->route('lecturer');
+                    if (! $lec instanceof Lecturer) {
+                        return false;
+                    }
+
+                    return trim((string) ($lec->photo ?? '')) === '';
+                }),
+            ];
+
         return [
             'sort_order' => ['required', 'integer', 'min:0', 'max:65535'],
             'name_id' => ['required', 'string', 'max:255'],
-            'name_en' => ['nullable', 'string', 'max:255'],
-            'nidn' => ['nullable', 'string', 'max:32'],
-            'nip' => ['nullable', 'string', 'max:128'],
+            'name_en' => ['required', 'string', 'max:255'],
+            'nidn' => ['required', 'string', 'max:32'],
+            'nip' => ['required', 'string', 'max:128'],
             'study_program_id' => $studyProgramIdRules,
-            'study_program_en' => ['nullable', 'string', 'max:255'],
+            'study_program_en' => ['required', 'string', 'max:255'],
             'functional_role_id' => ['required', 'string', Rule::in(Lecturer::functionalRankIds())],
-            'functional_role_en' => ['nullable', 'string', 'max:191'],
-            'phone' => ['nullable', 'string', 'max:64'],
-            'email' => ['nullable', 'string', 'lowercase', 'email', 'max:255'],
-            'google_scholar_url' => ['nullable', 'string', 'url', 'max:512'],
-            'photo' => ['nullable', 'image', 'max:4096'],
+            'functional_role_en' => ['required', 'string', 'max:191'],
+            'phone' => ['required', 'string', 'max:64'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255'],
+            'google_scholar_url' => ['required', 'string', 'url', 'max:512'],
+            'photo' => $photoRules,
         ];
     }
 }

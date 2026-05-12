@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\AlumniActivityController;
 use App\Http\Controllers\Admin\AnnouncementItemController;
 use App\Http\Controllers\Admin\CooperationPartnerController;
 use App\Http\Controllers\Admin\DirectorGreetingController;
+use App\Http\Controllers\Admin\GraduateSchoolHistoryController;
 use App\Http\Controllers\Admin\HeroSlideController;
 use App\Http\Controllers\Admin\LeadershipPersonController;
 use App\Http\Controllers\Admin\LecturerController;
@@ -70,6 +71,8 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function (): v
     });
     Route::get('visi-misi', [VisionMissionController::class, 'edit'])->middleware('permission:visi-misi.manage')->name('visi-misi.edit');
     Route::patch('visi-misi', [VisionMissionController::class, 'update'])->middleware('permission:visi-misi.manage')->name('visi-misi.update');
+    Route::get('beranda-sejarah', [GraduateSchoolHistoryController::class, 'edit'])->middleware('permission:beranda-sejarah.manage')->name('beranda-sejarah.edit');
+    Route::patch('beranda-sejarah', [GraduateSchoolHistoryController::class, 'update'])->middleware('permission:beranda-sejarah.manage')->name('beranda-sejarah.update');
     Route::get('tautan-portal-akademik', [AcademicPortalSettingController::class, 'edit'])->middleware('permission:tautan-portal-akademik.manage')->name('tautan-portal-akademik.edit');
     Route::patch('tautan-portal-akademik', [AcademicPortalSettingController::class, 'update'])->middleware('permission:tautan-portal-akademik.manage')->name('tautan-portal-akademik.update');
     Route::post('struktur-pimpinan/import-json', [LeadershipPersonController::class, 'importJson'])->middleware('permission:struktur-pimpinan.manage')->name('struktur-pimpinan.import-json');

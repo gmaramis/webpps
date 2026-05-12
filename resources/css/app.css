@@ -23,3 +23,173 @@
 }
 
 @import './pps.css';
+
+/*
+ | Paragraf sejarah beranda — rata kiri–kanan.
+ | Ditempatkan setelah Tailwind + pps agar tidak kalah oleh @layer components/utilities;
+ | white-space normal supaya baris baru di sumber tidak memecah blok (justify butuh lebar penuh per baris).
+ */
+main.site-home-root p.site-home-history-paragraph {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  white-space: normal !important;
+  text-align: justify !important;
+  text-justify: inter-word !important;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  overflow-wrap: break-word;
+}
+
+/*
+ | Blok sejarah + gambar: utilitas Tailwind di dalam string @class([ '...' => $x ]) pada Blade
+ | tidak selalu ikut di-scan Tailwind v4, sehingga grid tidak pernah di-build (teks kolaps per huruf).
+ | Layout dijamin lewat CSS biasa di bawah ini.
+ */
+main.site-home-root .site-home-history-layout--has-image {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+main.site-home-root .site-home-history-layout--has-image .site-home-history-text {
+  min-width: 0;
+}
+
+main.site-home-root .site-home-history-layout--has-image .site-home-history-aside {
+  min-width: 0;
+  justify-self: center;
+  max-width: min(100%, 20rem);
+  width: 100%;
+}
+
+@media (width >= 40rem) {
+  main.site-home-root .site-home-history-layout--has-image {
+    grid-template-columns: minmax(0, 1fr) 13.5rem;
+  }
+
+  main.site-home-root .site-home-history-layout--has-image .site-home-history-aside {
+    justify-self: end;
+    max-width: none;
+  }
+}
+
+@media (width >= 48rem) {
+  main.site-home-root .site-home-history-layout--has-image {
+    grid-template-columns: minmax(0, 1fr) 15rem;
+    gap: 2.5rem;
+  }
+}
+
+@media (width >= 64rem) {
+  main.site-home-root .site-home-history-layout--has-image {
+    grid-template-columns: minmax(0, 1fr) 16.5rem;
+  }
+}
+
+/*
+ | Struktur pimpinan — foto lingkaran.
+ | Preflight img (max-width:100%; height:auto) + urutan @layer membuat lingkaran dari pps tidak terlihat;
+ | pembungkus .leader-card-photo__clip + aturan di luar @layer memaksa crop lingkaran.
+ */
+main#main .leadership-pyramid .leader-card-photo {
+  display: flex;
+  justify-content: center;
+  padding-top: 1.35rem;
+  padding-bottom: 0.2rem;
+  padding-inline: 1rem;
+}
+
+main#main .leadership-pyramid .leader-card-photo__ring {
+  box-sizing: border-box;
+  display: flex;
+  flex-shrink: 0;
+  align-items: stretch;
+  justify-content: stretch;
+  border-radius: 9999px;
+  padding: 3px;
+  background: linear-gradient(
+    155deg,
+    rgb(56 189 248 / 0.55) 0%,
+    rgb(14 165 233 / 0.78) 40%,
+    rgb(12 74 110 / 0.92) 100%
+  );
+  box-shadow:
+    0 14px 34px -14px rgb(2 132 199 / 0.45),
+    0 0 0 1px rgb(255 255 255 / 0.88) inset;
+  transition: box-shadow 0.25s ease;
+}
+
+main#main .leadership-pyramid .director-card .leader-card-photo__ring {
+  width: 11.25rem;
+  height: 11.25rem;
+}
+
+main#main .leadership-pyramid .vice-card .leader-card-photo__ring {
+  width: 9.75rem;
+  height: 9.75rem;
+}
+
+@media (width >= 40rem) {
+  main#main .leadership-pyramid .director-card .leader-card-photo__ring {
+    width: 12.25rem;
+    height: 12.25rem;
+  }
+
+  main#main .leadership-pyramid .vice-card .leader-card-photo__ring {
+    width: 10.5rem;
+    height: 10.5rem;
+  }
+}
+
+main#main .leadership-pyramid .leader-card-photo__clip {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 0;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: rgb(226 232 240);
+}
+
+main#main .leadership-pyramid .leader-card-photo__img {
+  display: block;
+  width: 100%;
+  height: 100% !important;
+  max-width: none !important;
+  object-fit: cover;
+  object-position: center;
+  box-shadow: inset 0 0 0 3px rgb(255 255 255 / 1);
+}
+
+main#main .leadership-pyramid .director-card {
+  max-width: 26rem;
+}
+
+main#main .leadership-pyramid .vice-card.leader-card--portrait {
+  max-width: 24rem;
+}
+
+main#main .leadership-pyramid .leader-card--portrait {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+@media (hover: hover) {
+  main#main .leadership-pyramid .leader-card--portrait:hover {
+    transform: translateY(-3px);
+    box-shadow:
+      0 20px 42px -22px rgb(15 23 42 / 0.2),
+      0 0 0 1px rgb(2 132 199 / 0.14);
+  }
+
+  main#main .leadership-pyramid .leader-card--portrait:hover .leader-card-photo__ring {
+    box-shadow:
+      0 20px 44px -12px rgb(2 132 199 / 0.5),
+      0 0 0 1px rgb(255 255 255 / 0.92) inset;
+  }
+}

@@ -185,6 +185,11 @@
     background: linear-gradient(to top, var(--home-floor) 0%, rgb(238 242 247 / 0.55) 42%, transparent 100%);
   }
 
+  /* Paragraf sejarah: aturan dasar (perataan kuat ada di app.css di luar @layer). */
+  .site-home-root .site-home-history-paragraph {
+    overflow-wrap: break-word;
+  }
+
   .lang-btn {
     @apply cursor-pointer rounded-lg border-0 bg-transparent px-[0.65rem] py-1.5 text-xs font-semibold text-slate-500 transition-colors;
   }
@@ -296,6 +301,23 @@
   .nav-sub-link:hover::before,
   .nav-sub-link:focus-visible::before {
     transform: translateY(-50%) scale(1);
+  }
+
+  /* Struktur pimpinan — bagan piramida (direktur atas, dua wakil bawah + garis SVG) */
+  .leadership-pyramid {
+    position: relative;
+  }
+
+  .leadership-pyramid__connector {
+    margin-top: 0.15rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .leadership-pyramid__svg--tree {
+    max-width: min(42rem, 100%);
+    margin-inline: auto;
+    height: 4.25rem;
+    color: rgb(7 89 133 / 0.82);
   }
 
   /* Struktur pimpinan */

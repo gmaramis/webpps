@@ -25,8 +25,8 @@
             @enderror
         </div>
         <div>
-            <label for="name_en" class="mb-1 block text-xs font-semibold text-slate-700">Nama lengkap &amp; gelar (English) <span class="font-normal text-slate-400">(opsional)</span></label>
-            <input id="name_en" type="text" name="name_en" value="{{ old('name_en', $lecturer->name_en) }}" maxlength="255"
+            <label for="name_en" class="mb-1 block text-xs font-semibold text-slate-700">Nama lengkap &amp; gelar (English)</label>
+            <input id="name_en" type="text" name="name_en" required value="{{ old('name_en', $lecturer->name_en) }}" maxlength="255"
                 class="w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 text-sm transition focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 @error('name_en') border-rose-400 @enderror">
             @error('name_en')
                 <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
@@ -35,16 +35,16 @@
     </div>
     <div class="grid gap-4 sm:grid-cols-2">
         <div>
-            <label for="nidn" class="mb-1 block text-xs font-semibold text-slate-700">NIDN <span class="font-normal text-slate-400">(opsional)</span></label>
-            <input id="nidn" type="text" name="nidn" value="{{ old('nidn', $lecturer->nidn) }}" maxlength="32"
+            <label for="nidn" class="mb-1 block text-xs font-semibold text-slate-700">NIDN</label>
+            <input id="nidn" type="text" name="nidn" required value="{{ old('nidn', $lecturer->nidn) }}" maxlength="32"
                 class="w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 font-mono text-sm transition focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 @error('nidn') border-rose-400 @enderror">
             @error('nidn')
                 <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
             @enderror
         </div>
         <div>
-            <label for="nip" class="mb-1 block text-xs font-semibold text-slate-700">NIP <span class="font-normal text-slate-400">(opsional)</span></label>
-            <input id="nip" type="text" name="nip" value="{{ old('nip', $lecturer->nip) }}" maxlength="128"
+            <label for="nip" class="mb-1 block text-xs font-semibold text-slate-700">NIP</label>
+            <input id="nip" type="text" name="nip" required value="{{ old('nip', $lecturer->nip) }}" maxlength="128"
                 class="w-full rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2 font-mono text-sm transition focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 @error('nip') border-rose-400 @enderror">
             @error('nip')
                 <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
@@ -122,8 +122,8 @@
         <p class="mt-1.5 text-[11px] leading-relaxed text-slate-600">Isi email untuk tautan <code class="rounded bg-white/70 px-1">mailto:</code> di situs. URL Scholar harus lengkap (<code class="rounded bg-white/70 px-1">https://…</code>), biasanya halaman profil <em>citations?user=…</em> di Google Scholar.</p>
         <div class="mt-4 space-y-4">
             <div>
-                <label for="phone" class="mb-1 block text-xs font-semibold text-slate-700">Kontak / telepon <span class="font-normal text-slate-400">(opsional)</span></label>
-                <input id="phone" type="text" name="phone" value="{{ old('phone', $lecturer->phone) }}" maxlength="64"
+                <label for="phone" class="mb-1 block text-xs font-semibold text-slate-700">Kontak / telepon</label>
+                <input id="phone" type="text" name="phone" required value="{{ old('phone', $lecturer->phone) }}" maxlength="64"
                     class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 @error('phone') border-rose-400 @enderror">
                 @error('phone')
                     <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
@@ -131,16 +131,16 @@
             </div>
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
-                    <label for="email" class="mb-1 block text-xs font-semibold text-slate-700">Email <span class="font-normal text-slate-400">(opsional)</span></label>
-                    <input id="email" type="email" name="email" value="{{ old('email', $lecturer->email) }}" maxlength="255" autocomplete="email"
+                    <label for="email" class="mb-1 block text-xs font-semibold text-slate-700">Email</label>
+                    <input id="email" type="email" name="email" required value="{{ old('email', $lecturer->email) }}" maxlength="255" autocomplete="email"
                         class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 @error('email') border-rose-400 @enderror">
                     @error('email')
                         <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
                     @enderror
                 </div>
                 <div>
-                    <label for="google_scholar_url" class="mb-1 block text-xs font-semibold text-slate-700">URL Google Scholar <span class="font-normal text-slate-400">(opsional)</span></label>
-                    <input id="google_scholar_url" type="url" name="google_scholar_url" value="{{ old('google_scholar_url', $lecturer->google_scholar_url) }}" maxlength="512" placeholder="https://scholar.google.com/citations?user=…"
+                    <label for="google_scholar_url" class="mb-1 block text-xs font-semibold text-slate-700">URL Google Scholar</label>
+                    <input id="google_scholar_url" type="url" name="google_scholar_url" required value="{{ old('google_scholar_url', $lecturer->google_scholar_url) }}" maxlength="512" placeholder="https://scholar.google.com/citations?user=…"
                         class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 font-mono text-xs transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 @error('google_scholar_url') border-rose-400 @enderror">
                     @error('google_scholar_url')
                         <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
@@ -151,13 +151,15 @@
     </div>
     <div>
         <label for="photo" class="mb-1 block text-xs font-semibold text-slate-700">Foto</label>
-        <p class="mb-2 text-[11px] text-slate-500">PNG, JPG, atau WebP — maks. 4&nbsp;MB. Lewati jika memakai path aset statis (mis. <code class="rounded bg-slate-100 px-1">faculty/…</code>) yang sudah tersimpan.</p>
-        <input id="photo" type="file" name="photo" accept="image/jpeg,image/png,image/webp"
+        <p class="mb-2 text-[11px] text-slate-500">PNG, JPG, atau WebP — maks. 4&nbsp;MB. @if($isEdit) Unggah berkas baru hanya jika ingin mengganti foto. @else Wajib mengunggah foto. @endif</p>
+        <input id="photo" type="file" name="photo" accept="image/jpeg,image/png,image/webp" @if(! $isEdit) required @endif
             class="block w-full cursor-pointer rounded-xl border border-dashed border-slate-300 bg-slate-50/50 px-3 py-2 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-white hover:border-primary/40 @error('photo') border-rose-400 @enderror">
         @error('photo')
             <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
         @enderror
-        @if($isEdit && ($lecturer->photo ?? '') !== '')
+        @if($isEdit && trim((string) ($lecturer->photo ?? '')) === '')
+            <p class="mt-2 rounded-lg border border-amber-200 bg-amber-50/90 px-3 py-2 text-[11px] leading-relaxed text-amber-900">Belum ada foto tersimpan — unggah foto wajib diisi sebelum menyimpan.</p>
+        @elseif($isEdit && ($lecturer->photo ?? '') !== '')
             <div class="mt-3 flex flex-wrap items-center gap-4">
                 <img src="{{ $lecturer->resolvedPhotoUrl() }}" alt="" class="h-20 w-20 rounded-xl border border-slate-200 object-cover shadow-sm" width="80" height="80">
                 <p class="max-w-md text-[11px] leading-relaxed text-slate-500">Berkas / path: <code class="rounded bg-slate-100 px-1 break-all">{{ $lecturer->photo }}</code></p>

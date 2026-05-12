@@ -44,28 +44,47 @@
         <div class="site-home-hero-bottom-fade" aria-hidden="true"></div>
     </section>
 
+    @php
+        $historyParagraph = trim((string) ($t['historyParagraph'] ?? ''));
+        if ($historyParagraph === '') {
+            $historyParagraph = trim(implode(' ', array_filter([
+                (string) ($t['historyLead'] ?? ''),
+                (string) ($t['historyP1'] ?? ''),
+                (string) ($t['historyP2'] ?? ''),
+            ])));
+        }
+        $historyImageRaw = data_get($ppsData, 'GRADUATE_SCHOOL_HISTORY_IMAGE');
+        $historyImageUrl = is_string($historyImageRaw) && trim($historyImageRaw) !== '' ? trim($historyImageRaw) : null;
+    @endphp
     <section class="relative isolate overflow-hidden border-y border-slate-200/70 bg-gradient-to-b from-white/50 via-white/90 to-white py-12 md:py-16">
         <div class="mx-auto w-full max-w-6xl px-4">
-            <div class="overflow-hidden rounded-3xl border border-white/70 bg-white/80 p-6 shadow-xl shadow-slate-900/10 backdrop-blur-sm md:p-9">
-                <div class="mb-8 flex flex-col gap-4 border-l-4 border-primary/80 pl-5 md:mb-10 md:pl-6">
-                    <p class="text-xs font-bold uppercase tracking-widest text-primary">{{ $t['historyEyebrow'] }}</p>
-                    <h2 class="font-display text-3xl font-bold tracking-tight text-primary md:text-4xl">{{ $t['historyTitle'] }}</h2>
-                    <p class="max-w-3xl text-base leading-relaxed text-slate-700 md:text-lg">{{ $t['historyLead'] }}</p>
-                </div>
-                <div class="grid gap-6 lg:grid-cols-[1.2fr_0.95fr]">
-                    <article class="rounded-2xl border border-sky-100 bg-gradient-to-br from-sky-50 to-white p-5 shadow-sm md:p-6">
-                        <p class="m-0 text-sm leading-relaxed text-slate-700 md:text-base">{{ $t['historyP1'] }}</p>
-                        <p class="mt-4 text-sm leading-relaxed text-slate-700 md:text-base">{{ $t['historyP2'] }}</p>
-                    </article>
-                    <article class="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50/60 to-white p-5 shadow-sm md:p-6">
-                        <h3 class="mb-4 text-base font-bold text-primary md:text-lg">{{ $t['historyMilestonesTitle'] }}</h3>
-                        <ul class="m-0 list-none space-y-3 p-0 text-sm leading-relaxed text-slate-700 md:text-base">
-                            @foreach([$t['historyMilestone1'],$t['historyMilestone2'],$t['historyMilestone3'],$t['historyMilestone4']] as $m)
-                                <li class="flex items-start gap-3"><span class="mt-1 inline-block h-2 w-2 shrink-0 rounded-full bg-primary"></span><span>{{ $m }}</span></li>
-                            @endforeach
-                        </ul>
-                    </article>
-                </div>
+            <div class="mx-auto w-full max-w-6xl overflow-hidden rounded-3xl border border-white/70 bg-white/80 p-6 shadow-xl shadow-slate-900/10 backdrop-blur-sm md:p-9">
+                @if($historyImageUrl)
+                    <div class="site-home-history-with-image border-l-4 border-primary/80 pl-5 md:pl-6">
+                        <p class="m-0 mb-4 text-xs font-bold uppercase tracking-widest text-primary md:mb-5">{{ $t['historyEyebrow'] }}</p>
+                        <div class="site-home-history-layout site-home-history-layout--has-image">
+                            <div class="site-home-history-text min-w-0 flex flex-col gap-4">
+                                <h2 class="break-words font-display text-3xl font-bold tracking-tight text-primary md:text-4xl">{{ $t['historyTitle'] }}</h2>
+                                <p class="site-home-history-paragraph m-0 w-full min-w-0 text-base leading-relaxed text-slate-700 md:text-lg" lang="{{ $loc }}">{{ $historyParagraph }}</p>
+                            </div>
+                            <aside class="site-home-history-aside min-w-0 w-full" aria-hidden="false">
+                                <figure class="m-0 w-full max-w-full overflow-hidden rounded-2xl border border-slate-200/90 bg-slate-100/80 shadow-sm ring-1 ring-slate-900/[0.04]">
+                                    <div class="aspect-[3/4] w-full max-h-[min(22rem,52vh)] overflow-hidden">
+                                        <img src="{{ $historyImageUrl }}" alt="{{ $t['historyTitle'] }}" class="h-full w-full object-cover object-center" sizes="(min-width: 640px) 16.5rem, 100vw" loading="lazy" decoding="async">
+                                    </div>
+                                </figure>
+                            </aside>
+                        </div>
+                    </div>
+                @else
+                    <div class="site-home-history-layout">
+                        <div class="site-home-history-text min-w-0 flex max-w-3xl flex-col gap-4 border-l-4 border-primary/80 pl-5 md:pl-6">
+                            <p class="text-xs font-bold uppercase tracking-widest text-primary">{{ $t['historyEyebrow'] }}</p>
+                            <h2 class="break-words font-display text-3xl font-bold tracking-tight text-primary md:text-4xl">{{ $t['historyTitle'] }}</h2>
+                            <p class="site-home-history-paragraph m-0 w-full min-w-0 text-base leading-relaxed text-slate-700 md:text-lg" lang="{{ $loc }}">{{ $historyParagraph }}</p>
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </section>
