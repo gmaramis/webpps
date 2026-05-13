@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\AcademicGuide;
 use App\Models\NewsItem;
+use App\Models\S2Program;
+use App\Models\S3Program;
 use App\Models\VisionMissionContent;
 use App\Support\PpsContent;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class PpsPageController extends Controller
@@ -66,6 +69,35 @@ class PpsPageController extends Controller
     public function panduanAkademik(): View
     {
         return view('pages.panduan-akademik');
+    }
+
+    public function kurikulum(): View
+    {
+        if (! Schema::hasTable('study_program_curricula')) {
+            return view('pages.kurikulum', [
+                's2Programs' => collect(),
+                's3Programs' => collect(),
+                'kurikulumSchemaMissing' => true,
+            ]);
+        }
+
+        $s2Programs = S2Program::query()
+            ->with('studyProgramCurriculum')
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        $s3Programs = S3Program::query()
+            ->with('studyProgramCurriculum')
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        return view('pages.kurikulum', [
+            's2Programs' => $s2Programs,
+            's3Programs' => $s3Programs,
+            'kurikulumSchemaMissing' => false,
+        ]);
     }
 
     public function kalenderAkademik(Request $request): View

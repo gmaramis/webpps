@@ -72,6 +72,7 @@ class PpsContent
         if (! empty($data['NAV']) && is_array($data['NAV'])) {
             $data['NAV'] = self::normalizeNav($data['NAV']);
             $data['NAV'] = self::applyAcademicExternalNavHrefs($data['NAV'], $academicUrls);
+            $data['NAV'] = self::injectCurriculumNavItemUnderAkademic($data['NAV'], $data['STRINGS'] ?? []);
         }
         $leadersPath = resource_path('data/leaders.json');
         if (File::exists($leadersPath)) {
@@ -333,6 +334,74 @@ class PpsContent
         };
 
         return $map($nav);
+    }
+
+    /**
+     * Sisipkan item menu Kurikulum di bawah Kalender Akademik dalam grup Akademik.
+     *
+     * @param  list<array<string, mixed>>  $nav
+     * @param  array<string, mixed>  $stringsBlock  Isi kunci STRINGS dari JSON (berisi 'id' / 'en').
+     * @return list<array<string, mixed>>
+     */
+    protected static function injectCurriculumNavItemUnderAkademic(array $nav, array $stringsBlock): array
+    {
+        $locId = is_array($stringsBlock['id'] ?? null) ? $stringsBlock['id'] : [];
+        $locEn = is_array($stringsBlock['en'] ?? null) ? $stringsBlock['en'] : [];
+        $labelId = trim((string) ($locId['kurikulumNavLabel'] ?? 'Kurikulum'));
+        $labelEn = trim((string) ($locEn['kurikulumNavLabel'] ?? 'Curriculum'));
+        if ($labelEn === '') {
+            $labelEn = $labelId !== '' ? $labelId : 'Curriculum';
+        }
+        if ($labelId === '') {
+            $labelId = 'Kurikulum';
+        }
+
+        $child = [
+            'label' => ['id' => $labelId, 'en' => $labelEn],
+            'href' => url('/kurikulum'),
+        ];
+
+        foreach ($nav as &$item) {
+            if (! is_array($item)) {
+                continue;
+            }
+            $topId = (string) (($item['label'] ?? [])['id'] ?? '');
+            if ($topId !== 'Akademik') {
+                continue;
+            }
+            $children = isset($item['children']) && is_array($item['children']) ? $item['children'] : [];
+            foreach ($children as $c) {
+                if (! is_array($c)) {
+                    continue;
+                }
+                $h = (string) ($c['href'] ?? '');
+                if (str_contains($h, 'kurikulum')) {
+                    return $nav;
+                }
+            }
+            $newChildren = [];
+            $inserted = false;
+            foreach ($children as $c) {
+                $newChildren[] = $c;
+                if ($inserted || ! is_array($c)) {
+                    continue;
+                }
+                $href = (string) ($c['href'] ?? '');
+                $cLabelId = (string) (($c['label'] ?? [])['id'] ?? '');
+                if (str_contains($href, 'kalender-akademik') || $cLabelId === 'Kalender Akademik') {
+                    $newChildren[] = $child;
+                    $inserted = true;
+                }
+            }
+            if (! $inserted) {
+                $newChildren[] = $child;
+            }
+            $item['children'] = $newChildren;
+            break;
+        }
+        unset($item);
+
+        return $nav;
     }
 
     protected static function normalizeHref(string $href): string

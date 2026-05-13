@@ -28,6 +28,7 @@ final class AdminPermissions
             'dokumen-akreditasi.manage',
             'prodi-s2.manage',
             'prodi-s3.manage',
+            'kurikulum.manage',
             'kegiatan-mahasiswa.manage',
             'kegiatan-alumni.manage',
             'tautan-portal-akademik.manage',
@@ -72,6 +73,7 @@ final class AdminPermissions
             'dokumen-akreditasi.manage' => 'Kelola dokumen akreditasi',
             'prodi-s2.manage' => 'Kelola program studi S2',
             'prodi-s3.manage' => 'Kelola program studi S3',
+            'kurikulum.manage' => 'Kelola PDF kurikulum per program studi',
             'kegiatan-mahasiswa.manage' => 'Kelola kegiatan mahasiswa',
             'kegiatan-alumni.manage' => 'Kelola kegiatan alumni',
             'tautan-portal-akademik.manage' => 'Kelola tautan portal akademik',
@@ -112,6 +114,7 @@ final class AdminPermissions
             'Program studi & aktivitas' => [
                 'prodi-s2.manage',
                 'prodi-s3.manage',
+                'kurikulum.manage',
                 'kegiatan-mahasiswa.manage',
                 'kegiatan-alumni.manage',
             ],

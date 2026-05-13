@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Support\PpsContent;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -178,5 +179,10 @@ class S3Program extends Model
         PpsContent::flush();
 
         return $count;
+    }
+
+    public function studyProgramCurriculum(): HasOne
+    {
+        return $this->hasOne(StudyProgramCurriculum::class, 's3_program_id');
     }
 }

@@ -36,6 +36,9 @@
         if (str_ends_with($trim, '/s3')) {
             return route('admin.prodi-s3.index');
         }
+        if (str_ends_with($trim, '/kurikulum')) {
+            return route('admin.kurikulum.index');
+        }
         if (str_ends_with($trim, '/pengumuman')) {
             return route('admin.pengumuman.index');
         }
@@ -75,6 +78,7 @@
             str_ends_with($trim, '/panduan-akademik') => 'panduan-akademik.manage',
             str_ends_with($trim, '/s2') => 'prodi-s2.manage',
             str_ends_with($trim, '/s3') => 'prodi-s3.manage',
+            str_ends_with($trim, '/kurikulum') => 'kurikulum.manage',
             str_ends_with($trim, '/pengumuman') => 'pengumuman.manage',
             str_ends_with($trim, '/agenda') => 'agenda.manage',
             str_ends_with($trim, '/kegiatan-mahasiswa') => 'kegiatan-mahasiswa.manage',
@@ -232,7 +236,7 @@
             };
         @endphp
         @if (! empty($navItem['children']) && is_array($navItem['children']))
-            <details class="admin-sidebar-details overflow-hidden rounded-2xl border border-slate-200/70 bg-white/65 shadow-md shadow-slate-900/[0.03] backdrop-blur-sm" @if ($topKey === 'Akademik' && request()->routeIs('admin.tautan-portal-akademik.*')) open @endif @if ($topKey === 'Program Studi' && (request()->routeIs('admin.prodi-s2.*') || request()->routeIs('admin.prodi-s3.*') || request()->routeIs('admin.program-heroes.*'))) open @endif @if ($topKey === 'Unit Penjamin Mutu' && (request()->routeIs('admin.stop-korupsi.*') || request()->routeIs('admin.stop-gratifikasi.*'))) open @endif>
+            <details class="admin-sidebar-details overflow-hidden rounded-2xl border border-slate-200/70 bg-white/65 shadow-md shadow-slate-900/[0.03] backdrop-blur-sm" @if ($topKey === 'Akademik' && (request()->routeIs('admin.tautan-portal-akademik.*') || request()->routeIs('admin.kurikulum.*'))) open @endif @if ($topKey === 'Program Studi' && (request()->routeIs('admin.prodi-s2.*') || request()->routeIs('admin.prodi-s3.*') || request()->routeIs('admin.program-heroes.*'))) open @endif @if ($topKey === 'Unit Penjamin Mutu' && (request()->routeIs('admin.stop-korupsi.*') || request()->routeIs('admin.stop-gratifikasi.*'))) open @endif>
                 <summary class="flex cursor-pointer items-center gap-2 px-3.5 py-3 text-[13px] font-bold tracking-tight text-slate-800 transition-colors duration-200 ease-out hover:bg-slate-400">
                     @include('admin.layouts.sidebar-icon', ['name' => $groupIcon, 'class' => 'h-4 w-4 shrink-0 text-slate-500'])
                     <span class="min-w-0 flex-1 text-left leading-snug">{{ $topLabel }}</span>

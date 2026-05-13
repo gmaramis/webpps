@@ -30,6 +30,7 @@ use App\Http\Controllers\Admin\StopKorupsiHubController;
 use App\Http\Controllers\Admin\StopKorupsiImportController;
 use App\Http\Controllers\Admin\StopKorupsiPageContentController;
 use App\Http\Controllers\Admin\StudentActivityController;
+use App\Http\Controllers\Admin\StudyProgramCurriculumController;
 use App\Http\Controllers\Admin\VisionMissionController;
 use App\Http\Controllers\Admin\ZiComplaintChannelController;
 use App\Http\Controllers\Admin\ZiGalleryItemController;
@@ -103,6 +104,11 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function (): v
     Route::resource('prodi-s2', S2ProgramController::class)->except(['show'])->parameters(['prodi-s2' => 'program'])->middleware('permission:prodi-s2.manage');
     Route::post('prodi-s3/import-json', [S3ProgramController::class, 'importJson'])->middleware('permission:prodi-s3.manage')->name('prodi-s3.import-json');
     Route::resource('prodi-s3', S3ProgramController::class)->except(['show'])->parameters(['prodi-s3' => 'program'])->middleware('permission:prodi-s3.manage');
+    Route::get('kurikulum', [StudyProgramCurriculumController::class, 'index'])->middleware('permission:kurikulum.manage')->name('kurikulum.index');
+    Route::post('kurikulum/s2/{s2Program}', [StudyProgramCurriculumController::class, 'updateMagister'])->middleware('permission:kurikulum.manage')->name('kurikulum.s2.update');
+    Route::delete('kurikulum/s2/{s2Program}', [StudyProgramCurriculumController::class, 'destroyMagister'])->middleware('permission:kurikulum.manage')->name('kurikulum.s2.destroy');
+    Route::post('kurikulum/s3/{s3Program}', [StudyProgramCurriculumController::class, 'updateDoktor'])->middleware('permission:kurikulum.manage')->name('kurikulum.s3.update');
+    Route::delete('kurikulum/s3/{s3Program}', [StudyProgramCurriculumController::class, 'destroyDoktor'])->middleware('permission:kurikulum.manage')->name('kurikulum.s3.destroy');
     Route::post('kegiatan-mahasiswa/import-json', [StudentActivityController::class, 'importJson'])->middleware('permission:kegiatan-mahasiswa.manage')->name('kegiatan-mahasiswa.import-json');
     Route::post('kegiatan-mahasiswa/{activity}/toggle-publish', [StudentActivityController::class, 'togglePublish'])->middleware('permission:kegiatan-mahasiswa.manage')->name('kegiatan-mahasiswa.toggle-publish');
     Route::resource('kegiatan-mahasiswa', StudentActivityController::class)->except(['show'])->parameters(['kegiatan-mahasiswa' => 'activity'])->middleware('permission:kegiatan-mahasiswa.manage');
@@ -164,6 +170,7 @@ Route::get('/kerjasama', [PpsPageController::class, 'kerjasama'])->name('kerjasa
 Route::get('/dosen', [PpsPageController::class, 'dosen'])->name('dosen');
 Route::get('/panduan-akademik', [PpsPageController::class, 'panduanAkademik'])->name('panduan-akademik');
 Route::get('/kalender-akademik', [PpsPageController::class, 'kalenderAkademik'])->name('kalender-akademik');
+Route::get('/kurikulum', [PpsPageController::class, 'kurikulum'])->name('kurikulum');
 Route::get('/kegiatan-mahasiswa', [PpsPageController::class, 'kegiatanMahasiswa'])->name('kegiatan-mahasiswa');
 Route::get('/kegiatan-alumni', [PpsPageController::class, 'kegiatanAlumni'])->name('kegiatan-alumni');
 Route::get('/instrumen-zona-integritas', [PpsPageController::class, 'instrumenZonaIntegritas'])->name('instrumen-zona-integritas');
