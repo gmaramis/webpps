@@ -61,6 +61,77 @@ function initMobileNav() {
             btn.setAttribute('aria-expanded', 'false');
         });
     });
+
+    const mqDesktopNav = window.matchMedia('(min-width: 64rem)');
+    const closePanel = () => {
+        panel.classList.add('hidden');
+        btn.setAttribute('aria-expanded', 'false');
+    };
+    mqDesktopNav.addEventListener('change', (e) => {
+        if (e.matches) closePanel();
+    });
+}
+
+/** Menu dropdown bar navigasi desktop (lg+, sama dengan Tailwind lg): sentuh/tablet — buka/tutup dengan ketuk + klik luar. */
+function initDesktopNavDropdowns() {
+    const strip = document.querySelector('.site-header-nav-strip');
+    if (!strip) return;
+
+    const desktopNav = strip.querySelector('nav[aria-label]');
+    if (!desktopNav) return;
+
+    const items = desktopNav.querySelectorAll(':scope > ul > li.nav-dropdown');
+    if (items.length === 0) return;
+
+    const mq = window.matchMedia('(min-width: 64rem)');
+
+    const closeAll = () => {
+        items.forEach((li) => {
+            li.classList.remove('is-open');
+            li.querySelector('.nav-dropdown-toggle')?.setAttribute('aria-expanded', 'false');
+        });
+    };
+
+    items.forEach((li) => {
+        const btn = li.querySelector('.nav-dropdown-toggle');
+        const panel = li.querySelector('.nav-dropdown-panel');
+        if (!btn || !panel) return;
+
+        btn.addEventListener('click', () => {
+            if (!mq.matches) return;
+
+            const willOpen = !li.classList.contains('is-open');
+
+            items.forEach((other) => {
+                if (other === li) return;
+                other.classList.remove('is-open');
+                other.querySelector('.nav-dropdown-toggle')?.setAttribute('aria-expanded', 'false');
+            });
+
+            li.classList.toggle('is-open', willOpen);
+            btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+        });
+
+        panel.querySelectorAll('a[href]').forEach((a) => {
+            a.addEventListener('click', () => closeAll());
+        });
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!mq.matches) return;
+        const t = e.target;
+        if (!(t instanceof Element)) return;
+        if (t.closest('.nav-dropdown')) return;
+        closeAll();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeAll();
+    });
+
+    mq.addEventListener('change', () => {
+        if (!mq.matches) closeAll();
+    });
 }
 
 /** Klik gambar berita di beranda → modal gambar besar */
@@ -291,6 +362,7 @@ function initActivitiesCardsDelayedReveal() {
 document.addEventListener('DOMContentLoaded', () => {
     initHeroSlider();
     initMobileNav();
+    initDesktopNavDropdowns();
     initNewsImageLightbox();
     initStudyProgramBrochureLightbox();
     initStudyProgramTabs();

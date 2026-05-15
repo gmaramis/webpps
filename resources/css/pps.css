@@ -268,8 +268,22 @@
 
   .nav-top-link:hover::after,
   .nav-top-link:focus-visible::after,
-  .group:focus-within > .nav-top-link::after {
+  .group:focus-within > .nav-top-link::after,
+  .nav-dropdown.is-open > .nav-top-link::after {
     transform: scaleX(1);
+  }
+
+  /* Dropdown horizontal (lg+ = sama dengan bilah menu desktop): hover + keyboard + .is-open untuk sentuh (tablet/iPad). */
+  @media (width >= 64rem) {
+    .site-header-nav-strip nav .nav-dropdown .nav-dropdown-panel {
+      display: none;
+    }
+
+    .site-header-nav-strip nav .nav-dropdown:hover .nav-dropdown-panel,
+    .site-header-nav-strip nav .nav-dropdown:focus-within .nav-dropdown-panel,
+    .site-header-nav-strip nav .nav-dropdown.is-open .nav-dropdown-panel {
+      display: block;
+    }
   }
 
   .nav-sub-link {
