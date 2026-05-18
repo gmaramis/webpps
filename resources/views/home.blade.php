@@ -253,19 +253,19 @@
                         <span class="inline-flex items-center rounded-full border border-sky-200/90 bg-gradient-to-r from-sky-50 to-cyan-50 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-sky-900">{{ $loc === 'en' ? 'Master (S2)' : 'Magister (S2)' }}</span>
                         <h2 class="font-display mt-5 text-3xl font-bold tracking-tight text-primary md:text-4xl">{{ $t['magisterTitle'] }}</h2>
                         <p class="mt-3 max-w-xl text-base leading-relaxed text-slate-600 md:text-lg">{{ $t['magisterLead'] }}</p>
-                        <ul class="mt-8 grid list-none gap-3 p-0 sm:grid-cols-2">
+                        <ul class="mt-8 grid list-none gap-3 p-0 sm:grid-cols-2 sm:items-stretch">
                             @foreach($magister as $p)
                                 @php
                                     $excerptText = trim((string) (($p['excerpt'] ?? [])[$loc] ?? ''));
                                     $cardTeaser = $excerptText !== '' ? $excerptText : ($loc === 'id' ? 'Lihat deskripsi lengkap program di halaman Magister.' : "See the full program description on the Master's page.");
                                 @endphp
-                                <li class="magister-card rounded-2xl border border-slate-200/70 bg-gradient-to-br from-white to-sky-50/50 shadow-sm transition hover:border-sky-300/80 hover:shadow-md">
-                                    <a href="{{ route('program.s2', ['program' => $p['slug'] ?? '']) }}" class="group block rounded-2xl p-4 no-underline text-inherit outline-none ring-primary/25 focus-visible:ring-2">
-                                        <div class="flex items-start gap-3">
+                                <li class="magister-card flex h-full rounded-2xl border border-slate-200/70 bg-gradient-to-br from-white to-sky-50/50 shadow-sm transition hover:border-sky-300/80 hover:shadow-md">
+                                    <a href="{{ route('program.s2', ['program' => $p['slug'] ?? '']) }}" class="group flex h-full min-h-0 flex-1 rounded-2xl p-4 no-underline text-inherit outline-none ring-primary/25 focus-visible:ring-2" @if($excerptText !== '') title="{{ $excerptText }}" @endif>
+                                        <div class="flex min-h-0 min-w-0 flex-1 items-start gap-3">
                                             <span class="program-study-accent program-study-accent--sky mt-0.5 shrink-0" aria-hidden="true"></span>
-                                            <div class="min-w-0">
-                                                <h3 class="text-[1.02rem] font-semibold leading-snug text-primary group-hover:underline">{{ $p['name'][$loc] }}</h3>
-                                                <p class="mt-1 text-sm leading-relaxed text-slate-600">{{ $cardTeaser }}</p>
+                                            <div class="min-w-0 flex-1">
+                                                <h3 class="line-clamp-2 text-[1.02rem] font-semibold leading-snug text-primary group-hover:underline">{{ $p['name'][$loc] }}</h3>
+                                                <p class="home-program-card-teaser mt-1 text-sm leading-relaxed text-slate-600">{{ $cardTeaser }}</p>
                                                 <p class="mt-2 text-xs font-semibold text-primary">{{ $loc === 'id' ? 'Selengkapnya' : 'Learn more' }} <span aria-hidden="true">→</span></p>
                                             </div>
                                         </div>
@@ -306,19 +306,19 @@
                         <span class="inline-flex items-center rounded-full border border-violet-200/90 bg-gradient-to-r from-violet-50 to-indigo-50 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-indigo-950">{{ $loc === 'en' ? 'Doctorate (S3)' : 'Doktor (S3)' }}</span>
                         <h2 class="font-display mt-5 text-3xl font-bold tracking-tight text-primary md:text-4xl">{{ $t['doktorTitle'] }}</h2>
                         <p class="mt-3 max-w-xl text-base leading-relaxed text-slate-600 md:text-lg">{{ $t['doktorLead'] }}</p>
-                        <ul class="mt-8 grid list-none gap-3 p-0 sm:grid-cols-2">
+                        <ul class="mt-8 grid list-none gap-3 p-0 sm:grid-cols-2 sm:items-stretch">
                             @foreach($doktor as $p)
                                 @php
                                     $excerptText = trim((string) (($p['excerpt'] ?? [])[$loc] ?? ''));
                                     $cardTeaser = $excerptText !== '' ? $excerptText : ($loc === 'id' ? 'Lihat deskripsi lengkap program di halaman Doktor.' : 'See the full program description on the Doctoral page.');
                                 @endphp
-                                <li class="doktor-card rounded-2xl border border-slate-200/70 bg-gradient-to-br from-white to-violet-50/40 shadow-sm transition hover:border-violet-300/80 hover:shadow-md">
-                                    <a href="{{ route('program.s3', ['program' => $p['slug'] ?? '']) }}" class="group block rounded-2xl p-4 no-underline text-inherit outline-none ring-primary/25 focus-visible:ring-2">
-                                        <div class="flex items-start gap-3">
+                                <li class="doktor-card flex h-full rounded-2xl border border-slate-200/70 bg-gradient-to-br from-white to-violet-50/40 shadow-sm transition hover:border-violet-300/80 hover:shadow-md">
+                                    <a href="{{ route('program.s3', ['program' => $p['slug'] ?? '']) }}" class="group flex h-full min-h-0 flex-1 rounded-2xl p-4 no-underline text-inherit outline-none ring-primary/25 focus-visible:ring-2" @if($excerptText !== '') title="{{ $excerptText }}" @endif>
+                                        <div class="flex min-h-0 min-w-0 flex-1 items-start gap-3">
                                             <span class="program-study-accent program-study-accent--violet mt-0.5 shrink-0" aria-hidden="true"></span>
-                                            <div class="min-w-0">
-                                                <h3 class="text-[1.02rem] font-semibold leading-snug text-primary group-hover:underline">{{ $p['name'][$loc] }}</h3>
-                                                <p class="mt-1 text-sm leading-relaxed text-slate-600">{{ $cardTeaser }}</p>
+                                            <div class="min-w-0 flex-1">
+                                                <h3 class="line-clamp-2 text-[1.02rem] font-semibold leading-snug text-primary group-hover:underline">{{ $p['name'][$loc] }}</h3>
+                                                <p class="home-program-card-teaser mt-1 text-sm leading-relaxed text-slate-600">{{ $cardTeaser }}</p>
                                                 <p class="mt-2 text-xs font-semibold text-primary">{{ $loc === 'id' ? 'Selengkapnya' : 'Learn more' }} <span aria-hidden="true">→</span></p>
                                             </div>
                                         </div>

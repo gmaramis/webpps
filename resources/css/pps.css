@@ -641,6 +641,14 @@
     box-shadow: 0 0 0 1px rgb(99 102 241 / 0.28);
   }
 
+  /* Kartu program di beranda: ringkasan dipotong agar grid dua kolom tetap rapi */
+  .home-program-card-teaser {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+  }
+
   @keyframes magister-line {
     0%,
     100% {
