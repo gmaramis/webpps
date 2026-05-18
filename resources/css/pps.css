@@ -649,6 +649,32 @@
     overflow: hidden;
   }
 
+  /* Pratinjau program di beranda (maks. 6): kartu kompak nama + panah */
+  .home-program-preview-card__title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    word-break: break-word;
+  }
+
+  .home-program-preview-card__accent {
+    width: 0.25rem;
+    min-height: 2rem;
+    align-self: center;
+    margin-top: 0;
+  }
+
+  .home-program-preview-card.magister-card,
+  .home-program-preview-card.doktor-card {
+    position: relative;
+  }
+
+  .home-program-preview-card.magister-card::after,
+  .home-program-preview-card.doktor-card::before {
+    display: none;
+  }
+
   @keyframes magister-line {
     0%,
     100% {

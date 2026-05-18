@@ -242,95 +242,45 @@
     </section>
     @endif
 
-    <section id="magister" class="magister-section relative isolate overflow-hidden border-y border-slate-200/80 py-16 md:py-24">
-        <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(165deg,#f0f9ff_0%,#ffffff_42%,#f8fafc_100%)]" aria-hidden="true"></div>
-        <div class="pointer-events-none absolute -right-16 top-24 h-80 w-80 rounded-full bg-sky-400/25 blur-3xl md:-right-8 md:h-[28rem] md:w-[28rem]" aria-hidden="true"></div>
-        <div class="pointer-events-none absolute bottom-0 left-0 h-48 w-48 rounded-full bg-cyan-300/15 blur-2xl" aria-hidden="true"></div>
-        <div class="relative mx-auto max-w-6xl px-4">
-            <div class="grid items-center gap-12 lg:grid-cols-12 lg:gap-10">
-                <div class="order-2 min-w-0 lg:order-1 lg:col-span-5 xl:col-span-5">
-                    <div class="magister-panel rounded-3xl border border-slate-200/70 bg-white/95 p-6 shadow-[0_24px_60px_-24px_rgba(15,23,42,0.14)] backdrop-blur-md md:p-8">
-                        <span class="inline-flex items-center rounded-full border border-sky-200/90 bg-gradient-to-r from-sky-50 to-cyan-50 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-sky-900">{{ $loc === 'en' ? 'Master (S2)' : 'Magister (S2)' }}</span>
-                        <h2 class="font-display mt-5 text-3xl font-bold tracking-tight text-primary md:text-4xl">{{ $t['magisterTitle'] }}</h2>
-                        <p class="mt-3 max-w-xl text-base leading-relaxed text-slate-600 md:text-lg">{{ $t['magisterLead'] }}</p>
-                        <ul class="mt-8 grid list-none gap-3 p-0 sm:grid-cols-2 sm:items-stretch">
-                            @foreach($magister as $p)
-                                @php
-                                    $excerptText = trim((string) (($p['excerpt'] ?? [])[$loc] ?? ''));
-                                    $cardTeaser = $excerptText !== '' ? $excerptText : ($loc === 'id' ? 'Lihat deskripsi lengkap program di halaman Magister.' : "See the full program description on the Master's page.");
-                                @endphp
-                                <li class="magister-card flex h-full rounded-2xl border border-slate-200/70 bg-gradient-to-br from-white to-sky-50/50 shadow-sm transition hover:border-sky-300/80 hover:shadow-md">
-                                    <a href="{{ route('program.s2', ['program' => $p['slug'] ?? '']) }}" class="group flex h-full min-h-0 flex-1 rounded-2xl p-4 no-underline text-inherit outline-none ring-primary/25 focus-visible:ring-2" @if($excerptText !== '') title="{{ $excerptText }}" @endif>
-                                        <div class="flex min-h-0 min-w-0 flex-1 items-start gap-3">
-                                            <span class="program-study-accent program-study-accent--sky mt-0.5 shrink-0" aria-hidden="true"></span>
-                                            <div class="min-w-0 flex-1">
-                                                <h3 class="line-clamp-2 text-[1.02rem] font-semibold leading-snug text-primary group-hover:underline">{{ $p['name'][$loc] }}</h3>
-                                                <p class="home-program-card-teaser mt-1 text-sm leading-relaxed text-slate-600">{{ $cardTeaser }}</p>
-                                                <p class="mt-2 text-xs font-semibold text-primary">{{ $loc === 'id' ? 'Selengkapnya' : 'Learn more' }} <span aria-hidden="true">→</span></p>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-                <div class="order-1 min-w-0 lg:order-2 lg:col-span-7 xl:col-span-7">
-                    <div class="relative mx-auto max-w-xl lg:mx-0 lg:max-w-none">
-                        <div class="absolute -inset-3 rounded-[1.75rem] bg-gradient-to-br from-sky-400/35 via-cyan-300/15 to-transparent opacity-70 blur-2xl md:-inset-5 md:rounded-[2rem]" aria-hidden="true"></div>
-                        <figure class="program-hero-frame program-hero-frame--showcase relative overflow-hidden rounded-3xl ring-1 ring-slate-900/[0.06] shadow-[0_28px_60px_-18px_rgba(15,23,42,0.28)]">
-                            <img src="{{ $magisterHeroSrc }}" alt="" width="960" height="600" class="program-hero-img h-full w-full" loading="lazy" decoding="async">
-                        </figure>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    @include('partials.home-study-program-section', [
+        'sectionId' => 'magister',
+        'sectionClass' => 'magister-section border-y border-slate-200/80',
+        'theme' => 'sky',
+        'panelClass' => 'magister-panel',
+        'cardClass' => 'magister-card',
+        'accentClass' => 'program-study-accent--sky',
+        'badgeClass' => 'border-sky-200/90 bg-gradient-to-r from-sky-50 to-cyan-50 text-sky-900',
+        'badgeLabel' => $loc === 'en' ? 'Master (S2)' : 'Magister (S2)',
+        'title' => $t['magisterTitle'],
+        'lead' => $t['magisterLead'],
+        'heroSrc' => $magisterHeroSrc,
+        'heroGlowClass' => 'bg-gradient-to-br from-sky-400/35 via-cyan-300/15 to-transparent',
+        'heroFigureClass' => 'shadow-[0_28px_60px_-18px_rgba(15,23,42,0.28)]',
+        'ctaClass' => 'bg-primary shadow-primary/25 focus-visible:ring-primary',
+        'programs' => $magister,
+        'programRouteName' => 'program.s2',
+        'imageFirst' => 'false',
+    ])
 
-    <section id="doktor" class="doktor-section relative isolate overflow-hidden border-b border-slate-200/80 py-16 md:py-24">
-        <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(195deg,#f5f3ff_0%,#ffffff_48%,#f8fafc_100%)]" aria-hidden="true"></div>
-        <div class="pointer-events-none absolute -left-12 top-20 h-80 w-80 rounded-full bg-violet-400/20 blur-3xl md:h-[26rem] md:w-[26rem]" aria-hidden="true"></div>
-        <div class="pointer-events-none absolute bottom-10 right-0 h-56 w-56 rounded-full bg-indigo-400/15 blur-2xl" aria-hidden="true"></div>
-        <div class="relative mx-auto max-w-6xl px-4">
-            <div class="grid items-center gap-12 lg:grid-cols-12 lg:gap-10">
-                <div class="order-1 min-w-0 lg:col-span-7 xl:col-span-7">
-                    <div class="relative mx-auto max-w-xl lg:mx-0 lg:max-w-none">
-                        <div class="absolute -inset-3 rounded-[1.75rem] bg-gradient-to-br from-violet-500/30 via-indigo-400/15 to-transparent opacity-70 blur-2xl md:-inset-5 md:rounded-[2rem]" aria-hidden="true"></div>
-                        <figure class="program-hero-frame program-hero-frame--showcase relative overflow-hidden rounded-3xl ring-1 ring-slate-900/[0.06] shadow-[0_28px_60px_-18px_rgba(30,27,75,0.32)]">
-                            <img src="{{ $doktorHeroSrc }}" alt="" width="960" height="600" class="program-hero-img h-full w-full" loading="lazy" decoding="async">
-                        </figure>
-                    </div>
-                </div>
-                <div class="order-2 min-w-0 lg:col-span-5 xl:col-span-5">
-                    <div class="doktor-panel rounded-3xl border border-slate-200/70 bg-white/95 p-6 shadow-[0_24px_60px_-24px_rgba(15,23,42,0.14)] backdrop-blur-md md:p-8">
-                        <span class="inline-flex items-center rounded-full border border-violet-200/90 bg-gradient-to-r from-violet-50 to-indigo-50 px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-indigo-950">{{ $loc === 'en' ? 'Doctorate (S3)' : 'Doktor (S3)' }}</span>
-                        <h2 class="font-display mt-5 text-3xl font-bold tracking-tight text-primary md:text-4xl">{{ $t['doktorTitle'] }}</h2>
-                        <p class="mt-3 max-w-xl text-base leading-relaxed text-slate-600 md:text-lg">{{ $t['doktorLead'] }}</p>
-                        <ul class="mt-8 grid list-none gap-3 p-0 sm:grid-cols-2 sm:items-stretch">
-                            @foreach($doktor as $p)
-                                @php
-                                    $excerptText = trim((string) (($p['excerpt'] ?? [])[$loc] ?? ''));
-                                    $cardTeaser = $excerptText !== '' ? $excerptText : ($loc === 'id' ? 'Lihat deskripsi lengkap program di halaman Doktor.' : 'See the full program description on the Doctoral page.');
-                                @endphp
-                                <li class="doktor-card flex h-full rounded-2xl border border-slate-200/70 bg-gradient-to-br from-white to-violet-50/40 shadow-sm transition hover:border-violet-300/80 hover:shadow-md">
-                                    <a href="{{ route('program.s3', ['program' => $p['slug'] ?? '']) }}" class="group flex h-full min-h-0 flex-1 rounded-2xl p-4 no-underline text-inherit outline-none ring-primary/25 focus-visible:ring-2" @if($excerptText !== '') title="{{ $excerptText }}" @endif>
-                                        <div class="flex min-h-0 min-w-0 flex-1 items-start gap-3">
-                                            <span class="program-study-accent program-study-accent--violet mt-0.5 shrink-0" aria-hidden="true"></span>
-                                            <div class="min-w-0 flex-1">
-                                                <h3 class="line-clamp-2 text-[1.02rem] font-semibold leading-snug text-primary group-hover:underline">{{ $p['name'][$loc] }}</h3>
-                                                <p class="home-program-card-teaser mt-1 text-sm leading-relaxed text-slate-600">{{ $cardTeaser }}</p>
-                                                <p class="mt-2 text-xs font-semibold text-primary">{{ $loc === 'id' ? 'Selengkapnya' : 'Learn more' }} <span aria-hidden="true">→</span></p>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    @include('partials.home-study-program-section', [
+        'sectionId' => 'doktor',
+        'sectionClass' => 'doktor-section border-b border-slate-200/80',
+        'theme' => 'violet',
+        'panelClass' => 'doktor-panel',
+        'cardClass' => 'doktor-card',
+        'accentClass' => 'program-study-accent--violet',
+        'badgeClass' => 'border-violet-200/90 bg-gradient-to-r from-violet-50 to-indigo-50 text-indigo-950',
+        'badgeLabel' => $loc === 'en' ? 'Doctorate (S3)' : 'Doktor (S3)',
+        'title' => $t['doktorTitle'],
+        'lead' => $t['doktorLead'],
+        'heroSrc' => $doktorHeroSrc,
+        'heroGlowClass' => 'bg-gradient-to-br from-violet-500/30 via-indigo-400/15 to-transparent',
+        'heroFigureClass' => 'shadow-[0_28px_60px_-18px_rgba(30,27,75,0.32)]',
+        'ctaClass' => 'bg-indigo-600 shadow-indigo-500/30 focus-visible:ring-indigo-600',
+        'programs' => $doktor,
+        'programRouteName' => 'program.s3',
+        'imageFirst' => 'true',
+    ])
 
     <section id="pengumuman-agenda" class="border-t border-slate-200 bg-white py-14 md:py-20">
         <div class="mx-auto max-w-6xl px-4">
