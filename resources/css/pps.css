@@ -691,13 +691,136 @@
     animation: news-feature-img-in 0.26s ease-out;
   }
 
-  /* Tab program studi (/s2, /s3) */
-  .study-program-tab {
-    @apply inline-flex shrink-0 items-center rounded-t-lg border border-transparent border-b-0 bg-slate-100 px-3.5 py-2.5 text-left text-sm font-semibold text-slate-700 transition hover:bg-white hover:text-primary focus-visible:outline focus-visible:ring-2 focus-visible:ring-primary/35 sm:px-4;
+  /* Halaman program studi (/s2, /s3): sidebar + panel */
+  .study-program-layout {
+    display: grid;
+    gap: 1.25rem;
+    align-items: start;
   }
 
-  .study-program-tab--active {
-    @apply z-[1] -mb-px border-slate-200 border-b-white bg-white font-bold text-primary shadow-sm;
+  @media (min-width: 64rem) {
+    .study-program-layout {
+      grid-template-columns: minmax(13.5rem, 17.5rem) minmax(0, 1fr);
+      gap: 1.75rem;
+    }
+  }
+
+  .study-program-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    max-height: min(70vh, 40rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0.45rem;
+    border-radius: 1rem;
+    border: 1px solid rgb(226 232 240 / 0.95);
+    background: rgb(248 250 252 / 0.9);
+    scrollbar-width: thin;
+  }
+
+  .study-program-nav__item {
+    display: block;
+    width: 100%;
+    border: 0;
+    border-radius: 0.65rem;
+    padding: 0.65rem 0.75rem;
+    text-align: left;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: rgb(51 65 85);
+    background: transparent;
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  .study-program-nav__item:hover {
+    background: rgb(255 255 255 / 0.95);
+    color: var(--color-primary, #0b3d91);
+  }
+
+  .study-program-nav__item--active {
+    background: #fff;
+    color: var(--color-primary, #0b3d91);
+    box-shadow: 0 1px 3px rgb(15 23 42 / 0.08);
+  }
+
+  .study-program-nav__item:focus-visible {
+    outline: 2px solid rgb(14 116 144 / 0.45);
+    outline-offset: 2px;
+  }
+
+  .study-program-picker__select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230b3d91' stroke-width='2.5'%3E%3Cpath stroke-linecap='round' d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.85rem center;
+    padding-right: 2.5rem;
+  }
+
+  .study-program-prose {
+    max-width: 70ch;
+  }
+
+  .study-program-prose > :first-child {
+    margin-top: 0;
+  }
+
+  .study-program-prose > :last-child {
+    margin-bottom: 0;
+  }
+
+  .study-program-prose p {
+    margin-top: 0;
+    margin-bottom: 1em;
+  }
+
+  .study-program-prose p:last-child {
+    margin-bottom: 0;
+  }
+
+  .study-program-prose h2,
+  .study-program-prose h3,
+  .study-program-prose h4 {
+    margin-top: 1.35em;
+    margin-bottom: 0.5em;
+    font-family: var(--font-display, inherit);
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--color-primary, #0b3d91);
+  }
+
+  .study-program-prose h2 {
+    font-size: 1.2rem;
+  }
+
+  .study-program-prose h3 {
+    font-size: 1.05rem;
+  }
+
+  .study-program-prose ul,
+  .study-program-prose ol {
+    margin: 0 0 1em;
+    padding-left: 1.35em;
+  }
+
+  .study-program-prose li {
+    margin-bottom: 0.35em;
+  }
+
+  .study-program-prose a {
+    color: var(--color-primary, #0b3d91);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .study-program-prose strong {
+    font-weight: 700;
+    color: rgb(30 41 59);
   }
 
   /* Lightbox gambar berita (beranda) */

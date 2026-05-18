@@ -223,59 +223,101 @@ function initStudyProgramBrochureLightbox() {
     });
 }
 
-/** Tab program studi (halaman /s2 dan /s3): panel penjelasan + tautan resmi */
+/** Program studi (/s2, /s3): sidebar desktop + select mobile + panel konten */
 function initStudyProgramTabs() {
     document.querySelectorAll('[data-study-program-tabs]').forEach((root) => {
         const tablist = root.querySelector('[role="tablist"]');
-        if (!tablist) return;
+        const select = root.querySelector('[data-study-program-select]');
+        const tabs = tablist ? Array.from(tablist.querySelectorAll('[role="tab"]')) : [];
+        const panelNodes = Array.from(root.querySelectorAll('[role="tabpanel"]'));
 
-        const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
-        if (tabs.length === 0) return;
+        if (tabs.length === 0 && panelNodes.length === 0) {
+            return;
+        }
 
         const path = root.getAttribute('data-program-path') || '';
-        const panels = tabs.map((tab) => {
-            const id = tab.getAttribute('aria-controls');
-            return id ? document.getElementById(id) : null;
-        });
+        const count = Math.max(tabs.length, panelNodes.length, select?.options?.length ?? 0);
 
-        const activate = (tab, updateUrl) => {
+        const panels =
+            panelNodes.length > 0
+                ? panelNodes
+                : tabs.map((tab) => {
+                      const id = tab.getAttribute('aria-controls');
+                      return id ? document.getElementById(id) : null;
+                  });
+
+        const tabByIndex = (index) => tabs[index] ?? null;
+
+        const scrollTabIntoView = (tab) => {
+            if (!tab || !tablist) return;
+            tab.scrollIntoView({ block: 'nearest', behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
+        };
+
+        const activateIndex = (index, updateUrl) => {
+            const safeIndex = ((index % count) + count) % count;
+            const tab = tabByIndex(safeIndex);
+
             tabs.forEach((t, i) => {
-                const sel = t === tab;
+                const sel = i === safeIndex;
                 t.setAttribute('aria-selected', sel ? 'true' : 'false');
                 t.tabIndex = sel ? 0 : -1;
-                t.classList.toggle('study-program-tab--active', sel);
-                const p = panels[i];
-                if (p) p.hidden = !sel;
+                t.classList.toggle('study-program-nav__item--active', sel);
             });
 
+            panels.forEach((p, i) => {
+                if (p) p.hidden = i !== safeIndex;
+            });
+
+            if (select && select.options[safeIndex]) {
+                select.selectedIndex = safeIndex;
+            }
+
+            if (tab) scrollTabIntoView(tab);
+
             if (updateUrl && path && window.history?.replaceState) {
-                const slug = tab.getAttribute('data-tab-slug') || '';
+                const slug =
+                    tab?.getAttribute('data-tab-slug') ||
+                    select?.options[safeIndex]?.value ||
+                    '';
                 const q = slug ? `?program=${encodeURIComponent(slug)}` : '';
                 window.history.replaceState({}, '', `${path}${q}`);
             }
         };
 
         tabs.forEach((tab, i) => {
-            tab.addEventListener('click', () => activate(tab, true));
+            tab.addEventListener('click', () => activateIndex(i, true));
             tab.addEventListener('keydown', (e) => {
-                if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft' && e.key !== 'Home' && e.key !== 'End') {
+                if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Home' && e.key !== 'End') {
                     return;
                 }
                 e.preventDefault();
                 let next = i;
-                if (e.key === 'ArrowRight') next = (i + 1) % tabs.length;
-                else if (e.key === 'ArrowLeft') next = (i - 1 + tabs.length) % tabs.length;
+                if (e.key === 'ArrowDown') next = (i + 1) % tabs.length;
+                else if (e.key === 'ArrowUp') next = (i - 1 + tabs.length) % tabs.length;
                 else if (e.key === 'Home') next = 0;
                 else if (e.key === 'End') next = tabs.length - 1;
                 const t = tabs[next];
                 t?.focus();
-                activate(t, true);
+                activateIndex(next, true);
             });
         });
 
+        select?.addEventListener('change', () => {
+            activateIndex(select.selectedIndex, true);
+        });
+
         const initial = root.getAttribute('data-initial-slug') || '';
-        const match = tabs.find((t) => (t.getAttribute('data-tab-slug') || '') === initial);
-        activate(match || tabs[0], false);
+        let startIndex = 0;
+        if (initial) {
+            const fromTab = tabs.findIndex((t) => (t.getAttribute('data-tab-slug') || '') === initial);
+            if (fromTab >= 0) startIndex = fromTab;
+            else if (select) {
+                const fromSelect = Array.from(select.options).findIndex((o) => o.value === initial);
+                if (fromSelect >= 0) startIndex = fromSelect;
+            }
+        }
+
+        activateIndex(startIndex, false);
     });
 }
 
