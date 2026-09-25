@@ -9,14 +9,18 @@
     $moreCount = max(0, count($allPrograms) - count($previewPrograms));
     $imageOnLeft = ($imageFirst ?? 'false') === 'true';
     $isS3 = ($programRouteName ?? '') === 'program.s3';
-    $viewAllLabel = $loc === 'id'
+    $viewAllLabel = $loc === 'zh'
+    ? ($isS3 ? '查看所有博士 (S3) 课程' : '查看所有硕士 (S2) 课程')
+    : ($loc === 'id'
         ? ($isS3 ? 'Lihat semua program Doktor (S3)' : 'Lihat semua program Magister (S2)')
-        : ($isS3 ? 'View all doctoral (S3) programmes' : "View all master's (S2) programmes");
-    $moreLabel = $loc === 'id'
+        : ($isS3 ? 'View all doctoral (S3) programmes' : "View all master's (S2) programmes"));
+    $moreLabel = $loc === 'zh'
+    ? '还有 :count 个其他专业。'
+    : ($loc === 'id'
         ? 'Dan :count program studi lainnya.'
-        : 'And :count other study programme(s).';
+        : 'And :count other study programme(s).');
     $moreLabel = str_replace(':count', (string) $moreCount, $moreLabel);
-    $learnMore = $loc === 'id' ? 'Selengkapnya' : 'Learn more';
+    $learnMore = $loc === 'zh' ? '了解更多' : ($loc === 'id' ? 'Selengkapnya' : 'Learn more');
     $theme = $theme ?? 'sky';
 @endphp
 
@@ -73,7 +77,7 @@
                     @if($moreCount > 0)
                         <p class="m-0 text-sm text-slate-500">{{ $moreLabel }}</p>
                     @else
-                        <p class="m-0 text-sm text-slate-500">{{ $loc === 'id' ? 'Klik program untuk detail lengkap.' : 'Click a programme for full details.' }}</p>
+                        <p class="m-0 text-sm text-slate-500">{{ $loc === 'zh' ? '点击专业查看完整详情。' : ($loc === 'id' ? 'Klik program untuk detail lengkap.' : 'Click a programme for full details.') }}</p>
                     @endif
                     <a href="{{ route($programRouteName) }}" class="home-program-preview-cta {{ $ctaClass }} inline-flex shrink-0 items-center justify-center rounded-xl px-5 py-2.5 text-center text-sm font-bold text-white shadow-md transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2">
                         {{ $viewAllLabel }}

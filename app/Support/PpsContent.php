@@ -229,6 +229,8 @@ class PpsContent
         self::mergeGraduateSchoolHistoryFromDatabase($data);
         self::mergeAccreditationDocumentsFromDatabase($data);
 
+        self::applyMultilingualFallback($data);
+
         self::$cache = $data;
 
         return self::$cache;
@@ -242,6 +244,31 @@ class PpsContent
         $locale ??= app()->getLocale();
         $all = self::all();
         $strings = $all['STRINGS'] ?? [];
+
+        if ($locale === 'zh') {
+            $id = is_array($strings['id'] ?? null) ? $strings['id'] : [];
+            $en = is_array($strings['en'] ?? null) ? $strings['en'] : [];
+            $zh = is_array($strings['zh'] ?? null) ? $strings['zh'] : [];
+            $keys = array_unique(array_merge(array_keys($id), array_keys($en), array_keys($zh)));
+            $resolved = [];
+            foreach ($keys as $k) {
+                $zhVal = isset($zh[$k]) && $zh[$k] !== null ? trim((string) $zh[$k]) : '';
+                $enVal = isset($en[$k]) && $en[$k] !== null ? trim((string) $en[$k]) : '';
+                $idVal = isset($id[$k]) && $id[$k] !== null ? trim((string) $id[$k]) : '';
+
+                if ($zhVal !== '') {
+                    $resolved[$k] = (string) $zh[$k];
+                } elseif ($enVal !== '') {
+                    $resolved[$k] = (string) $en[$k];
+                } elseif ($idVal !== '') {
+                    $resolved[$k] = (string) $id[$k];
+                } else {
+                    $resolved[$k] = (string) ($zh[$k] ?? $en[$k] ?? $id[$k] ?? '');
+                }
+            }
+
+            return $resolved;
+        }
 
         return $strings[$locale] ?? $strings['id'] ?? [];
     }
@@ -264,7 +291,7 @@ class PpsContent
             return $photo;
         }
         if (str_starts_with($photo, 'director-greeting/')) {
-            return asset('storage/'.$photo);
+            return asset('storage/' . $photo);
         }
 
         return asset(ltrim($photo, '/'));
@@ -347,17 +374,22 @@ class PpsContent
     {
         $locId = is_array($stringsBlock['id'] ?? null) ? $stringsBlock['id'] : [];
         $locEn = is_array($stringsBlock['en'] ?? null) ? $stringsBlock['en'] : [];
+        $locZh = is_array($stringsBlock['zh'] ?? null) ? $stringsBlock['zh'] : [];
         $labelId = trim((string) ($locId['kurikulumNavLabel'] ?? 'Kurikulum'));
         $labelEn = trim((string) ($locEn['kurikulumNavLabel'] ?? 'Curriculum'));
+        $labelZh = trim((string) ($locZh['kurikulumNavLabel'] ?? '培养方案'));
         if ($labelEn === '') {
             $labelEn = $labelId !== '' ? $labelId : 'Curriculum';
+        }
+        if ($labelZh === '') {
+            $labelZh = '培养方案';
         }
         if ($labelId === '') {
             $labelId = 'Kurikulum';
         }
 
         $child = [
-            'label' => ['id' => $labelId, 'en' => $labelEn],
+            'label' => ['id' => $labelId, 'en' => $labelEn, 'zh' => $labelZh],
             'href' => url('/kurikulum'),
         ];
 
@@ -413,7 +445,7 @@ class PpsContent
             return url('/');
         }
         if (str_starts_with($href, '#/')) {
-            $path = '/'.ltrim(substr($href, 2), '/');
+            $path = '/' . ltrim(substr($href, 2), '/');
 
             return url($path);
         }
@@ -442,7 +474,7 @@ class PpsContent
                 return null;
             }
 
-            return $people->map(fn (LeadershipPerson $p): array => $p->toFrontArray())->values()->all();
+            return $people->map(fn(LeadershipPerson $p): array => $p->toFrontArray())->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -469,7 +501,7 @@ class PpsContent
                 return null;
             }
 
-            return $rows->map(fn (CooperationPartner $p): array => $p->toFrontArray())->values()->all();
+            return $rows->map(fn(CooperationPartner $p): array => $p->toFrontArray())->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -496,7 +528,7 @@ class PpsContent
                 return null;
             }
 
-            return $rows->map(fn (Lecturer $row): array => $row->toFrontArray())->values()->all();
+            return $rows->map(fn(Lecturer $row): array => $row->toFrontArray())->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -523,7 +555,7 @@ class PpsContent
                 return null;
             }
 
-            return $rows->map(fn (AcademicGuide $row): array => $row->toFrontArray())->values()->all();
+            return $rows->map(fn(AcademicGuide $row): array => $row->toFrontArray())->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -539,7 +571,7 @@ class PpsContent
     {
         $used = [];
 
-        return collect($rows)->filter(fn ($row): bool => is_array($row))->values()->map(function (array $row) use (&$used): array {
+        return collect($rows)->filter(fn($row): bool => is_array($row))->values()->map(function (array $row) use (&$used): array {
             $name = $row['name'] ?? [];
             $nameId = (string) ($name['id'] ?? '');
             $base = Str::slug($nameId);
@@ -552,14 +584,14 @@ class PpsContent
                 $slug = $base;
                 $n = 2;
                 while (isset($used[$slug])) {
-                    $slug = $base.'-'.$n;
+                    $slug = $base . '-' . $n;
                     $n++;
                 }
             } else {
                 $orig = $slug;
                 $n = 2;
                 while (isset($used[$slug])) {
-                    $slug = $orig.'-'.$n;
+                    $slug = $orig . '-' . $n;
                     $n++;
                 }
             }
@@ -573,12 +605,14 @@ class PpsContent
             if (is_array($excerpt)) {
                 $exId = trim((string) ($excerpt['id'] ?? ''));
                 $exEn = isset($excerpt['en']) ? trim((string) $excerpt['en']) : '';
+                $exZh = isset($excerpt['zh']) ? trim((string) $excerpt['zh']) : '';
                 $row['excerpt'] = [
                     'id' => $exId,
                     'en' => $exEn !== '' ? $exEn : $exId,
+                    'zh' => $exZh,
                 ];
             } else {
-                $row['excerpt'] = ['id' => '', 'en' => ''];
+                $row['excerpt'] = ['id' => '', 'en' => '', 'zh' => ''];
             }
 
             return $row;
@@ -606,7 +640,7 @@ class PpsContent
                 return null;
             }
 
-            return $rows->map(fn (S3Program $row): array => $row->toFrontArray())->values()->all();
+            return $rows->map(fn(S3Program $row): array => $row->toFrontArray())->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -633,7 +667,7 @@ class PpsContent
                 return null;
             }
 
-            return $rows->map(fn (S2Program $row): array => $row->toFrontArray())->values()->all();
+            return $rows->map(fn(S2Program $row): array => $row->toFrontArray())->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -662,7 +696,7 @@ class PpsContent
                 ->orderBy('id')
                 ->get();
 
-            return $rows->map(fn (StudentActivity $row): array => $row->toFrontArray())->values()->all();
+            return $rows->map(fn(StudentActivity $row): array => $row->toFrontArray())->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -691,7 +725,7 @@ class PpsContent
                 ->orderBy('id')
                 ->get();
 
-            return $rows->map(fn (AlumniActivity $row): array => $row->toFrontArray())->values()->all();
+            return $rows->map(fn(AlumniActivity $row): array => $row->toFrontArray())->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -748,7 +782,7 @@ class PpsContent
                     'stopKorupsiCtaP',
                 ];
 
-                foreach (['id', 'en'] as $loc) {
+                foreach (['id', 'en', 'zh'] as $loc) {
                     if (! isset($data['STRINGS'][$loc]) || ! is_array($data['STRINGS'][$loc])) {
                         $data['STRINGS'][$loc] = [];
                     }
@@ -789,7 +823,7 @@ class PpsContent
                 ->get();
 
             $data['STOP_KORUPSI_BULLETS'] = $rows
-                ->map(fn (StopKorupsiBullet $b): array => $b->toFrontArray())
+                ->map(fn(StopKorupsiBullet $b): array => $b->toFrontArray())
                 ->values()
                 ->all();
         } catch (\Throwable) {
@@ -847,7 +881,7 @@ class PpsContent
                     'stopGratifikasiCtaP',
                 ];
 
-                foreach (['id', 'en'] as $loc) {
+                foreach (['id', 'en', 'zh'] as $loc) {
                     if (! isset($data['STRINGS'][$loc]) || ! is_array($data['STRINGS'][$loc])) {
                         $data['STRINGS'][$loc] = [];
                     }
@@ -888,7 +922,7 @@ class PpsContent
                 ->get();
 
             $data['STOP_GRATIFIKASI_BULLETS'] = $rows
-                ->map(fn (StopGratifikasiBullet $b): array => $b->toFrontArray())
+                ->map(fn(StopGratifikasiBullet $b): array => $b->toFrontArray())
                 ->values()
                 ->all();
         } catch (\Throwable) {
@@ -994,7 +1028,7 @@ class PpsContent
                 ->get();
 
             $data['ACCREDITATION_DOCUMENTS'] = $rows
-                ->map(fn (AccreditationDocument $doc): array => $doc->toFrontArray())
+                ->map(fn(AccreditationDocument $doc): array => $doc->toFrontArray())
                 ->values()
                 ->all();
         } catch (\Throwable) {
@@ -1041,7 +1075,7 @@ class PpsContent
                 ->orderBy('sort_order')
                 ->orderBy('id')
                 ->get()
-                ->map(fn (ZiPillar $row): array => $row->toFrontArray())
+                ->map(fn(ZiPillar $row): array => $row->toFrontArray())
                 ->values()
                 ->all();
         } catch (\Throwable) {
@@ -1067,7 +1101,7 @@ class PpsContent
                 ->orderBy('sort_order')
                 ->orderBy('id')
                 ->get()
-                ->map(fn (ZiGalleryItem $row): array => $row->toFrontArray())
+                ->map(fn(ZiGalleryItem $row): array => $row->toFrontArray())
                 ->values()
                 ->all();
         } catch (\Throwable) {
@@ -1093,7 +1127,7 @@ class PpsContent
                 ->orderBy('sort_order')
                 ->orderBy('id')
                 ->get()
-                ->map(fn (ZiComplaintChannel $row): array => $row->toFrontArray())
+                ->map(fn(ZiComplaintChannel $row): array => $row->toFrontArray())
                 ->values()
                 ->all();
         } catch (\Throwable) {
@@ -1119,7 +1153,7 @@ class PpsContent
                 ->orderBy('sort_order')
                 ->orderBy('id')
                 ->get()
-                ->map(fn (ZiUpdateItem $row): array => $row->toFrontArray())
+                ->map(fn(ZiUpdateItem $row): array => $row->toFrontArray())
                 ->values()
                 ->all();
         } catch (\Throwable) {
@@ -1148,7 +1182,7 @@ class PpsContent
                 return null;
             }
 
-            return $slides->map(fn (HeroSlide $s): string => (string) $s->image)->values()->all();
+            return $slides->map(fn(HeroSlide $s): string => (string) $s->image)->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -1177,7 +1211,7 @@ class PpsContent
                 return null;
             }
 
-            return $rows->map(fn (AnnouncementItem $row): array => $row->toFrontArray())->values()->all();
+            return $rows->map(fn(AnnouncementItem $row): array => $row->toFrontArray())->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -1205,7 +1239,7 @@ class PpsContent
                 return null;
             }
 
-            return $rows->map(fn (AgendaItem $row): array => $row->toFrontArray())->values()->all();
+            return $rows->map(fn(AgendaItem $row): array => $row->toFrontArray())->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -1233,7 +1267,7 @@ class PpsContent
                 return null;
             }
 
-            return $items->map(fn (NewsItem $item): array => self::newsItemToFrontArray($item))->values()->all();
+            return $items->map(fn(NewsItem $item): array => self::newsItemToFrontArray($item))->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -1247,32 +1281,174 @@ class PpsContent
         $image = $item->resolvedNewsImagePath();
         $slugId = (string) ($item->getTranslationWithoutFallback('slug', 'id') ?? '');
         $slugEn = (string) ($item->getTranslationWithoutFallback('slug', 'en') ?? '');
+        $slugZh = (string) ($item->getTranslationWithoutFallback('slug', 'zh') ?? '');
+
+        $effectiveSlugId = $slugId !== '' ? $slugId : ($item->exists ? 'berita-' . $item->getKey() : '');
+        $effectiveSlugEn = $slugEn !== '' ? $slugEn : ($effectiveSlugId !== '' ? $effectiveSlugId : ($item->exists ? 'news-' . $item->getKey() : ''));
+        $effectiveSlugZh = $slugZh !== '' ? $slugZh : ($slugEn !== '' ? $slugEn : $effectiveSlugId);
+
         $href = [
-            'id' => $slugId !== '' ? route('news.show', ['locale' => 'id', 'slug' => $slugId], false) : '#',
-            'en' => $slugEn !== '' ? route('news.show', ['locale' => 'en', 'slug' => $slugEn], false) : '#',
+            'id' => $effectiveSlugId !== '' ? route('news.show', ['locale' => 'id', 'slug' => $effectiveSlugId], false) : '#',
+            'en' => $effectiveSlugEn !== '' ? route('news.show', ['locale' => 'en', 'slug' => $effectiveSlugEn], false) : '#',
+            'zh' => $effectiveSlugZh !== '' ? route('news.show', ['locale' => 'zh', 'slug' => $effectiveSlugZh], false) : '#',
         ];
+
+        $hasCustomHref = $item->href !== null
+            && $item->href !== ''
+            && $item->href !== '#'
+            && ! str_starts_with($item->href, '#dummy-news-seed:');
 
         return [
             'id' => (string) $item->getKey(),
             'date' => $item->published_at?->format('Y-m-d')
                 ?? $item->created_at?->format('Y-m-d')
                 ?? now()->format('Y-m-d'),
-            'title' => $item->translationsForFrontend('title'),
-            'excerpt' => $item->translationsForFrontend('excerpt'),
-            'href' => ($item->href !== null && $item->href !== '' && $item->href !== '#')
-                ? $item->href
-                : $href,
-            'location' => $item->translationsForFrontend('location'),
+            'title' => self::newsAttributeTranslations($item, 'title'),
+            'excerpt' => self::newsAttributeTranslations($item, 'excerpt'),
+            'href' => $hasCustomHref ? $item->href : $href,
+            'location' => self::newsAttributeTranslations($item, 'location'),
             'image' => $image,
-            'imageAlt' => $item->translationsForFrontend('title'),
-            'category' => $item->translationsForFrontend('category'),
+            'imageAlt' => self::newsAttributeTranslations($item, 'title'),
+            'category' => self::newsAttributeTranslations($item, 'category'),
         ];
+    }
+
+    /**
+     * @return array{id: string, en: string, zh: string}
+     */
+    protected static function newsAttributeTranslations(NewsItem $item, string $attribute): array
+    {
+        $id = (string) ($item->getTranslationWithoutFallback($attribute, 'id') ?? '');
+        $en = (string) ($item->getTranslationWithoutFallback($attribute, 'en') ?? '');
+        $zh = (string) ($item->getTranslationWithoutFallback($attribute, 'zh') ?? '');
+
+        return [
+            'id' => $id,
+            'en' => $en,
+            'zh' => $zh,
+        ];
+    }
+
+    /**
+     * Cek apakah array merupakan leaf node translasi multibahasa (bukan slug/URL/ID teknis).
+     *
+     * @param  array<string, mixed>  $arr
+     */
+    protected static function isLocalizedLeafNode(array $arr, string $parentKey = ''): bool
+    {
+        if (in_array($parentKey, ['href', 'url', 'slug', 'official_url', 'downloadUrl', 'id', 'category_slug'], true)) {
+            return false;
+        }
+
+        $keys = array_keys($arr);
+        if (empty($keys)) {
+            return false;
+        }
+
+        if (! in_array('id', $keys, true) && ! in_array('en', $keys, true)) {
+            return false;
+        }
+
+        foreach ($keys as $k) {
+            if (! in_array($k, ['id', 'en', 'zh'], true)) {
+                return false;
+            }
+        }
+
+        foreach ($arr as $v) {
+            if ($v !== null && ! is_scalar($v)) {
+                return false;
+            }
+            if (is_string($v) && (str_starts_with($v, 'http://') || str_starts_with($v, 'https://') || str_starts_with($v, '/'))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Terapkan fallback zh -> en -> id pada leaf node translasi.
+     *
+     * @param  array<string, mixed>  $node
+     * @return array<string, mixed>
+     */
+    protected static function applyZhFallbackToNode(array $node): array
+    {
+        $zhRaw = $node['zh'] ?? null;
+        $enRaw = $node['en'] ?? null;
+        $idRaw = $node['id'] ?? null;
+
+        $zhTrim = is_string($zhRaw) ? trim($zhRaw) : ($zhRaw !== null ? (string) $zhRaw : '');
+        $enTrim = is_string($enRaw) ? trim($enRaw) : ($enRaw !== null ? (string) $enRaw : '');
+        $idTrim = is_string($idRaw) ? trim($idRaw) : ($idRaw !== null ? (string) $idRaw : '');
+
+        if ($zhTrim !== '') {
+            $node['zh'] = is_string($zhRaw) ? $zhRaw : (string) $zhRaw;
+        } elseif ($enTrim !== '') {
+            $node['zh'] = is_string($enRaw) ? $enRaw : (string) $enRaw;
+        } elseif ($idTrim !== '') {
+            $node['zh'] = is_string($idRaw) ? $idRaw : (string) $idRaw;
+        } else {
+            $node['zh'] = $zhRaw ?? ($enRaw ?? ($idRaw ?? ''));
+        }
+
+        return $node;
+    }
+
+    /**
+     * Terapkan fallback zh -> en -> id secara rekursif pada seluruh data konten multibahasa.
+     */
+    protected static function applyMultilingualFallback(mixed &$item, string $key = ''): void
+    {
+        if (! is_array($item)) {
+            return;
+        }
+
+        if ($key === 'STRINGS') {
+            $id = is_array($item['id'] ?? null) ? $item['id'] : [];
+            $en = is_array($item['en'] ?? null) ? $item['en'] : [];
+            $zh = is_array($item['zh'] ?? null) ? $item['zh'] : [];
+            $allKeys = array_unique(array_merge(array_keys($id), array_keys($en), array_keys($zh)));
+
+            foreach ($allKeys as $k) {
+                $zhVal = isset($zh[$k]) && $zh[$k] !== null ? trim((string) $zh[$k]) : '';
+                $enVal = isset($en[$k]) && $en[$k] !== null ? trim((string) $en[$k]) : '';
+                $idVal = isset($id[$k]) && $id[$k] !== null ? trim((string) $id[$k]) : '';
+
+                if ($zhVal !== '') {
+                    $zh[$k] = (string) $zh[$k];
+                } elseif ($enVal !== '') {
+                    $zh[$k] = (string) $en[$k];
+                } elseif ($idVal !== '') {
+                    $zh[$k] = (string) $id[$k];
+                } else {
+                    $zh[$k] = (string) ($zh[$k] ?? $en[$k] ?? $id[$k] ?? '');
+                }
+            }
+
+            $item['zh'] = $zh;
+
+            return;
+        }
+
+        if (self::isLocalizedLeafNode($item, $key)) {
+            $item = self::applyZhFallbackToNode($item);
+
+            return;
+        }
+
+        foreach ($item as $k => &$child) {
+            self::applyMultilingualFallback($child, (string) $k);
+        }
+        unset($child);
     }
 
     public static function formatAnnouncementDate(string $iso, string $locale): string
     {
         try {
-            $c = Carbon::parse($iso)->locale($locale === 'en' ? 'en_GB' : 'id_ID');
+            $carbonLocale = $locale === 'en' ? 'en_GB' : ($locale === 'zh' ? 'zh' : 'id_ID');
+            $c = Carbon::parse($iso)->locale($carbonLocale);
 
             return strtoupper($c->translatedFormat('d F Y'));
         } catch (\Throwable) {
@@ -1290,7 +1466,7 @@ class PpsContent
         $tz = config('app.timezone') ?: 'UTC';
         $pub = Carbon::parse($publishedAt)->timezone($tz);
 
-        $isoLocale = $locale === 'en' ? 'en' : 'id';
+        $isoLocale = $locale === 'en' ? 'en' : ($locale === 'zh' ? 'zh' : 'id');
 
         return $pub->copy()->locale($isoLocale)->diffForHumans();
     }

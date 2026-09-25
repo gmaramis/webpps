@@ -4,7 +4,7 @@
 @php
     $loc = $loc ?? app()->getLocale();
     $selectId = $selectId ?? ($tabPrefix.'-program-select');
-    $selectLabel = $loc === 'id' ? 'Pilih program studi' : 'Select a study programme';
+    $selectLabel = $loc === 'zh' ? '选择专业' : ($loc === 'en' ? 'Select a study programme' : 'Pilih program studi');
 @endphp
 
 @if($invalidProgramSelection)
@@ -76,10 +76,10 @@
 
                             @if($official !== '')
                                 <p class="mt-8">
-                                    <a href="{{ $official }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-dark">{{ $loc === 'id' ? 'Situs web resmi prodi' : 'Official programme website' }} <span aria-hidden="true" class="ml-1">↗</span></a>
+                                    <a href="{{ $official }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-dark">{{ $loc === 'zh' ? '专业官方网站' : ($loc === 'en' ? 'Official programme website' : 'Situs web resmi prodi') }} <span aria-hidden="true" class="ml-1">↗</span></a>
                                 </p>
                             @else
-                                <p class="mt-8 text-sm text-slate-500">{{ $loc === 'id' ? 'Tautan situs resmi prodi belum diatur.' : 'The official programme website link has not been set yet.' }}</p>
+                                <p class="mt-8 text-sm text-slate-500">{{ $loc === 'zh' ? '尚未设置专业官方网站链接。' : ($loc === 'en' ? 'The official programme website link has not been set yet.' : 'Tautan situs resmi prodi belum diatur.') }}</p>
                             @endif
 
                             @php
@@ -87,14 +87,14 @@
                             @endphp
                             @if($brochureUrl !== '')
                                 <div class="mt-8 border-t border-slate-100 pt-6">
-                                    <p class="text-xs font-bold uppercase tracking-wide text-slate-500">{{ $loc === 'id' ? 'Brosur pendaftaran' : 'Admission brochure' }}</p>
+                                    <p class="text-xs font-bold uppercase tracking-wide text-slate-500">{{ $loc === 'zh' ? '招生简章' : ($loc === 'en' ? 'Admission brochure' : 'Brosur pendaftaran') }}</p>
                                     <button type="button"
                                         class="group mt-3 inline-flex max-w-full flex-col gap-1 rounded-xl border border-slate-200 bg-slate-50/80 p-2 text-left shadow-sm transition hover:border-primary/40 hover:bg-sky-50/80 focus:outline-none focus:ring-2 focus:ring-primary/30"
                                         data-program-brochure-lightbox-src="{{ e($brochureUrl) }}"
-                                        data-program-brochure-lightbox-alt="{{ e(($loc === 'id' ? 'Brosur ' : 'Brochure: ').$pName) }}">
-                                        <span class="sr-only">{{ $loc === 'id' ? 'Buka brosur ukuran penuh' : 'Open brochure at full size' }}</span>
+                                        data-program-brochure-lightbox-alt="{{ e(($loc === 'zh' ? '简章：' : ($loc === 'id' ? 'Brosur ' : 'Brochure: ')).$pName) }}">
+                                        <span class="sr-only">{{ $loc === 'zh' ? '查看完整简章' : ($loc === 'id' ? 'Buka brosur ukuran penuh' : 'Open brochure at full size') }}</span>
                                         <img src="{{ e($brochureUrl) }}" alt="" class="h-28 max-h-32 w-auto max-w-[14rem] rounded-lg border border-slate-200/90 object-contain object-left shadow-sm transition group-hover:border-primary/25" width="224" height="112" loading="lazy" decoding="async">
-                                        <span class="text-[11px] font-semibold text-primary underline decoration-primary/30 underline-offset-2 group-hover:decoration-primary">{{ $loc === 'id' ? 'Klik untuk memperbesar' : 'Click to enlarge' }}</span>
+                                        <span class="text-[11px] font-semibold text-primary underline decoration-primary/30 underline-offset-2 group-hover:decoration-primary">{{ $loc === 'zh' ? '点击放大' : ($loc === 'id' ? 'Klik untuk memperbesar' : 'Click to enlarge') }}</span>
                                     </button>
                                 </div>
                             @endif

@@ -57,21 +57,51 @@ class NewsItem extends Model
             PpsContent::flush();
         });
 
-        static::saved(static fn () => PpsContent::flush());
-        static::deleted(static fn () => PpsContent::flush());
+        static::saved(static fn() => PpsContent::flush());
+        static::deleted(static fn() => PpsContent::flush());
     }
 
     /** Slug URL per locale dari judul saat ini. */
     public function syncSlugsFromTitles(): void
     {
-        foreach (['id', 'en'] as $loc) {
+        foreach (['id', 'en', 'zh'] as $loc) {
             $title = (string) $this->getTranslationWithoutFallback('title', $loc);
+            if ($loc === 'zh' && trim($title) === '') {
+                continue;
+            }
             $base = Str::slug(Str::limit($title !== '' ? $title : ($loc === 'id' ? 'berita' : 'news'), 80, ''));
             if ($base === '') {
                 $base = $loc === 'id' ? 'berita' : 'news';
             }
-            $this->setTranslation('slug', $loc, $base.'-'.$this->getKey());
+            $this->setTranslation('slug', $loc, $base . '-' . $this->getKey());
         }
+    }
+
+    /**
+     * Ambil translasi atribut dengan fallback: zh -> en -> id, en -> id, id.
+     */
+    public function getTranslationWithFallback(string $attribute, ?string $locale = null): string
+    {
+        $locale = $locale ?? app()->getLocale();
+        $val = trim((string) ($this->getTranslationWithoutFallback($attribute, $locale) ?? ''));
+        if ($val !== '') {
+            return $val;
+        }
+
+        if ($locale === 'zh') {
+            $valEn = trim((string) ($this->getTranslationWithoutFallback($attribute, 'en') ?? ''));
+            if ($valEn !== '') {
+                return $valEn;
+            }
+
+            return trim((string) ($this->getTranslationWithoutFallback($attribute, 'id') ?? ''));
+        }
+
+        if ($locale === 'en') {
+            return trim((string) ($this->getTranslationWithoutFallback($attribute, 'id') ?? ''));
+        }
+
+        return '';
     }
 
     /** Draf dengan isi Indonesia tapi isi Inggris masih kosong → layak diterjemahkan otomatis. */
@@ -85,12 +115,13 @@ class NewsItem extends Model
         return $idBody !== '' && trim((string) $this->getTranslationWithoutFallback('body', 'en')) === '';
     }
 
-    /** @return array{id: string, en: string} */
+    /** @return array{id: string, en: string, zh: string} */
     public function translationsForFrontend(string $attribute): array
     {
         return [
             'id' => (string) ($this->getTranslationWithoutFallback($attribute, 'id') ?? ''),
             'en' => (string) ($this->getTranslationWithoutFallback($attribute, 'en') ?? ''),
+            'zh' => (string) ($this->getTranslationWithoutFallback($attribute, 'zh') ?? ''),
         ];
     }
 
@@ -112,10 +143,10 @@ class NewsItem extends Model
 
         $rel = ltrim(str_replace('\\', '/', $trim), '/');
         if (Storage::disk('public')->exists($rel)) {
-            return '/storage/'.$rel;
+            return '/storage/' . $rel;
         }
 
-        return str_starts_with($trim, '/') ? $trim : '/'.$rel;
+        return str_starts_with($trim, '/') ? $trim : '/' . $rel;
     }
 
     /** URL lengkap untuk atribut HTML `src`. */

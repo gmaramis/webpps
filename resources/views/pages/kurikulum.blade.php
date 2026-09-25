@@ -39,9 +39,13 @@
                             @php
                                 $curriculum = $program->studyProgramCurriculum;
                                 $pdfUrl = $curriculum?->resolvedPdfUrl() ?? '';
-                                $programName = $loc === 'en'
-                                    ? (trim((string) ($program->name_en ?? '')) !== '' ? $program->name_en : $program->name_id)
-                                    : $program->name_id;
+                                $programName = $loc === 'zh'
+                                    ? (trim((string) ($program->name_zh ?? '')) !== ''
+                                        ? $program->name_zh
+                                        : (trim((string) ($program->name_en ?? '')) !== '' ? $program->name_en : $program->name_id))
+                                    : ($loc === 'en'
+                                        ? (trim((string) ($program->name_en ?? '')) !== '' ? $program->name_en : $program->name_id)
+                                        : $program->name_id);
                             @endphp
                             <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                                 <div class="border-b border-slate-100 bg-slate-50/70 px-5 py-4">

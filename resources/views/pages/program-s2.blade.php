@@ -21,10 +21,10 @@
         'heroSrc' => $heroSrc,
         'programPagePath' => $programPagePath,
         'tabPrefix' => 's2',
-        'programsHeading' => $loc === 'id' ? 'Program Magister (S2)' : "Master's programmes (S2)",
-        'programsHint' => $loc === 'id' ? 'Pilih program di daftar (atau menu di ponsel) untuk membaca deskripsi lengkap, tautan resmi, dan brosur.' : 'Choose a programme from the list (or menu on mobile) for the full description, official link, and brochure.',
-        'tablistAriaLabel' => $loc === 'id' ? 'Daftar program Magister (S2)' : "Master's programmes (S2)",
-        'invalidUrlMessage' => $loc === 'id' ? 'Program pada URL tidak ditemukan; menampilkan program pertama.' : 'The programme in the URL was not found; showing the first programme.',
-        'emptyMessage' => $loc === 'id' ? 'Belum ada program S2 yang dipublikasikan.' : 'No master’s (S2) programmes are published yet.',
+        'programsHeading' => $loc === 'zh' ? '硕士课程 (S2)' : ($loc === 'en' ? "Master's programmes (S2)" : 'Program Magister (S2)'),
+        'programsHint' => $loc === 'zh' ? '从列表（或手机菜单）中选择一个专业，以阅读完整介绍、官方网站链接及招生简章。' : ($loc === 'en' ? 'Choose a programme from the list (or menu on mobile) for the full description, official link, and brochure.' : 'Pilih program di daftar (atau menu di ponsel) untuk membaca deskripsi lengkap, tautan resmi, dan brosur.'),
+        'tablistAriaLabel' => $loc === 'zh' ? '硕士专业列表 (S2)' : ($loc === 'en' ? "Master's programmes (S2)" : 'Daftar program Magister (S2)'),
+        'invalidUrlMessage' => $loc === 'zh' ? '网址中的专业未找到；正在显示第一个专业。' : ($loc === 'en' ? 'The programme in the URL was not found; showing the first programme.' : 'Program pada URL tidak ditemukan; menampilkan program pertama.'),
+        'emptyMessage' => $loc === 'zh' ? '尚未发布任何硕士 (S2) 专业。' : ($loc === 'en' ? 'No master’s (S2) programmes are published yet.' : 'Belum ada program S2 yang dipublikasikan.'),
     ])
 @endsection

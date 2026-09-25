@@ -33,7 +33,7 @@
             <header class="program-study-page__hero overflow-hidden rounded-3xl border border-slate-200/80 bg-gradient-to-br from-white to-slate-50/90 shadow-[0_20px_50px_-24px_rgba(15,23,42,0.12)]">
                 <div class="grid gap-8 p-6 md:grid-cols-2 md:items-center md:gap-10 md:p-8 lg:p-10">
                     <div class="min-w-0">
-                        <p class="text-xs font-bold uppercase tracking-widest text-primary">{{ $loc === 'id' ? 'Program Studi' : 'Study programmes' }}</p>
+                        <p class="text-xs font-bold uppercase tracking-widest text-primary">{{ $loc === 'zh' ? '专业课程' : ($loc === 'en' ? 'Study programmes' : 'Program Studi') }}</p>
                         <h1 class="mt-2 font-display text-3xl font-bold tracking-tight text-primary md:text-4xl">{{ $t[$pageTitle] ?? '' }}</h1>
                         <p class="mt-4 max-w-2xl text-base leading-relaxed text-slate-600 md:text-lg">{{ $t[$pageLead] ?? '' }}</p>
                     </div>

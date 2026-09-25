@@ -173,7 +173,7 @@
                     @php
                         $featuredImgSrc = asset(ltrim($featured['image'], '/'));
                         $featuredImgAlt = $featured['imageAlt'][$loc] ?? '';
-                        $newsZoomLabel = $loc === 'id' ? 'Perbesar gambar' : 'Enlarge image';
+                        $newsZoomLabel = $loc === 'zh' ? '放大图片' : ($loc === 'id' ? 'Perbesar gambar' : 'Enlarge image');
                     @endphp
                     <div class="relative isolate h-44 min-h-[11rem] w-full shrink-0 overflow-hidden bg-[#2a2420] sm:h-48 sm:min-h-[12rem] md:h-52 md:min-h-[13rem] lg:h-full lg:min-h-[15rem]">
                         <button type="button"
@@ -233,8 +233,8 @@
 
             <dialog id="news-image-lightbox" class="news-image-lightbox" aria-labelledby="news-image-lightbox-title">
                 <div class="news-image-lightbox__inner">
-                    <h2 id="news-image-lightbox-title" class="sr-only">{{ $loc === 'id' ? 'Gambar berita' : 'News image' }}</h2>
-                    <button type="button" id="news-image-lightbox-close" class="news-image-lightbox__close" aria-label="{{ $loc === 'id' ? 'Tutup' : 'Close' }}">×</button>
+                    <h2 id="news-image-lightbox-title" class="sr-only">{{ $loc === 'zh' ? '新闻图片' : ($loc === 'id' ? 'Gambar berita' : 'News image') }}</h2>
+                    <button type="button" id="news-image-lightbox-close" class="news-image-lightbox__close" aria-label="{{ $loc === 'zh' ? '关闭' : ($loc === 'id' ? 'Tutup' : 'Close') }}">×</button>
                     <img id="news-image-lightbox-img" src="" alt="" class="news-image-lightbox__img" width="1100" height="800" decoding="async">
                 </div>
             </dialog>
@@ -250,7 +250,7 @@
         'cardClass' => 'magister-card',
         'accentClass' => 'program-study-accent--sky',
         'badgeClass' => 'border-sky-200/90 bg-gradient-to-r from-sky-50 to-cyan-50 text-sky-900',
-        'badgeLabel' => $loc === 'en' ? 'Master (S2)' : 'Magister (S2)',
+        'badgeLabel' => $loc === 'zh' ? '硕士 (S2)' : ($loc === 'en' ? 'Master (S2)' : 'Magister (S2)'),
         'title' => $t['magisterTitle'],
         'lead' => $t['magisterLead'],
         'heroSrc' => $magisterHeroSrc,
@@ -270,7 +270,7 @@
         'cardClass' => 'doktor-card',
         'accentClass' => 'program-study-accent--violet',
         'badgeClass' => 'border-violet-200/90 bg-gradient-to-r from-violet-50 to-indigo-50 text-indigo-950',
-        'badgeLabel' => $loc === 'en' ? 'Doctorate (S3)' : 'Doktor (S3)',
+        'badgeLabel' => $loc === 'zh' ? '博士 (S3)' : ($loc === 'en' ? 'Doctorate (S3)' : 'Doktor (S3)'),
         'title' => $t['doktorTitle'],
         'lead' => $t['doktorLead'],
         'heroSrc' => $doktorHeroSrc,
