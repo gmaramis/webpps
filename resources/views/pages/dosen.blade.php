@@ -4,13 +4,15 @@
 
 @php
     $loc = app()->getLocale();
-    $lecturersLead = $loc === 'id'
-        ? 'Cari dan urutkan daftar dosen. Tabel menampilkan ringkasan; NIDN, NIP, dan jabatan fungsional ada di jendela detail (tombol "Detail").'
-        : 'Search and sort the directory. The table shows a summary; NIDN, employee ID, and academic rank appear in the detail dialog (the "Details" button).';
+    $lecturersLead = $loc === 'zh'
+        ? '搜索并排序教师名录。表格显示概览信息；NIDN、NIP和职称可在详情窗口（点击“详情”按钮）中查看。'
+        : ($loc === 'en'
+            ? 'Search and sort the directory. The table shows a summary; NIDN, employee ID, and academic rank appear in the detail dialog (the "Details" button).'
+            : 'Cari dan urutkan daftar dosen. Tabel menampilkan ringkasan; NIDN, NIP, dan jabatan fungsional ada di jendela detail (tombol "Detail").');
     $lecturerDetailLabels = [
-        'title' => $t['lecturersDetailModalTitle'] ?? ($loc === 'id' ? 'Detail dosen' : 'Faculty details'),
-        'close' => $t['lecturersDetailModalClose'] ?? ($loc === 'id' ? 'Tutup' : 'Close'),
-        'openLabel' => $t['lecturersOpenDetail'] ?? ($loc === 'id' ? 'Detail' : 'Details'),
+        'title' => $t['lecturersDetailModalTitle'] ?? ($loc === 'zh' ? '教师详情' : ($loc === 'id' ? 'Detail dosen' : 'Faculty details')),
+        'close' => $t['lecturersDetailModalClose'] ?? ($loc === 'zh' ? '关闭' : ($loc === 'id' ? 'Tutup' : 'Close')),
+        'openLabel' => $t['lecturersOpenDetail'] ?? ($loc === 'zh' ? '详情' : ($loc === 'id' ? 'Detail' : 'Details')),
         'nidn' => $t['lecturersColNidn'] ?? 'NIDN',
         'nip' => $t['lecturersColNip'] ?? 'NIP',
         'functional' => $t['lecturersColFunctional'] ?? '',
@@ -70,7 +72,7 @@
                     </label>
                     <div class="flex flex-wrap items-end gap-3 md:gap-4">
                         <label class="min-w-[10.5rem] flex-1 text-sm font-semibold text-slate-800 sm:flex-initial">
-                            <span class="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">{{ $loc === 'id' ? 'Urutkan' : 'Sort' }}</span>
+                            <span class="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">{{ $loc === 'zh' ? '排序' : ($loc === 'id' ? 'Urutkan' : 'Sort') }}</span>
                             <select id="lecturer-sort" class="w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none ring-primary/20 focus:border-primary focus:ring-2 md:min-w-[13rem]">
                                 <option value="name">{{ $t['lecturersSortByName'] }}</option>
                                 <option value="nidn">{{ $t['lecturersColNidn'] }}</option>
@@ -81,7 +83,7 @@
                             </select>
                         </label>
                         <label class="w-full min-w-[5.5rem] text-sm font-semibold text-slate-800 sm:w-auto">
-                            <span class="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">{{ $loc === 'id' ? 'Per halaman' : 'Per page' }}</span>
+                            <span class="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500">{{ $loc === 'zh' ? '每页显示' : ($loc === 'id' ? 'Per halaman' : 'Per page') }}</span>
                             <select id="lecturer-page-size" class="w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm shadow-sm outline-none focus:border-primary focus:ring-2">
                                 <option value="5">5</option>
                                 <option value="10" selected>10</option>
@@ -95,9 +97,11 @@
             <div class="overflow-x-auto px-1 pb-1 md:px-2">
                 <table class="lecturers-table w-full min-w-[640px] border-collapse text-left text-sm md:min-w-0">
                     <caption class="sr-only">
-                        {{ $loc === 'id'
-                            ? 'Tabel dosen: foto, nama, program studi, telepon, email, Google Scholar, dan tombol detail (NIDN, NIP, jabatan di modal).'
-                            : 'Faculty table: photo, name, study programme, phone, email, Google Scholar, and a detail button (NIDN, ID, rank in a dialog).' }}
+                        {{ $loc === 'zh'
+                            ? '教师表格：照片、姓名、专业、电话、电子邮箱、Google Scholar 以及详情按钮（在弹窗中显示 NIDN、NIP、职称）。'
+                            : ($loc === 'en'
+                                ? 'Faculty table: photo, name, study programme, phone, email, Google Scholar, and a detail button (NIDN, ID, rank in a dialog).'
+                                : 'Tabel dosen: foto, nama, program studi, telepon, email, Google Scholar, dan tombol detail (NIDN, NIP, jabatan di modal).') }}
                     </caption>
                     <thead>
                         <tr class="bg-gradient-to-r from-primary to-primary-light text-[11px] font-bold uppercase tracking-wider text-white shadow-inner">
@@ -107,7 +111,7 @@
                             <th scope="col" class="min-w-[6.5rem] px-4 py-3.5">{{ $t['lecturersColPhone'] }}</th>
                             <th scope="col" class="min-w-[8rem] px-4 py-3.5">{{ $t['lecturersColEmail'] }}</th>
                             <th scope="col" class="min-w-[5.5rem] px-4 py-3.5">{{ $t['lecturersColScholar'] }}</th>
-                            <th scope="col" class="w-[1%] rounded-tr-xl px-4 py-3.5 pr-5 text-right"><span class="sr-only">{{ $t['lecturersOpenDetail'] ?? ($loc === 'id' ? 'Detail' : 'Details') }}</span></th>
+                            <th scope="col" class="w-[1%] rounded-tr-xl px-4 py-3.5 pr-5 text-right"><span class="sr-only">{{ $t['lecturersOpenDetail'] ?? ($loc === 'zh' ? '详情' : ($loc === 'id' ? 'Detail' : 'Details')) }}</span></th>
                         </tr>
                     </thead>
                     <tbody id="lecturers-tbody" class="divide-y divide-slate-100 bg-white text-slate-700"></tbody>

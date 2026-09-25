@@ -17,6 +17,7 @@
                     <div class="hidden items-center gap-1 sm:flex" aria-label="Bahasa">
                         <a href="{{ route('locale.switch', ['locale' => 'id']) }}" class="rounded px-2 py-1 text-xs font-semibold {{ $loc === 'id' ? 'bg-white/20 text-white' : 'text-sky-100 hover:bg-white/10' }}">ID</a>
                         <a href="{{ route('locale.switch', ['locale' => 'en']) }}" class="rounded px-2 py-1 text-xs font-semibold {{ $loc === 'en' ? 'bg-white/20 text-white' : 'text-sky-100 hover:bg-white/10' }}">EN</a>
+                        <a href="{{ route('locale.switch', ['locale' => 'zh']) }}" class="rounded px-2 py-1 text-xs font-semibold {{ $loc === 'zh' ? 'bg-white/20 text-white' : 'text-sky-100 hover:bg-white/10' }}">ZH</a>
                     </div>
                     <button type="button" id="mobile-menu-toggle" class="nav-top-link inline-flex items-center justify-center rounded-lg px-3 py-2 text-sm font-medium text-white/90 transition hover:bg-white/10 hover:text-white lg:hidden" aria-expanded="false" aria-controls="mobile-menu" aria-label="{{ $t['navMenuToggle'] }}">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -83,6 +84,7 @@
                     <div class="mt-3 flex gap-2 border-t border-white/10 px-3 pt-3 sm:hidden">
                         <a href="{{ route('locale.switch', ['locale' => 'id']) }}" class="rounded px-2 py-1 text-xs font-semibold {{ $loc === 'id' ? 'bg-white/20 text-white' : 'text-sky-100' }}">ID</a>
                         <a href="{{ route('locale.switch', ['locale' => 'en']) }}" class="rounded px-2 py-1 text-xs font-semibold {{ $loc === 'en' ? 'bg-white/20 text-white' : 'text-sky-100' }}">EN</a>
+                        <a href="{{ route('locale.switch', ['locale' => 'zh']) }}" class="rounded px-2 py-1 text-xs font-semibold {{ $loc === 'zh' ? 'bg-white/20 text-white' : 'text-sky-100' }}">ZH</a>
                     </div>
                 </nav>
             </div>

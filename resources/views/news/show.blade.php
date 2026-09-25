@@ -6,7 +6,7 @@
     $excerpt = $post->getTranslation('excerpt', $locale, false);
     $metaTitle = $post->getTranslation('meta_title', $locale, false) ?: $title;
     $metaDescription = $post->getTranslation('meta_description', $locale, false) ?: ($excerpt ?: \Illuminate\Support\Str::limit(strip_tags((string) $body), 160));
-    $sidebarHeading = $locale === 'en' ? 'Other news' : 'Berita lainnya';
+    $sidebarHeading = $locale === 'zh' ? '其他新闻' : ($locale === 'en' ? 'Other news' : 'Berita lainnya');
     $publishedMoment = $post->published_at ?? $post->created_at;
     $publishedLabel = \App\Support\PpsContent::formatAnnouncementDate($publishedMoment->format('Y-m-d'), $locale);
     $publishedAgeHuman = \App\Support\PpsContent::newsPublishedAgeHuman($publishedMoment, $locale);
@@ -17,11 +17,22 @@
 
 @push('head')
     <meta name="description" content="{{ e($metaDescription) }}">
-    <link rel="alternate" hreflang="id"
-        href="{{ url(route('news.show', ['locale' => 'id', 'slug' => $post->getTranslationWithoutFallback('slug', 'id')], false)) }}">
-    @if ($post->hasTranslation('slug', 'en'))
+    @php
+        $idSlug = trim((string) $post->getTranslationWithoutFallback('slug', 'id'));
+        $enSlug = trim((string) $post->getTranslationWithoutFallback('slug', 'en'));
+        $zhSlug = trim((string) $post->getTranslationWithoutFallback('slug', 'zh'));
+    @endphp
+    @if ($idSlug !== '')
+        <link rel="alternate" hreflang="id"
+            href="{{ url(route('news.show', ['locale' => 'id', 'slug' => $idSlug], false)) }}">
+    @endif
+    @if ($enSlug !== '')
         <link rel="alternate" hreflang="en"
-            href="{{ url(route('news.show', ['locale' => 'en', 'slug' => $post->getTranslationWithoutFallback('slug', 'en')], false)) }}">
+            href="{{ url(route('news.show', ['locale' => 'en', 'slug' => $enSlug], false)) }}">
+    @endif
+    @if ($zhSlug !== '')
+        <link rel="alternate" hreflang="zh"
+            href="{{ url(route('news.show', ['locale' => 'zh', 'slug' => $zhSlug], false)) }}">
     @endif
 @endpush
 
@@ -52,14 +63,14 @@
 
             @if ($authorName !== '')
                 <p class="mt-3 text-sm text-slate-700">
-                    <span class="font-semibold text-slate-900">{{ $locale === 'en' ? 'Author' : 'Penulis' }}</span>
+                    <span class="font-semibold text-slate-900">{{ $locale === 'zh' ? '作者' : ($locale === 'en' ? 'Author' : 'Penulis') }}</span>
                     <span class="text-slate-600"> — {{ $authorName }}</span>
                 </p>
             @endif
 
             @if ($publishedAgeHuman !== '')
                 <p class="{{ $authorName !== '' ? 'mt-1.5' : 'mt-3' }} text-xs text-gray-500">
-                    {{ $locale === 'en' ? 'Published' : 'Sudah tayang' }} {{ $publishedAgeHuman }}.
+                    {{ $locale === 'zh' ? '已发布' : ($locale === 'en' ? 'Published' : 'Sudah tayang') }} {{ $publishedAgeHuman }}.
                 </p>
             @endif
 

@@ -22,8 +22,8 @@
     @endphp
     <dialog id="study-program-brochure-lightbox" class="news-image-lightbox" aria-labelledby="study-program-brochure-lightbox-title">
         <div class="news-image-lightbox__inner">
-            <h2 id="study-program-brochure-lightbox-title" class="sr-only">{{ $__layoutLoc === 'id' ? 'Brosur pendaftaran program studi' : 'Study programme admission brochure' }}</h2>
-            <button type="button" id="study-program-brochure-lightbox-close" class="news-image-lightbox__close" aria-label="{{ $__layoutLoc === 'id' ? 'Tutup' : 'Close' }}">×</button>
+            <h2 id="study-program-brochure-lightbox-title" class="sr-only">{{ $__layoutLoc === 'zh' ? '招生简章' : ($__layoutLoc === 'id' ? 'Brosur pendaftaran program studi' : 'Study programme admission brochure') }}</h2>
+            <button type="button" id="study-program-brochure-lightbox-close" class="news-image-lightbox__close" aria-label="{{ $__layoutLoc === 'zh' ? '关闭' : ($__layoutLoc === 'id' ? 'Tutup' : 'Close') }}">×</button>
             <img id="study-program-brochure-lightbox-img" src="" alt="" class="news-image-lightbox__img" width="1200" height="1600" decoding="async">
         </div>
     </dialog>
