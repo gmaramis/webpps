@@ -264,7 +264,7 @@ class PpsContent
             return $photo;
         }
         if (str_starts_with($photo, 'director-greeting/')) {
-            return asset('storage/'.$photo);
+            return asset('storage/' . $photo);
         }
 
         return asset(ltrim($photo, '/'));
@@ -347,17 +347,22 @@ class PpsContent
     {
         $locId = is_array($stringsBlock['id'] ?? null) ? $stringsBlock['id'] : [];
         $locEn = is_array($stringsBlock['en'] ?? null) ? $stringsBlock['en'] : [];
+        $locZh = is_array($stringsBlock['zh'] ?? null) ? $stringsBlock['zh'] : [];
         $labelId = trim((string) ($locId['kurikulumNavLabel'] ?? 'Kurikulum'));
         $labelEn = trim((string) ($locEn['kurikulumNavLabel'] ?? 'Curriculum'));
+        $labelZh = trim((string) ($locZh['kurikulumNavLabel'] ?? '培养方案'));
         if ($labelEn === '') {
             $labelEn = $labelId !== '' ? $labelId : 'Curriculum';
+        }
+        if ($labelZh === '') {
+            $labelZh = '培养方案';
         }
         if ($labelId === '') {
             $labelId = 'Kurikulum';
         }
 
         $child = [
-            'label' => ['id' => $labelId, 'en' => $labelEn],
+            'label' => ['id' => $labelId, 'en' => $labelEn, 'zh' => $labelZh],
             'href' => url('/kurikulum'),
         ];
 
@@ -413,7 +418,7 @@ class PpsContent
             return url('/');
         }
         if (str_starts_with($href, '#/')) {
-            $path = '/'.ltrim(substr($href, 2), '/');
+            $path = '/' . ltrim(substr($href, 2), '/');
 
             return url($path);
         }
@@ -442,7 +447,7 @@ class PpsContent
                 return null;
             }
 
-            return $people->map(fn (LeadershipPerson $p): array => $p->toFrontArray())->values()->all();
+            return $people->map(fn(LeadershipPerson $p): array => $p->toFrontArray())->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -469,7 +474,7 @@ class PpsContent
                 return null;
             }
 
-            return $rows->map(fn (CooperationPartner $p): array => $p->toFrontArray())->values()->all();
+            return $rows->map(fn(CooperationPartner $p): array => $p->toFrontArray())->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -496,7 +501,7 @@ class PpsContent
                 return null;
             }
 
-            return $rows->map(fn (Lecturer $row): array => $row->toFrontArray())->values()->all();
+            return $rows->map(fn(Lecturer $row): array => $row->toFrontArray())->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -523,7 +528,7 @@ class PpsContent
                 return null;
             }
 
-            return $rows->map(fn (AcademicGuide $row): array => $row->toFrontArray())->values()->all();
+            return $rows->map(fn(AcademicGuide $row): array => $row->toFrontArray())->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -539,7 +544,7 @@ class PpsContent
     {
         $used = [];
 
-        return collect($rows)->filter(fn ($row): bool => is_array($row))->values()->map(function (array $row) use (&$used): array {
+        return collect($rows)->filter(fn($row): bool => is_array($row))->values()->map(function (array $row) use (&$used): array {
             $name = $row['name'] ?? [];
             $nameId = (string) ($name['id'] ?? '');
             $base = Str::slug($nameId);
@@ -552,14 +557,14 @@ class PpsContent
                 $slug = $base;
                 $n = 2;
                 while (isset($used[$slug])) {
-                    $slug = $base.'-'.$n;
+                    $slug = $base . '-' . $n;
                     $n++;
                 }
             } else {
                 $orig = $slug;
                 $n = 2;
                 while (isset($used[$slug])) {
-                    $slug = $orig.'-'.$n;
+                    $slug = $orig . '-' . $n;
                     $n++;
                 }
             }
@@ -573,12 +578,14 @@ class PpsContent
             if (is_array($excerpt)) {
                 $exId = trim((string) ($excerpt['id'] ?? ''));
                 $exEn = isset($excerpt['en']) ? trim((string) $excerpt['en']) : '';
+                $exZh = isset($excerpt['zh']) ? trim((string) $excerpt['zh']) : '';
                 $row['excerpt'] = [
                     'id' => $exId,
                     'en' => $exEn !== '' ? $exEn : $exId,
+                    'zh' => $exZh,
                 ];
             } else {
-                $row['excerpt'] = ['id' => '', 'en' => ''];
+                $row['excerpt'] = ['id' => '', 'en' => '', 'zh' => ''];
             }
 
             return $row;
@@ -606,7 +613,7 @@ class PpsContent
                 return null;
             }
 
-            return $rows->map(fn (S3Program $row): array => $row->toFrontArray())->values()->all();
+            return $rows->map(fn(S3Program $row): array => $row->toFrontArray())->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -633,7 +640,7 @@ class PpsContent
                 return null;
             }
 
-            return $rows->map(fn (S2Program $row): array => $row->toFrontArray())->values()->all();
+            return $rows->map(fn(S2Program $row): array => $row->toFrontArray())->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -662,7 +669,7 @@ class PpsContent
                 ->orderBy('id')
                 ->get();
 
-            return $rows->map(fn (StudentActivity $row): array => $row->toFrontArray())->values()->all();
+            return $rows->map(fn(StudentActivity $row): array => $row->toFrontArray())->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -691,7 +698,7 @@ class PpsContent
                 ->orderBy('id')
                 ->get();
 
-            return $rows->map(fn (AlumniActivity $row): array => $row->toFrontArray())->values()->all();
+            return $rows->map(fn(AlumniActivity $row): array => $row->toFrontArray())->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -748,7 +755,7 @@ class PpsContent
                     'stopKorupsiCtaP',
                 ];
 
-                foreach (['id', 'en'] as $loc) {
+                foreach (['id', 'en', 'zh'] as $loc) {
                     if (! isset($data['STRINGS'][$loc]) || ! is_array($data['STRINGS'][$loc])) {
                         $data['STRINGS'][$loc] = [];
                     }
@@ -789,7 +796,7 @@ class PpsContent
                 ->get();
 
             $data['STOP_KORUPSI_BULLETS'] = $rows
-                ->map(fn (StopKorupsiBullet $b): array => $b->toFrontArray())
+                ->map(fn(StopKorupsiBullet $b): array => $b->toFrontArray())
                 ->values()
                 ->all();
         } catch (\Throwable) {
@@ -847,7 +854,7 @@ class PpsContent
                     'stopGratifikasiCtaP',
                 ];
 
-                foreach (['id', 'en'] as $loc) {
+                foreach (['id', 'en', 'zh'] as $loc) {
                     if (! isset($data['STRINGS'][$loc]) || ! is_array($data['STRINGS'][$loc])) {
                         $data['STRINGS'][$loc] = [];
                     }
@@ -888,7 +895,7 @@ class PpsContent
                 ->get();
 
             $data['STOP_GRATIFIKASI_BULLETS'] = $rows
-                ->map(fn (StopGratifikasiBullet $b): array => $b->toFrontArray())
+                ->map(fn(StopGratifikasiBullet $b): array => $b->toFrontArray())
                 ->values()
                 ->all();
         } catch (\Throwable) {
@@ -994,7 +1001,7 @@ class PpsContent
                 ->get();
 
             $data['ACCREDITATION_DOCUMENTS'] = $rows
-                ->map(fn (AccreditationDocument $doc): array => $doc->toFrontArray())
+                ->map(fn(AccreditationDocument $doc): array => $doc->toFrontArray())
                 ->values()
                 ->all();
         } catch (\Throwable) {
@@ -1041,7 +1048,7 @@ class PpsContent
                 ->orderBy('sort_order')
                 ->orderBy('id')
                 ->get()
-                ->map(fn (ZiPillar $row): array => $row->toFrontArray())
+                ->map(fn(ZiPillar $row): array => $row->toFrontArray())
                 ->values()
                 ->all();
         } catch (\Throwable) {
@@ -1067,7 +1074,7 @@ class PpsContent
                 ->orderBy('sort_order')
                 ->orderBy('id')
                 ->get()
-                ->map(fn (ZiGalleryItem $row): array => $row->toFrontArray())
+                ->map(fn(ZiGalleryItem $row): array => $row->toFrontArray())
                 ->values()
                 ->all();
         } catch (\Throwable) {
@@ -1093,7 +1100,7 @@ class PpsContent
                 ->orderBy('sort_order')
                 ->orderBy('id')
                 ->get()
-                ->map(fn (ZiComplaintChannel $row): array => $row->toFrontArray())
+                ->map(fn(ZiComplaintChannel $row): array => $row->toFrontArray())
                 ->values()
                 ->all();
         } catch (\Throwable) {
@@ -1119,7 +1126,7 @@ class PpsContent
                 ->orderBy('sort_order')
                 ->orderBy('id')
                 ->get()
-                ->map(fn (ZiUpdateItem $row): array => $row->toFrontArray())
+                ->map(fn(ZiUpdateItem $row): array => $row->toFrontArray())
                 ->values()
                 ->all();
         } catch (\Throwable) {
@@ -1148,7 +1155,7 @@ class PpsContent
                 return null;
             }
 
-            return $slides->map(fn (HeroSlide $s): string => (string) $s->image)->values()->all();
+            return $slides->map(fn(HeroSlide $s): string => (string) $s->image)->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -1177,7 +1184,7 @@ class PpsContent
                 return null;
             }
 
-            return $rows->map(fn (AnnouncementItem $row): array => $row->toFrontArray())->values()->all();
+            return $rows->map(fn(AnnouncementItem $row): array => $row->toFrontArray())->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -1205,7 +1212,7 @@ class PpsContent
                 return null;
             }
 
-            return $rows->map(fn (AgendaItem $row): array => $row->toFrontArray())->values()->all();
+            return $rows->map(fn(AgendaItem $row): array => $row->toFrontArray())->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -1233,7 +1240,7 @@ class PpsContent
                 return null;
             }
 
-            return $items->map(fn (NewsItem $item): array => self::newsItemToFrontArray($item))->values()->all();
+            return $items->map(fn(NewsItem $item): array => self::newsItemToFrontArray($item))->values()->all();
         } catch (\Throwable) {
             return null;
         }
@@ -1247,9 +1254,11 @@ class PpsContent
         $image = $item->resolvedNewsImagePath();
         $slugId = (string) ($item->getTranslationWithoutFallback('slug', 'id') ?? '');
         $slugEn = (string) ($item->getTranslationWithoutFallback('slug', 'en') ?? '');
+        $slugZh = (string) ($item->getTranslationWithoutFallback('slug', 'zh') ?? '');
         $href = [
             'id' => $slugId !== '' ? route('news.show', ['locale' => 'id', 'slug' => $slugId], false) : '#',
             'en' => $slugEn !== '' ? route('news.show', ['locale' => 'en', 'slug' => $slugEn], false) : '#',
+            'zh' => $slugZh !== '' ? route('news.show', ['locale' => 'zh', 'slug' => $slugZh], false) : '#',
         ];
 
         return [
@@ -1272,7 +1281,8 @@ class PpsContent
     public static function formatAnnouncementDate(string $iso, string $locale): string
     {
         try {
-            $c = Carbon::parse($iso)->locale($locale === 'en' ? 'en_GB' : 'id_ID');
+            $carbonLocale = $locale === 'en' ? 'en_GB' : ($locale === 'zh' ? 'zh_CN' : 'id_ID');
+            $c = Carbon::parse($iso)->locale($carbonLocale);
 
             return strtoupper($c->translatedFormat('d F Y'));
         } catch (\Throwable) {
@@ -1290,7 +1300,7 @@ class PpsContent
         $tz = config('app.timezone') ?: 'UTC';
         $pub = Carbon::parse($publishedAt)->timezone($tz);
 
-        $isoLocale = $locale === 'en' ? 'en' : 'id';
+        $isoLocale = $locale === 'en' ? 'en' : ($locale === 'zh' ? 'zh' : 'id');
 
         return $pub->copy()->locale($isoLocale)->diffForHumans();
     }
