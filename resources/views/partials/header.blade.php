@@ -1,9 +1,9 @@
 @php
     $loc = app()->getLocale();
     $languages = [
-        'id' => ['label' => 'Indonesia', 'flag' => '🇮🇩'],
-        'en' => ['label' => 'English', 'flag' => '🇬🇧'],
-        'zh' => ['label' => '中文', 'flag' => '🇨🇳'],
+        'id' => ['label' => 'Indonesia', 'flag' => 'ID'],
+        'en' => ['label' => 'English', 'flag' => 'EN'],
+        'zh' => ['label' => '中文', 'flag' => 'ZH'],
     ];
     $currentLang = $languages[$loc] ?? $languages['id'];
 @endphp
@@ -29,7 +29,7 @@
                             <summary
                                 class="flex cursor-pointer list-none items-center gap-1.5 rounded-lg border border-white/20 bg-white/10 px-2 py-1 text-xs font-semibold text-white transition hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white sm:gap-2 sm:px-2.5 sm:py-1.5"
                                 aria-label="Ganti bahasa ({{ $currentLang['label'] }})">
-                                <span class="inline-block text-sm leading-none font-semibold"
+                                <span class="inline-block text-xs font-bold leading-none tracking-wide"
                                     aria-hidden="true">{{ $currentLang['flag'] }}</span>
                                 <svg class="nav-details-chevron h-3.5 w-3.5 text-white/80" viewBox="0 0 20 20"
                                     fill="currentColor" aria-hidden="true">
@@ -45,7 +45,7 @@
                                         <a href="{{ route('locale.switch', ['locale' => $code]) }}"
                                             class="flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition {{ $loc === $code ? 'bg-white/20 text-white font-semibold' : 'text-sky-100 hover:bg-white/10 hover:text-white' }}">
                                             <span
-                                                class="inline-block w-6 shrink-0 text-left text-sm leading-none font-semibold">{{ $lang['flag'] }}</span>
+                                                class="inline-block w-6 shrink-0 text-left text-xs font-bold leading-none tracking-wide">{{ $lang['flag'] }}</span>
                                             <span>{{ $lang['label'] }}</span>
                                             @if ($loc === $code)
                                                 <svg class="ml-auto h-3.5 w-3.5 text-white" viewBox="0 0 20 20"

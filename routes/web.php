@@ -155,6 +155,51 @@ Route::get('/lang/{locale}', function (string $locale) {
     abort_unless(in_array($locale, ['id', 'en', 'zh'], true), 404);
     session(['locale' => $locale]);
 
+    try {
+        $previousUrl = (string) url()->previous();
+        if ($previousUrl !== '') {
+            $req = \Illuminate\Http\Request::create($previousUrl);
+            $matchedRoute = Route::getRoutes()->match($req);
+            if ($matchedRoute->getName() === 'news.show') {
+                $slug = (string) $matchedRoute->parameter('slug');
+                $oldLocale = (string) $matchedRoute->parameter('locale');
+
+                $post = \App\Models\NewsItem::query()
+                    ->where('is_published', true)
+                    ->where(function (\Illuminate\Database\Eloquent\Builder $sub) use ($oldLocale, $slug): void {
+                        $locales = match ($oldLocale) {
+                            'zh' => ['zh', 'en', 'id'],
+                            'en' => ['en', 'id'],
+                            default => ['id'],
+                        };
+                        $sub->whereJsonContainsLocales('slug', $locales, $slug);
+                        if (preg_match('/-(\d+)$/', $slug, $m)) {
+                            $sub->orWhere('id', (int) $m[1]);
+                        } elseif (is_numeric($slug)) {
+                            $sub->orWhere('id', (int) $slug);
+                        }
+                    })
+                    ->first();
+
+                if ($post) {
+                    $targetSlug = (string) $post->getTranslationWithoutFallback('slug', $locale);
+                    if ($targetSlug === '') {
+                        $targetSlug = (string) $post->getTranslationWithoutFallback('slug', 'en');
+                    }
+                    if ($targetSlug === '') {
+                        $targetSlug = (string) $post->getTranslationWithoutFallback('slug', 'id');
+                    }
+                    if ($targetSlug === '') {
+                        $targetSlug = $slug;
+                    }
+
+                    return redirect()->route('news.show', ['locale' => $locale, 'slug' => $targetSlug]);
+                }
+            }
+        }
+    } catch (\Throwable) {
+    }
+
     return redirect()->back();
 })->name('locale.switch');
 

@@ -8,6 +8,7 @@ use App\Models\S2Program;
 use App\Models\S3Program;
 use App\Models\VisionMissionContent;
 use App\Support\PpsContent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
@@ -26,7 +27,19 @@ class PpsPageController extends Controller
 
         $post = NewsItem::query()
             ->where('is_published', true)
-            ->whereJsonContainsLocale('slug', $locale, $slug)
+            ->where(function (Builder $sub) use ($locale, $slug): void {
+                $locales = match ($locale) {
+                    'zh' => ['zh', 'en', 'id'],
+                    'en' => ['en', 'id'],
+                    default => ['id'],
+                };
+                $sub->whereJsonContainsLocales('slug', $locales, $slug);
+                if (preg_match('/-(\d+)$/', $slug, $m)) {
+                    $sub->orWhere('id', (int) $m[1]);
+                } elseif (is_numeric($slug)) {
+                    $sub->orWhere('id', (int) $slug);
+                }
+            })
             ->firstOrFail();
 
         $sidebarNews = NewsItem::query()
@@ -40,6 +53,7 @@ class PpsPageController extends Controller
         return view('news.show', [
             'post' => $post,
             'locale' => $locale,
+            'slug' => $slug,
             'sidebarNews' => $sidebarNews,
         ]);
     }

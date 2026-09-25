@@ -1282,11 +1282,21 @@ class PpsContent
         $slugId = (string) ($item->getTranslationWithoutFallback('slug', 'id') ?? '');
         $slugEn = (string) ($item->getTranslationWithoutFallback('slug', 'en') ?? '');
         $slugZh = (string) ($item->getTranslationWithoutFallback('slug', 'zh') ?? '');
+
+        $effectiveSlugId = $slugId !== '' ? $slugId : ($item->exists ? 'berita-' . $item->getKey() : '');
+        $effectiveSlugEn = $slugEn !== '' ? $slugEn : ($effectiveSlugId !== '' ? $effectiveSlugId : ($item->exists ? 'news-' . $item->getKey() : ''));
+        $effectiveSlugZh = $slugZh !== '' ? $slugZh : ($slugEn !== '' ? $slugEn : $effectiveSlugId);
+
         $href = [
-            'id' => $slugId !== '' ? route('news.show', ['locale' => 'id', 'slug' => $slugId], false) : '#',
-            'en' => $slugEn !== '' ? route('news.show', ['locale' => 'en', 'slug' => $slugEn], false) : '#',
-            'zh' => $slugZh !== '' ? route('news.show', ['locale' => 'zh', 'slug' => $slugZh], false) : '#',
+            'id' => $effectiveSlugId !== '' ? route('news.show', ['locale' => 'id', 'slug' => $effectiveSlugId], false) : '#',
+            'en' => $effectiveSlugEn !== '' ? route('news.show', ['locale' => 'en', 'slug' => $effectiveSlugEn], false) : '#',
+            'zh' => $effectiveSlugZh !== '' ? route('news.show', ['locale' => 'zh', 'slug' => $effectiveSlugZh], false) : '#',
         ];
+
+        $hasCustomHref = $item->href !== null
+            && $item->href !== ''
+            && $item->href !== '#'
+            && ! str_starts_with($item->href, '#dummy-news-seed:');
 
         return [
             'id' => (string) $item->getKey(),
@@ -1295,9 +1305,7 @@ class PpsContent
                 ?? now()->format('Y-m-d'),
             'title' => self::newsAttributeTranslations($item, 'title'),
             'excerpt' => self::newsAttributeTranslations($item, 'excerpt'),
-            'href' => ($item->href !== null && $item->href !== '' && $item->href !== '#')
-                ? $item->href
-                : $href,
+            'href' => $hasCustomHref ? $item->href : $href,
             'location' => self::newsAttributeTranslations($item, 'location'),
             'image' => $image,
             'imageAlt' => self::newsAttributeTranslations($item, 'title'),
@@ -1439,7 +1447,7 @@ class PpsContent
     public static function formatAnnouncementDate(string $iso, string $locale): string
     {
         try {
-            $carbonLocale = $locale === 'en' ? 'en_GB' : ($locale === 'zh' ? 'zh_CN' : 'id_ID');
+            $carbonLocale = $locale === 'en' ? 'en_GB' : ($locale === 'zh' ? 'zh' : 'id_ID');
             $c = Carbon::parse($iso)->locale($carbonLocale);
 
             return strtoupper($c->translatedFormat('d F Y'));
