@@ -21,7 +21,7 @@ class PpsPageController extends Controller
 
     public function newsShow(string $locale, string $slug): View
     {
-        abort_unless(in_array($locale, ['id', 'en'], true), 404);
+        abort_unless(in_array($locale, ['id', 'en', 'zh'], true), 404);
         app()->setLocale($locale);
 
         $post = NewsItem::query()
@@ -182,7 +182,7 @@ class PpsPageController extends Controller
                 $selectedSlug = (string) ($active['slug'] ?? '');
             } else {
                 $active = collect($programs)->first(
-                    fn (array $p): bool => (string) ($p['slug'] ?? '') === $querySlug
+                    fn(array $p): bool => (string) ($p['slug'] ?? '') === $querySlug
                 );
                 if ($active !== null) {
                     $selectedSlug = $querySlug;
