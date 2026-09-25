@@ -229,6 +229,8 @@ class PpsContent
         self::mergeGraduateSchoolHistoryFromDatabase($data);
         self::mergeAccreditationDocumentsFromDatabase($data);
 
+        self::applyMultilingualFallback($data);
+
         self::$cache = $data;
 
         return self::$cache;
@@ -242,6 +244,31 @@ class PpsContent
         $locale ??= app()->getLocale();
         $all = self::all();
         $strings = $all['STRINGS'] ?? [];
+
+        if ($locale === 'zh') {
+            $id = is_array($strings['id'] ?? null) ? $strings['id'] : [];
+            $en = is_array($strings['en'] ?? null) ? $strings['en'] : [];
+            $zh = is_array($strings['zh'] ?? null) ? $strings['zh'] : [];
+            $keys = array_unique(array_merge(array_keys($id), array_keys($en), array_keys($zh)));
+            $resolved = [];
+            foreach ($keys as $k) {
+                $zhVal = isset($zh[$k]) && $zh[$k] !== null ? trim((string) $zh[$k]) : '';
+                $enVal = isset($en[$k]) && $en[$k] !== null ? trim((string) $en[$k]) : '';
+                $idVal = isset($id[$k]) && $id[$k] !== null ? trim((string) $id[$k]) : '';
+
+                if ($zhVal !== '') {
+                    $resolved[$k] = (string) $zh[$k];
+                } elseif ($enVal !== '') {
+                    $resolved[$k] = (string) $en[$k];
+                } elseif ($idVal !== '') {
+                    $resolved[$k] = (string) $id[$k];
+                } else {
+                    $resolved[$k] = (string) ($zh[$k] ?? $en[$k] ?? $id[$k] ?? '');
+                }
+            }
+
+            return $resolved;
+        }
 
         return $strings[$locale] ?? $strings['id'] ?? [];
     }
@@ -1266,16 +1293,147 @@ class PpsContent
             'date' => $item->published_at?->format('Y-m-d')
                 ?? $item->created_at?->format('Y-m-d')
                 ?? now()->format('Y-m-d'),
-            'title' => $item->translationsForFrontend('title'),
-            'excerpt' => $item->translationsForFrontend('excerpt'),
+            'title' => self::newsAttributeTranslations($item, 'title'),
+            'excerpt' => self::newsAttributeTranslations($item, 'excerpt'),
             'href' => ($item->href !== null && $item->href !== '' && $item->href !== '#')
                 ? $item->href
                 : $href,
-            'location' => $item->translationsForFrontend('location'),
+            'location' => self::newsAttributeTranslations($item, 'location'),
             'image' => $image,
-            'imageAlt' => $item->translationsForFrontend('title'),
-            'category' => $item->translationsForFrontend('category'),
+            'imageAlt' => self::newsAttributeTranslations($item, 'title'),
+            'category' => self::newsAttributeTranslations($item, 'category'),
         ];
+    }
+
+    /**
+     * @return array{id: string, en: string, zh: string}
+     */
+    protected static function newsAttributeTranslations(NewsItem $item, string $attribute): array
+    {
+        $id = (string) ($item->getTranslationWithoutFallback($attribute, 'id') ?? '');
+        $en = (string) ($item->getTranslationWithoutFallback($attribute, 'en') ?? '');
+        $zh = (string) ($item->getTranslationWithoutFallback($attribute, 'zh') ?? '');
+
+        return [
+            'id' => $id,
+            'en' => $en,
+            'zh' => $zh,
+        ];
+    }
+
+    /**
+     * Cek apakah array merupakan leaf node translasi multibahasa (bukan slug/URL/ID teknis).
+     *
+     * @param  array<string, mixed>  $arr
+     */
+    protected static function isLocalizedLeafNode(array $arr, string $parentKey = ''): bool
+    {
+        if (in_array($parentKey, ['href', 'url', 'slug', 'official_url', 'downloadUrl', 'id', 'category_slug'], true)) {
+            return false;
+        }
+
+        $keys = array_keys($arr);
+        if (empty($keys)) {
+            return false;
+        }
+
+        if (! in_array('id', $keys, true) && ! in_array('en', $keys, true)) {
+            return false;
+        }
+
+        foreach ($keys as $k) {
+            if (! in_array($k, ['id', 'en', 'zh'], true)) {
+                return false;
+            }
+        }
+
+        foreach ($arr as $v) {
+            if ($v !== null && ! is_scalar($v)) {
+                return false;
+            }
+            if (is_string($v) && (str_starts_with($v, 'http://') || str_starts_with($v, 'https://') || str_starts_with($v, '/'))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Terapkan fallback zh -> en -> id pada leaf node translasi.
+     *
+     * @param  array<string, mixed>  $node
+     * @return array<string, mixed>
+     */
+    protected static function applyZhFallbackToNode(array $node): array
+    {
+        $zhRaw = $node['zh'] ?? null;
+        $enRaw = $node['en'] ?? null;
+        $idRaw = $node['id'] ?? null;
+
+        $zhTrim = is_string($zhRaw) ? trim($zhRaw) : ($zhRaw !== null ? (string) $zhRaw : '');
+        $enTrim = is_string($enRaw) ? trim($enRaw) : ($enRaw !== null ? (string) $enRaw : '');
+        $idTrim = is_string($idRaw) ? trim($idRaw) : ($idRaw !== null ? (string) $idRaw : '');
+
+        if ($zhTrim !== '') {
+            $node['zh'] = is_string($zhRaw) ? $zhRaw : (string) $zhRaw;
+        } elseif ($enTrim !== '') {
+            $node['zh'] = is_string($enRaw) ? $enRaw : (string) $enRaw;
+        } elseif ($idTrim !== '') {
+            $node['zh'] = is_string($idRaw) ? $idRaw : (string) $idRaw;
+        } else {
+            $node['zh'] = $zhRaw ?? ($enRaw ?? ($idRaw ?? ''));
+        }
+
+        return $node;
+    }
+
+    /**
+     * Terapkan fallback zh -> en -> id secara rekursif pada seluruh data konten multibahasa.
+     */
+    protected static function applyMultilingualFallback(mixed &$item, string $key = ''): void
+    {
+        if (! is_array($item)) {
+            return;
+        }
+
+        if ($key === 'STRINGS') {
+            $id = is_array($item['id'] ?? null) ? $item['id'] : [];
+            $en = is_array($item['en'] ?? null) ? $item['en'] : [];
+            $zh = is_array($item['zh'] ?? null) ? $item['zh'] : [];
+            $allKeys = array_unique(array_merge(array_keys($id), array_keys($en), array_keys($zh)));
+
+            foreach ($allKeys as $k) {
+                $zhVal = isset($zh[$k]) && $zh[$k] !== null ? trim((string) $zh[$k]) : '';
+                $enVal = isset($en[$k]) && $en[$k] !== null ? trim((string) $en[$k]) : '';
+                $idVal = isset($id[$k]) && $id[$k] !== null ? trim((string) $id[$k]) : '';
+
+                if ($zhVal !== '') {
+                    $zh[$k] = (string) $zh[$k];
+                } elseif ($enVal !== '') {
+                    $zh[$k] = (string) $en[$k];
+                } elseif ($idVal !== '') {
+                    $zh[$k] = (string) $id[$k];
+                } else {
+                    $zh[$k] = (string) ($zh[$k] ?? $en[$k] ?? $id[$k] ?? '');
+                }
+            }
+
+            $item['zh'] = $zh;
+
+            return;
+        }
+
+        if (self::isLocalizedLeafNode($item, $key)) {
+            $item = self::applyZhFallbackToNode($item);
+
+            return;
+        }
+
+        foreach ($item as $k => &$child) {
+            self::applyMultilingualFallback($child, (string) $k);
+        }
+        unset($child);
     }
 
     public static function formatAnnouncementDate(string $iso, string $locale): string
