@@ -152,14 +152,14 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function (): v
 });
 
 Route::get('/lang/{locale}', function (string $locale) {
-    abort_unless(in_array($locale, ['id', 'en'], true), 404);
+    abort_unless(in_array($locale, ['id', 'en', 'zh'], true), 404);
     session(['locale' => $locale]);
 
     return redirect()->back();
 })->name('locale.switch');
 
 Route::get('{locale}/berita/{slug}', [PpsPageController::class, 'newsShow'])
-    ->where('locale', 'id|en')
+    ->where('locale', 'id|en|zh')
     ->where('slug', '[^/]+')
     ->name('news.show');
 
