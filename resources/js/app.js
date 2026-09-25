@@ -134,6 +134,41 @@ function initDesktopNavDropdowns() {
     });
 }
 
+/** Dropdown pemilih bahasa (desktop & mobile): tutup saat klik di luar atau tombol Escape */
+function initLanguageDropdowns() {
+    const dropdowns = Array.from(document.querySelectorAll('details.language-dropdown'));
+    if (dropdowns.length === 0) return;
+
+    dropdowns.forEach((dd) => {
+        dd.addEventListener('toggle', () => {
+            if (dd.open) {
+                dropdowns.forEach((other) => {
+                    if (other !== dd && other.open) {
+                        other.open = false;
+                    }
+                });
+            }
+        });
+    });
+
+    document.addEventListener('click', (e) => {
+        const t = e.target;
+        if (!(t instanceof Element)) return;
+        if (t.closest('details.language-dropdown')) return;
+        dropdowns.forEach((dd) => {
+            if (dd.open) dd.open = false;
+        });
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            dropdowns.forEach((dd) => {
+                if (dd.open) dd.open = false;
+            });
+        }
+    });
+}
+
 /** Klik gambar berita di beranda → modal gambar besar */
 function initNewsImageLightbox() {
     const dialog = document.getElementById('news-image-lightbox');
@@ -405,6 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initHeroSlider();
     initMobileNav();
     initDesktopNavDropdowns();
+    initLanguageDropdowns();
     initNewsImageLightbox();
     initStudyProgramBrochureLightbox();
     initStudyProgramTabs();
